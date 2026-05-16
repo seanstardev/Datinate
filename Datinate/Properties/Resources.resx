@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="amber_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Scoring\amber_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="background" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="background_bw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\background_bw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="btn_hard_left" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Misc\btn_hard_left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="btn_hard_right" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Misc\btn_hard_right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="chatgpt" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Web\chatgpt.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="corner_bottomLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\corner_masks\corner_bottomLeft.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="corner_bottomRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\corner_masks\corner_bottomRight.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="corner_topLeft" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\corner_masks\corner_topLeft.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="corner_topRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\corner_masks\corner_topRight.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="datAction_compare" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DatAction\datAction_compare.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="datAction_customise" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DatAction\datAction_customise.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="datAction_grouper" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DatAction\datAction_grouper.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="datAction_home" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DatAction\datAction_home.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="datAction_main" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DatAction\datAction_main.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="exclude_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Scoring\exclude_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="google" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Web\google.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="include_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Scoring\include_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Loading_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\Loading_icon.gif;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="logo_datinate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\logo_datinate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_assign_bg_left" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\media_assign_bg_left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_assign_bg_right" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\media_assign_bg_right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_assign_not_found" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\media_assign_not_found.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_assign_ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\media_assign_ok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_edit_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DragDrop\media_edit_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Advert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Advert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Box" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Box.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Compilation" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Misc\media_icons_Compilation.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Family" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\GameFamily\media_icons_Family.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Game" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\GameFamily\media_icons_Game.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_GamePart" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\GameFamily\media_icons_GamePart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Magazine" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Magazine.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_MAME" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_MAME.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_MAME-2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_MAME-2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_MAME-Arcade" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_MAME-Arcade.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Manual" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Manual.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Map" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Map.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Media-cartridge" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Media-cartridge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Media-cartridge-2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Media-cartridge-2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Media-Cassette" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Media-Cassette.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Media-Disc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Media-Disc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Media-Disk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Media-Disk.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Other" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Other.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_ROM" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\GameFamily\media_icons_ROM.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Snap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Snap.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Soundtrack" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Soundtrack.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Star" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Misc\media_icons_Star.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Support" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Support.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Support-2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Support-2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Unspecified" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Unspecified.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Video" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Video.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-info" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-info.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-Info-credits" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-Info-credits.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-Info-description" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-Info-description.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-Info-icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-Info-icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-Info-releases" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-Info-release.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_icons_Web-screencomposition" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Media\media_icons_Web-screencomposition.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="media_preview_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DragDrop\media_preview_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pageCurl_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\page_curl\pageCurl_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pageCurl_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Misc\page_curl\pageCurl_2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="part_reports_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DragDrop\part_reports_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="search_game_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\DragDrop\search_game_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="wikipedia" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Web\wikipedia.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="youtube" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\App\Assets\Icons\Web\yourube.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+</root>

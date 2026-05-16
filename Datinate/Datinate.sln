@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Datinate", "Datinate.csproj", "{2F3539C2-8E1C-4DA6-B63F-1214F38BF5B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Datinate.Tests", "..\Datinate.Tests\Datinate.Tests.csproj", "{97C302EC-8408-4FDB-8AF6-5AFC969BD864}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2F3539C2-8E1C-4DA6-B63F-1214F38BF5B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F3539C2-8E1C-4DA6-B63F-1214F38BF5B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F3539C2-8E1C-4DA6-B63F-1214F38BF5B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F3539C2-8E1C-4DA6-B63F-1214F38BF5B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97C302EC-8408-4FDB-8AF6-5AFC969BD864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97C302EC-8408-4FDB-8AF6-5AFC969BD864}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97C302EC-8408-4FDB-8AF6-5AFC969BD864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97C302EC-8408-4FDB-8AF6-5AFC969BD864}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DA876B56-BC94-4A03-8DCC-560A70421BCC}
+	EndGlobalSection
+EndGlobal

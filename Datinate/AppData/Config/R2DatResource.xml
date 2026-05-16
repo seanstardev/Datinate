@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Sources>
+
+    <Source id="IGDB" template="https://www.igdb.com/games/{lookup}">
+      <Tokens>
+        <Token name="lookup" source="lookup" encoding="none" required="true" />
+      </Tokens>
+    </Source>
+	  
+	<Source id="MameSoftlist" template="https://github.com/mamedev/mame/blob/master/hash/{system}.xml">
+      <Tokens>
+        <Token name="system" source="system" encoding="none" required="true" />
+      </Tokens>
+    </Source>
+  </Sources>
+</Root>
