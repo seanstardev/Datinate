@@ -771,9 +771,5 @@ namespace com.RADIO.Datinate.RMVC
 
             return gameFamilyVOs;
         }
-        protected override void Initialise()
-        {
-
-        }
     }
 }

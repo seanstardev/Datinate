@@ -12,10 +12,6 @@ namespace com.RADIO.Datinate.RMVC
 
         string? lastPath;
 
-        protected override void Initialise()
-        {
-
-        }
         public void SetProjectRootPath(string projectRoot)
         {
             lastPath = Path.Combine(projectRoot, "Expression");

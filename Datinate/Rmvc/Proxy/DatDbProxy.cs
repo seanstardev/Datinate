@@ -355,10 +355,5 @@ WHERE fullpath = @fullpath;
                 System.Diagnostics.Debug.WriteLine($"Error: Failed to purge removed Dats - {ex.Message}");
             }
         }
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

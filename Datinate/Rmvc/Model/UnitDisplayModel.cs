@@ -28,10 +28,5 @@ namespace com.RADIO.Datinate.RMVC
         public UnitFormatHelper.Unit GetUnit() {
             return unit;
         }
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

@@ -210,9 +210,5 @@ namespace com.RADIO.Datinate.RMVC
 
             return dic;
         }
-        protected override void Initialise()
-        {
-
-        }
     }
 }

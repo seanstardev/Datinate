@@ -121,9 +121,5 @@ namespace com.RADIO.Datinate.RMVC
         {
             overlay = null;
         }
-        protected override void Initialise()
-        {
-
-        }
     }
 }

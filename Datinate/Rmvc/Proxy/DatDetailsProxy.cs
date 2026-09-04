@@ -217,11 +217,5 @@ namespace com.RADIO.Datinate.RMVC
             }
             return dat;
         }
-
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

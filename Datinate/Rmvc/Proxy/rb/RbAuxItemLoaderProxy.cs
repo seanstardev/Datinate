@@ -8,9 +8,6 @@ namespace com.RADIO.Datinate.RMVC
 {
     public class RbAuxItemLoaderProxy : RModel
     {
-        protected override void Initialise()
-        {
-        }
         public string? CreateURI(string lookupName, RadioSourceDTO source)
         {
             var resources = Facade.Instance?.AppDataProxy?.R2DatResources;

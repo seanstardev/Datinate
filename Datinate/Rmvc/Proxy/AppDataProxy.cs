@@ -37,11 +37,6 @@ namespace com.RADIO.Datinate.RMVC
             FlagFilterSetByGroup = BuildFlagFilterSetByGroupFromAppData();
         }
 
-        protected override void Initialise()
-        {
-
-        }
-
         private IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> BuildFlagFilterSetByGroupFromAppData()
         {
             var d = new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();

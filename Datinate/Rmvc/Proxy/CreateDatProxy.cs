@@ -7,11 +7,6 @@ namespace com.RADIO.Datinate.RMVC
 {
     internal class CreateDatProxy : RModel 
     {
-        protected override void Initialise()
-        {
-
-        }
-
         public void createXmlAndSave(DatVO datVO, string fileFullpath, bool useMachineTags) 
         {
 

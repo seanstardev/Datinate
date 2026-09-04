@@ -102,10 +102,5 @@ namespace com.RADIO.Datinate.RMVC
             CurrentLayout = LastStandardLayout;
             return LastStandardLayout;
         }
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

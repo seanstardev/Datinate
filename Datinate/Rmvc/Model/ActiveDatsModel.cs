@@ -25,10 +25,5 @@ namespace com.RADIO.Datinate.RMVC
             
             return null;
         }
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

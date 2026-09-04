@@ -551,10 +551,7 @@ namespace com.RADIO.Datinate.RMVC
                     return mediaCollectionsDictionaryView ??= new MediaCollectionsReadOnlyView(mediaCollectionsDictionary);
             }
         }
-        protected override void Initialise()
-        {
 
-        }
         private sealed class PendingMetaUpdate
         {
             public PendingMetaUpdate(IGameFamily family, HashSet<string> checkedDescriptors, string familyNotesText)

@@ -229,10 +229,5 @@ namespace com.RADIO.Datinate.RMVC
                 return projectsPath;
             }
         }
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

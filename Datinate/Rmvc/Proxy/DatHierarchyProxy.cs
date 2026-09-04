@@ -219,8 +219,6 @@ namespace com.RADIO.Datinate.RMVC
             }
         }
 
-        protected override void Initialise() { }
-
         public sealed class DatFetchResult
         {
             public DatGrouperProjectEntry[] DatHeadlines { get; init; } = Array.Empty<DatGrouperProjectEntry>();

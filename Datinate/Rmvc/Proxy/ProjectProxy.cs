@@ -502,10 +502,5 @@ namespace com.RADIO.Datinate.RMVC
 
             return list.ToArray();
         }
-
-        protected override void Initialise()
-        {
-
-        }
     }
 }

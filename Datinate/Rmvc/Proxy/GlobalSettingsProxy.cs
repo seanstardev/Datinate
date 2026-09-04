@@ -99,10 +99,6 @@ namespace com.RADIO.Datinate.RMVC
             }
         }
 
-        protected override void Initialise()
-        {
-        }
-
         private class GlobalDats
         {
             public string? MameSlHashPath { get; set; }

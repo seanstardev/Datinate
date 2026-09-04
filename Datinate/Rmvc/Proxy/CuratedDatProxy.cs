@@ -88,9 +88,5 @@ namespace com.RADIO.Datinate.RMVC
         {
             return Path.Combine(ProjectsPath, projectName + ".xml");
         }
-        protected override void Initialise()
-        {
-
-        }
     }
 }
