@@ -324,30 +324,22 @@ namespace datinate.app
 
             if (count == 0)
             {
-                viewOrder = Array.Empty<int>();
-
                 lastAutoBackingIndex = -1;
                 lastAutoScore = -1;
 
-                if (IsHandleCreated)
-                    SelectedIndices.Clear();
-
-                RefreshVirtualView();
+                ReplaceViewOrder(Array.Empty<int>());
                 return;
             }
 
-            viewOrder = new int[count];
-            Array.Copy(scratch, viewOrder, count);
+            var newViewOrder = new int[count];
+            Array.Copy(scratch, newViewOrder, count);
 
-            Array.Sort(viewOrder, CompareAlpha);
+            Array.Sort(newViewOrder, CompareAlpha);
 
             lastAutoBackingIndex = -1;
             lastAutoScore = -1;
 
-            if (IsHandleCreated)
-                SelectedIndices.Clear();
-
-            RefreshVirtualView();
+            ReplaceViewOrder(newViewOrder);
         }
 
         public void SetAlreadyAssigned(HashSet<string> alreadyAssigned)
@@ -612,6 +604,12 @@ namespace datinate.app
 
         protected override void OnRetrieveVirtualItem(RetrieveVirtualItemEventArgs e)
         {
+            if ((uint)e.ItemIndex >= (uint)viewOrder.Length)
+            {
+                e.Item = CreateEmptyVirtualItem();
+                return;
+            }
+
             if (!cache.TryGetValue(e.ItemIndex, out var item))
             {
                 item = CreateItem(e.ItemIndex);
@@ -620,20 +618,39 @@ namespace datinate.app
 
             e.Item = item;
         }
-
+        private static ListViewItem CreateEmptyVirtualItem()
+        {
+            var item = new ListViewItem(string.Empty);
+            item.SubItems.Add(string.Empty);
+            return item;
+        }
         protected override void OnCacheVirtualItems(CacheVirtualItemsEventArgs e)
         {
-            if (e.StartIndex >= cacheStart && e.EndIndex <= cacheEnd)
+            if (viewOrder.Length == 0)
+            {
+                ClearCache();
+                return;
+            }
+
+            int startIndex = Math.Max(0, e.StartIndex);
+            int endIndex = Math.Min(e.EndIndex, viewOrder.Length - 1);
+
+            if (startIndex > endIndex)
+            {
+                ClearCache();
+                return;
+            }
+
+            if (startIndex >= cacheStart && endIndex <= cacheEnd)
                 return;
 
             cache.Clear();
-            cacheStart = e.StartIndex;
-            cacheEnd = e.EndIndex;
+            cacheStart = startIndex;
+            cacheEnd = endIndex;
 
-            for (int i = e.StartIndex; i <= e.EndIndex; i++)
+            for (int i = startIndex; i <= endIndex; i++)
                 cache[i] = CreateItem(i);
         }
-
         /// <summary>
         /// Do not remove - cause selected list item to go into media mode.
         /// </summary>
@@ -667,7 +684,19 @@ namespace datinate.app
         }
         private ListViewItem CreateItem(int virtualIndex)
         {
+            if ((uint)virtualIndex >= (uint)viewOrder.Length)
+                return CreateEmptyVirtualItem();
+
             int backingIndex = viewOrder[virtualIndex];
+
+            if ((uint)backingIndex >= (uint)entriesFull.Length ||
+                (uint)backingIndex >= (uint)assigned.Length ||
+                (uint)backingIndex >= (uint)scorePct.Length ||
+                (uint)backingIndex >= (uint)scoreGen.Length ||
+                (uint)backingIndex >= (uint)entriesFlaglessUpper.Length)
+            {
+                return CreateEmptyVirtualItem();
+            }
 
             string name = entriesFull[backingIndex];
             bool isAssigned = assigned[backingIndex];
@@ -698,7 +727,6 @@ namespace datinate.app
 
             return item;
         }
-
         private int CompareAlpha(int a, int b)
         {
             var sa = entriesFull[a];
@@ -1223,6 +1251,51 @@ namespace datinate.app
             SelectedIndices.Clear();
             SelectedIndices.Add(virtualIndex);
             return true;
+        }
+
+        private void ReplaceViewOrder(int[] newViewOrder)
+        {
+            if (!IsHandleCreated)
+            {
+                viewOrder = newViewOrder;
+                ClearCache();
+                return;
+            }
+
+            BeginUpdate();
+
+            try
+            {
+                // NOTE: Clear selection while the old VirtualListSize and old viewOrder still agree.
+                SelectedIndices.Clear();
+
+                // NOTE: During the transition, expose only indexes that are valid in BOTH
+                // the old and new viewOrder arrays.
+                int transitionSize = Math.Min(viewOrder.Length, newViewOrder.Length);
+
+                if (VirtualListSize != transitionSize)
+                    VirtualListSize = transitionSize;
+
+                ClearCache();
+
+                viewOrder = newViewOrder;
+
+                if (VirtualListSize != viewOrder.Length)
+                    VirtualListSize = viewOrder.Length;
+            }
+            finally
+            {
+                EndUpdate();
+            }
+
+            ApplyPendingSelectionIfAny();
+
+            ResizeColumns();
+
+            if (VirtualListSize > 0)
+                RedrawItems(0, VirtualListSize - 1, true);
+
+            Invalidate();
         }
     }
 }
