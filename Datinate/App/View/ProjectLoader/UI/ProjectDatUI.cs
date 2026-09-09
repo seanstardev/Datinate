@@ -198,7 +198,7 @@ namespace datinate.app
                     datEnum,
                     typeEnum.ToString(),
                     projectEntry.DatSubsetFilter,
-                    friendlyNameTextBox.Text);
+                    friendlyNameTextBox.Text.Trim());
 
                 internalDescriptor = projectEntry.InternalDescriptor;
             }

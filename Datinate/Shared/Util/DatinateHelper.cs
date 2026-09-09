@@ -122,12 +122,7 @@ namespace com.RADIO.Datinate.RMVC.Shared
 
                 if (IsAlphaWord(prefix))
                 {
-                    if (prefix.Length <= 4)
-                        s = prefix.ToUpperInvariant();
-                    else if (prefix.Equals("Other", StringComparison.OrdinalIgnoreCase))
-                        s = "Other";
-                    else
-                        s = TakeAfterLastColon(s);
+                    s = prefix;
                 }
                 else
                 {
@@ -135,7 +130,9 @@ namespace com.RADIO.Datinate.RMVC.Shared
                 }
             }
 
-            s = s.Replace('-', ' ').Replace('_', ' ').Trim();
+            s = s.Replace('-', ' ')
+                 .Replace('_', ' ')
+                 .Trim();
 
             if (s.Length == 0)
                 return null;
@@ -148,7 +145,9 @@ namespace com.RADIO.Datinate.RMVC.Shared
             static string TakeAfterLastColon(string t)
             {
                 t = t.TrimEnd(':').Trim();
+
                 int lastColon = t.LastIndexOf(':');
+
                 return (lastColon >= 0 && lastColon < t.Length - 1)
                     ? t.Substring(lastColon + 1).Trim()
                     : t;
@@ -162,8 +161,12 @@ namespace com.RADIO.Datinate.RMVC.Shared
                 for (int i = 0; i < t.Length; i++)
                 {
                     char c = t[i];
-                    if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')))
+
+                    if (!((c >= 'A' && c <= 'Z') ||
+                          (c >= 'a' && c <= 'z')))
+                    {
                         return false;
+                    }
                 }
 
                 return true;
