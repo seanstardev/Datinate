@@ -17,6 +17,16 @@ namespace datinate.app
         private const int LightboxDefaultScalePercent = 100;
         private const int LightboxScreenshotScalePercent = 200;
 
+        // TODO: long filename workaround is cool, but BuildDocumentHtml() IS being run concurrently for multiple pages.
+        // ... As such: expanding images or opening images in new tabs can point to empty assets in Temp folder.
+
+        // Long filename workaround constants
+        private const int LegacyWindowsMaxPathLength = 260;
+        private static readonly string BrowserAssetTempRoot =
+            Path.Combine(Path.GetTempPath(), "R2W");
+        private static string BrowserAssetTempPage = "";
+        private static int BrowserAssetTempIndex;
+
         // Original - Blue:
         private const string PrimaryHex = "#7FB2FF";
         private const string BackgroundHex = "#0B0D12";
@@ -51,16 +61,18 @@ namespace datinate.app
         //private const string MutedHex = "#C8B79E";
 
         public static string BuildDocumentHtml(
-            InfoVO? info,
-            string? assetRootRelativePath,
-            string url,
-            bool createSampleVersion)
+    InfoVO? info,
+    string? assetRootRelativePath,
+    string url,
+    bool createSampleVersion)
         {
             if (info == null ||
                 string.IsNullOrWhiteSpace(assetRootRelativePath) ||
                 !Directory.Exists(assetRootRelativePath) ||
                 string.IsNullOrWhiteSpace(url))
                 return string.Empty;
+
+            ResetBrowserAssetTempFolder();
 
             string pageTitle = H(FirstNonEmpty(info.Name, info.Lookup, "Resource"));
 
@@ -81,6 +93,7 @@ namespace datinate.app
 
             return result;
         }
+
         private static string BuildBodyHtml(
             InfoVO info,
             string assetRootRelativePath,
@@ -2189,13 +2202,52 @@ namespace datinate.app
 
             try
             {
-                return new Uri(Path.GetFullPath(filePath)).AbsoluteUri;
+                string fullPath = Path.GetFullPath(filePath);
+
+                if (fullPath.Length < LegacyWindowsMaxPathLength)
+                    return new Uri(fullPath).AbsoluteUri;
+
+                string tempFolder = Path.Combine(
+                    BrowserAssetTempPage,
+                    (++BrowserAssetTempIndex).ToString(CultureInfo.InvariantCulture));
+
+                Directory.CreateDirectory(tempFolder);
+
+                string tempPath = Path.Combine(tempFolder, Path.GetFileName(fullPath));
+
+                File.Copy(ToExtendedPath(fullPath), tempPath, true);
+
+                return new Uri(tempPath).AbsoluteUri;
             }
             catch
             {
                 return "";
             }
         }
+        private static void ResetBrowserAssetTempFolder()
+        {
+            try
+            {
+                if (Directory.Exists(BrowserAssetTempRoot))
+                    Directory.Delete(BrowserAssetTempRoot, true);
+            }
+            catch
+            {
+                // Previous browser page may still briefly have a file open.
+            }
+
+            BrowserAssetTempPage = Path.Combine(
+                BrowserAssetTempRoot,
+                Guid.NewGuid().ToString("N")[..6]);
+
+            Directory.CreateDirectory(BrowserAssetTempPage);
+            BrowserAssetTempIndex = 0;
+        }
+
+        private static string ToExtendedPath(string path) =>
+            path.StartsWith(@"\\", StringComparison.Ordinal)
+                ? @"\\?\UNC\" + path[2..]
+                : @"\\?\" + path;
         private static string GetLightboxScaleAttribute(int scalePercent)
         {
             int safePercent = Math.Max(1, scalePercent);
