@@ -47,8 +47,6 @@
             okPic = new PictureBox();
             innerContainer = new Panel();
             outerContainer = new Panel();
-            bannerBgLeft = new PictureBox();
-            bannerBgRight = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)mediaIconUI).BeginInit();
             tabControl.SuspendLayout();
             mediaPage.SuspendLayout();
@@ -62,8 +60,6 @@
             ((System.ComponentModel.ISupportInitialize)okPic).BeginInit();
             innerContainer.SuspendLayout();
             outerContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)bannerBgLeft).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)bannerBgRight).BeginInit();
             SuspendLayout();
             // 
             // mediaIconUI
@@ -237,10 +233,10 @@
             notFoundPic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             notFoundPic.BackColor = Color.White;
             notFoundPic.Image = Datinate.Properties.Resources.media_assign_not_found;
-            notFoundPic.Location = new Point(-2, 150);
+            notFoundPic.Location = new Point(-2, 202);
             notFoundPic.Margin = new Padding(0);
             notFoundPic.Name = "notFoundPic";
-            notFoundPic.Size = new Size(284, 53);
+            notFoundPic.Size = new Size(100, 100);
             notFoundPic.SizeMode = PictureBoxSizeMode.Zoom;
             notFoundPic.TabIndex = 1;
             notFoundPic.TabStop = false;
@@ -250,10 +246,10 @@
             okPic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             okPic.BackColor = Color.White;
             okPic.Image = Datinate.Properties.Resources.media_assign_ok;
-            okPic.Location = new Point(-2, 150);
+            okPic.Location = new Point(-2, 202);
             okPic.Margin = new Padding(0);
             okPic.Name = "okPic";
-            okPic.Size = new Size(284, 53);
+            okPic.Size = new Size(100, 100);
             okPic.SizeMode = PictureBoxSizeMode.Zoom;
             okPic.TabIndex = 6;
             okPic.TabStop = false;
@@ -282,38 +278,11 @@
             outerContainer.Size = new Size(280, 302);
             outerContainer.TabIndex = 3;
             // 
-            // bannerBgLeft
-            // 
-            bannerBgLeft.BackColor = Color.Black;
-            bannerBgLeft.Image = Datinate.Properties.Resources.media_assign_bg_left;
-            bannerBgLeft.Location = new Point(-1, 131);
-            bannerBgLeft.Margin = new Padding(0);
-            bannerBgLeft.Name = "bannerBgLeft";
-            bannerBgLeft.Size = new Size(10, 22);
-            bannerBgLeft.SizeMode = PictureBoxSizeMode.StretchImage;
-            bannerBgLeft.TabIndex = 3;
-            bannerBgLeft.TabStop = false;
-            // 
-            // bannerBgRight
-            // 
-            bannerBgRight.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            bannerBgRight.BackColor = Color.Black;
-            bannerBgRight.Image = Datinate.Properties.Resources.media_assign_bg_right;
-            bannerBgRight.Location = new Point(270, 131);
-            bannerBgRight.Margin = new Padding(0);
-            bannerBgRight.Name = "bannerBgRight";
-            bannerBgRight.Size = new Size(10, 22);
-            bannerBgRight.SizeMode = PictureBoxSizeMode.StretchImage;
-            bannerBgRight.TabIndex = 7;
-            bannerBgRight.TabStop = false;
-            // 
             // Media2AssignUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
-            Controls.Add(bannerBgRight);
-            Controls.Add(bannerBgLeft);
             Controls.Add(notFoundPic);
             Controls.Add(okPic);
             Controls.Add(outerContainer);
@@ -335,8 +304,6 @@
             ((System.ComponentModel.ISupportInitialize)okPic).EndInit();
             innerContainer.ResumeLayout(false);
             outerContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)bannerBgLeft).EndInit();
-            ((System.ComponentModel.ISupportInitialize)bannerBgRight).EndInit();
             ResumeLayout(false);
         }
 
@@ -360,7 +327,5 @@
         private BorderlessTabControl tabControl;
         private Panel innerContainer;
         private Panel outerContainer;
-        private PictureBox bannerBgLeft;
-        private PictureBox bannerBgRight;
     }
 }

@@ -64,8 +64,6 @@ namespace datinate.app
 
             pageCurl.BringToFront();
             
-            bannerBgLeft.Visible = false;
-            bannerBgRight.Visible = false;
             entryListUI.BorderStyle = BorderStyle.None;
 
             GeneratePageCurl();
@@ -168,14 +166,10 @@ namespace datinate.app
             if (okPicVisble || notFoundPicVisible)
             {
                 outerContainer.Padding = new Padding(Pad, Pad, Pad, Pad);
-                bannerBgLeft.Visible = true;
-                bannerBgRight.Visible = true;
             }
             else
             {
                 outerContainer.Padding = new Padding(0, 0, 0, 0);
-                bannerBgLeft.Visible = false;
-                bannerBgRight.Visible = false;
             }
         }
         public void SetUI(
