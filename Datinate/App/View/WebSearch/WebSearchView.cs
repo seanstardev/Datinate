@@ -113,7 +113,7 @@ namespace datinate.app
                 - One-sentence overview.
 
                 ## Names and variants
-                - Known title variations (spelling/casing/alt titles).
+                - Known title variations (spelling/alt titles/fan translations).
                 - Regional title differences (US/EU/JP etc.), if any.
 
                 ## Release details
