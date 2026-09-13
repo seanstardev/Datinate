@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app;
 using Datinate.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using RMVC;
 using static app.datinate.DatGrouperEditDelta;
@@ -194,7 +195,7 @@ namespace com.RADIO.Datinate.RMVC
         private void OnGameEntitySelected(IGameEntity? entity, bool isFromAutoUI)
         {
             base.ExecuteCommand(new SetWebSearchTermsCmd(
-                DatinateHelper.GetGameEntityName(entity), null));
+                DatinateFamilyHelper.GetGameEntityName(entity), null));
 
             base.ExecuteCommand(new SetDatGrouperControlsCmd(entity, isFromAutoUI));
         }

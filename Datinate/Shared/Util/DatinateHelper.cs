@@ -257,54 +257,7 @@ namespace com.RADIO.Datinate.RMVC.Shared
             return nbr.ToString("N" + decimals);
         }
 
-        public static string BuildSummaryText(IGameFamily[] gameFamilies)
-        {
-            long families = gameFamilies.Length;
-            long games = 0;
-            long parts = 0;
-            long roms = 0;
-
-            for (int i = 0; i < gameFamilies.Length; i++)
-            {
-                var f = gameFamilies[i];
-
-                var g = f.GetAllGames();
-                games += g.Length;
-
-                var ps = f.GetAllGameParts(false);
-                parts += ps.Length;
-
-                for (int p = 0; p < ps.Length; p++)
-                    roms += ps[p].GetChecksums().Length;
-            }
-
-            const string s = "    ";
-            return $"■ Families: {families.ToString("N0") + s} ■ Entries: {games.ToString("N0") + s} ■ Parts: {parts.ToString("N0") + s} ■ ROMs: {roms.ToString("N0")}";
-        }
-
-        public static long GetTotalParts(IEnumerable<IGameFamily> gameFamilies)
-        {
-            long parts = 0L;
-            foreach (var family in gameFamilies)
-            {
-                parts += family.GetAllGameParts(false).Length;
-            }
-            return parts;
-        }
-
-        public static string? GetGameEntityName(IGameEntity? entity)
-        {
-            if (entity is IGameFamily family)
-                return family.GetFamilyDisplayName();
-
-            if (entity is IGame game)
-                return game.GetNameWithoutExt();
-
-            if (entity is IGamePart part)
-                return part.GetName();
-
-            return null;
-        }
+        
         // TODO: Why are we reverse engineering the string id?
         public static DAT_GROUP_ENUM GetDatGroup(string? pointerId)
         {

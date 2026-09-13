@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
@@ -208,7 +209,7 @@ namespace datinate.app
         {
             if (_activeEntity is IGameEntity && _activeEntity is not IGameEntityProxy)
             {
-                string? name = DatinateHelper.GetGameEntityName(_activeEntity);
+                string? name = DatinateFamilyHelper.GetGameEntityName(_activeEntity);
 
                 if (sendNameWithFlags == false && !string.IsNullOrWhiteSpace(name))
                     name = DatinateHelper.GetFlaglessName(name);

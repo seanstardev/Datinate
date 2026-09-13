@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Rmvc.Command;
+using Datinate.Shared.Util;
 using RMVC;
 using System.Diagnostics;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
@@ -50,7 +51,7 @@ namespace com.RADIO.Datinate.RMVC
 
             if (Facade.Instance?.DatGrouperSessionModel is { } sessionModel)
             {
-                sessionModel.PartsTotal = DatinateHelper.GetTotalParts(families);
+                sessionModel.PartsTotal = DatinateFamilyHelper.GetTotalParts(families);
 
                 if (Facade.Instance?.DatGrouperControlsMediator is { } controlsMediator)
                     controlsMediator.SetCompletionStats(0, sessionModel.PartsTotal);

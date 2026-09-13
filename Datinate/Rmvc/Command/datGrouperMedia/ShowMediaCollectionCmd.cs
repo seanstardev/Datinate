@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using RMVC;
 
@@ -26,7 +27,7 @@ namespace com.RADIO.Datinate.RMVC
 
             Facade.Instance?.MediaWebMediator?.ClearView();
 
-            var filter = DatinateHelper.GetGameEntityName(datGrouperEntryDTO.Entity);
+            var filter = DatinateFamilyHelper.GetGameEntityName(datGrouperEntryDTO.Entity);
 
             if (string.IsNullOrWhiteSpace(filter))
                 return;
@@ -47,7 +48,7 @@ namespace com.RADIO.Datinate.RMVC
 
                     if (collection != null)
                     {
-                        var prompts = CreatePrompts(family);
+                        var prompts = DatinateFamilyHelper.CreateSearchPrompts(family);
 
                         Facade.Instance?.MediaMediator?.ShowViewAssign(filter!, collection, prompts);
                         Facade.Instance?.MediaAssignmentMediator?.SetView(collection);
@@ -60,30 +61,6 @@ namespace com.RADIO.Datinate.RMVC
                     }
                 }
             }
-        }
-
-        private static IReadOnlyList<string> CreatePrompts(IGameFamily family)
-        {
-            List<string> prompts = new List<string>();
-            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var part in family.GetAllGameParts(true))
-            {
-                var unbracketed = DatinateHelper.GetFlaglessName(part.GetName()) ?? string.Empty;
-
-                string[] nameParts = unbracketed
-                    .Split(new[] { ' ', '-' }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var namePart in nameParts)
-                {
-                    var section = namePart.Trim();
-
-                    if (section.Length > 2 && seen.Add(section))
-                        prompts.Add(section);
-                }
-            }
-
-            return prompts;
         }
     }
 }

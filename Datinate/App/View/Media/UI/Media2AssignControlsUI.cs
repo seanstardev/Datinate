@@ -13,7 +13,6 @@ namespace datinate.app
         public string? EntryName => entryNameTxt.Text == "<Unassigned>" ? null : entryNameTxt.Text;
         internal MEDIA_ASSIGNMENT_ENUM AssignmentStatus => assignmentBtnStrip.AssignmentStatus;
 
-        private IReadOnlyList<string> searchPrompts = new List<string>();
         private readonly SearchPromptContextMenu searchPromptMenu = new();
 
         public Media2AssignControlsUI()
@@ -22,7 +21,7 @@ namespace datinate.app
             DatinateHelper.HideTabs(tabControl);
             assignmentBtnStrip.SelectedChanged += OnSegmentChange;
 
-            filterTxt.Click += filterTxt_Click;
+            searchPromptMenu.Attach(filterTxt);
 
             var tt = new ToolTip
             {
@@ -58,8 +57,7 @@ namespace datinate.app
 
         internal void SetSearchPrompts(IReadOnlyList<string>? searchPrompts)
         {
-            this.searchPrompts = searchPrompts ?? new List<string>();
-            searchPromptMenu.Close();
+            searchPromptMenu.SetPrompts(searchPrompts);
         }
 
         internal void ShowNamePage()
@@ -108,39 +106,7 @@ namespace datinate.app
                 tabControl.ResumeLayout(false);
             }
         }
-        private void filterTxt_Click(object? sender, EventArgs e)
-        {
-            ShowSearchPrompts();
-        }
 
-        private void ShowSearchPrompts()
-        {
-            // NOTE: Prompts are only offered as shortcuts when the field is empty.
-            if (filterTxt.Text.Length != 0)
-                return;
-
-            if (searchPrompts.Count == 0)
-                return;
-
-            searchPromptMenu.Close();
-            searchPromptMenu.Items.Clear();
-
-            foreach (var prompt in searchPrompts)
-            {
-                var item = new ToolStripMenuItem(prompt);
-
-                item.Click += (_, _) =>
-                {
-                    filterTxt.Text = prompt;
-                    filterTxt.SelectionStart = filterTxt.Text.Length;
-                    filterTxt.Focus();
-                };
-
-                searchPromptMenu.Items.Add(item);
-            }
-
-            searchPromptMenu.ShowFor(filterTxt);
-        }
         private void OnSegmentChange(MEDIA_ASSIGNMENT_ENUM segment)
         {
             AssignmentChangeEvt?.Invoke(segment);

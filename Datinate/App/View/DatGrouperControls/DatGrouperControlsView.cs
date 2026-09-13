@@ -2,6 +2,7 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Properties;
 using Datinate.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.ComponentModel;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
@@ -89,7 +90,7 @@ namespace datinate.app
         }
         public void SetView(IGameEntity? entity, bool isFromAuto)
         {
-            var newName = DatinateHelper.GetGameEntityName(entity);
+            var newName = DatinateFamilyHelper.GetGameEntityName(entity);
 
             if (object.ReferenceEquals(entity, SelectedEntity) &&
                 entitySourceIsAuto == isFromAuto &&

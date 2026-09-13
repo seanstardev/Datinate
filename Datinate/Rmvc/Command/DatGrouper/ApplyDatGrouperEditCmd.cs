@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared.Util;
 using RMVC;
 
 namespace com.RADIO.Datinate.RMVC
@@ -46,7 +47,7 @@ namespace com.RADIO.Datinate.RMVC
                 if (Facade.Instance?.DatGrouperModel is { } grouperModel &&
                     Facade.Instance?.DatGrouperSessionModel is { } sessionModel)
                 {
-                    var partsCurated = DatinateHelper.GetTotalParts(grouperModel.CuratedFamilies);
+                    var partsCurated = DatinateFamilyHelper.GetTotalParts(grouperModel.CuratedFamilies);
 
                     sessionModel.PartsCurated = partsCurated;
 

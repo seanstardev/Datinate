@@ -19,7 +19,7 @@ namespace datinate.app
             get => selectedNode;
             set
             {
-                if (!ReferenceEquals(value, selectedNode))
+                if (ReferenceEquals(value, selectedNode) == false)
                 {
                     if (value is not null)
                         lastJumpedItem = value;
@@ -39,9 +39,12 @@ namespace datinate.app
         private bool _searchAllSelectedOnMouseDown = false;
         private object? lastJumpedItem = null;
 
+        private readonly SearchPromptContextMenu searchPromptMenu = new();
+
         public DatGrouperSearchUI()
         {
             InitializeComponent();
+            searchPromptMenu.Attach(searchTextBox);
         }
 
         public void SetUI(Dictionary<IGameFamily, object> familyRendererDictionary)
@@ -62,6 +65,21 @@ namespace datinate.app
             searchTextBox.Text = value;
         }
 
+        public void SetSearchPrompts(IReadOnlyList<string>? searchPrompts)
+        {
+            if (InvokeRequired)
+            {
+                if (IsDisposed || !IsHandleCreated)
+                    return;
+
+                BeginInvoke(new Action(() => SetSearchPrompts(searchPrompts)));
+                return;
+            }
+
+            // NOTE: Null or empty clears the available prompts.
+            searchPromptMenu.SetPrompts(searchPrompts);
+        }
+
         public void ClearSearchHighlights()
         {
             if (string.IsNullOrWhiteSpace(searchHighlightText))
@@ -80,6 +98,9 @@ namespace datinate.app
                 BeginInvoke(new Action(() => ClearUI()));
                 return;
             }
+
+            searchPromptMenu.SetPrompts(null);
+
             selectedNode = null;
             familyDictionary.Clear();
             searchHighlightText = null;

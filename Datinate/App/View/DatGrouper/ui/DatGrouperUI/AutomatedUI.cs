@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using static com.RADIO.Datinate.RMVC.Shared.DatGrouperEditRequestDTO;
 
@@ -58,7 +59,7 @@ namespace datinate.app
                 if (effect != DragDropEffects.None &&
                     data.GetDataPresent(DatinateHelper.WEB_BROWSER_MAIN_SearchGame))
                 {
-                    var name = DatinateHelper.GetGameEntityName(entity);
+                    var name = DatinateFamilyHelper.GetGameEntityName(entity);
 
                     if (!string.IsNullOrWhiteSpace(name))
                         base.InvokeSearchGameNameEvt(name);

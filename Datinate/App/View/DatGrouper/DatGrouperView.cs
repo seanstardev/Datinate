@@ -2,6 +2,7 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app.ui;
 using Datinate.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using static app.datinate.DatGrouperEditDelta;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
@@ -268,7 +269,7 @@ namespace datinate.app
             RunOnUiThread(() =>
             {
                 ApplyAutomatedLayout(true);
-                summaryLabel.Text = DatinateHelper.BuildSummaryText(gameFamilies);
+                summaryLabel.Text = DatinateFamilyHelper.BuildSummaryText(gameFamilies);
 
                 if (_delayLayoutRequests)
                 {

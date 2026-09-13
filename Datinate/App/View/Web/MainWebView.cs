@@ -3,6 +3,7 @@ using com.RADIO.Datinate.RMVC.Shared;
 using datinate.shared;
 using Datinate.Properties;
 using Datinate.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.Diagnostics;
 
@@ -502,7 +503,7 @@ namespace datinate.app
                         DragDrop: (s, e) =>
                         {
                             if (dragDataValid && pendingPayload?.Entity is not null )
-                                SearchEntityNameEvt?.Invoke(DatinateHelper.GetGameEntityName(pendingPayload.Entity) ?? string.Empty);
+                                SearchEntityNameEvt?.Invoke(DatinateFamilyHelper.GetGameEntityName(pendingPayload.Entity) ?? string.Empty);
                         }
                     ), Color.LightBlue
                 ),

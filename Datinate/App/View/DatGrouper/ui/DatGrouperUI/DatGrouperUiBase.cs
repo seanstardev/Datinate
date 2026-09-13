@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.shared;
 using Datinate.App.View.projects.gameFamily;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1211,10 +1212,16 @@ namespace datinate.app
         {
             TreeNode? node = e.Node;
 
+            if (node != null && node.Tag is IGameEntity entity && entity is not IGameEntityProxy)
+                searchUI.SetSearchPrompts(DatinateFamilyHelper.CreateSearchPrompts(entity));
+            else
+                searchUI.SetSearchPrompts(null);
+
             while (node != null && node.Tag is not IGameFamily)
                 node = node.Parent;
 
             searchUI.SelectedNode = node;
+
             PulseSelectedNodeChanged();
         }
         private void JumpToNodeOnlyIfNeeded(TreeNode node)
@@ -1709,6 +1716,7 @@ namespace datinate.app
         {
             searchUI.ClearSearchHighlights();
             searchUI.SelectedNode = null;
+            searchUI.SetSearchPrompts(null);
             PulseSelectedNodeChanged();
         }
 
