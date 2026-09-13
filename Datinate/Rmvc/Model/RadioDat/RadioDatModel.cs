@@ -263,7 +263,16 @@ namespace com.RADIO.Datinate.RMVC
                 return MediaCollectionsView;
             }
         }
-
+        public bool HasAssignedMedia(IGameFamily family)
+        {
+            lock (gate)
+            {
+                return mediaCollectionsDictionary.TryGetValue(
+                           family,
+                           out var collection) &&
+                       collection.SourceIdAssignedItemDictionary.Count > 0;
+            }
+        }
         public IReadOnlyDictionary<IGameFamily, IMediaCollection> UpdateMediaReferences(
             IReadOnlyDictionary<IGameFamily, IGameFamily> familyReferenceUpdates)
         {

@@ -47,7 +47,9 @@ namespace com.RADIO.Datinate.RMVC
 
                     if (collection != null)
                     {
-                        Facade.Instance?.MediaMediator?.ShowViewAssign(filter!, collection);
+                        var prompts = CreatePrompts(family);
+
+                        Facade.Instance?.MediaMediator?.ShowViewAssign(filter!, collection, prompts);
                         Facade.Instance?.MediaAssignmentMediator?.SetView(collection);
 
                         var scoring = radioDatModel.GetScoring(family);
@@ -58,6 +60,30 @@ namespace com.RADIO.Datinate.RMVC
                     }
                 }
             }
+        }
+
+        private static IReadOnlyList<string> CreatePrompts(IGameFamily family)
+        {
+            List<string> prompts = new List<string>();
+            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var part in family.GetAllGameParts(true))
+            {
+                var unbracketed = DatinateHelper.GetFlaglessName(part.GetName()) ?? string.Empty;
+
+                string[] nameParts = unbracketed
+                    .Split(new[] { ' ', '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var namePart in nameParts)
+                {
+                    var section = namePart.Trim();
+
+                    if (section.Length > 2 && seen.Add(section))
+                        prompts.Add(section);
+                }
+            }
+
+            return prompts;
         }
     }
 }

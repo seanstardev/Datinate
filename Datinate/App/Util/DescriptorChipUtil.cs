@@ -23,7 +23,7 @@
             new DescriptorDefinitionDTO("NG", Color.DarkGoldenrod, "No Good Dump"),
             new DescriptorDefinitionDTO("Ed", Color.FromArgb(128, 128, 255), "Educational"),
             new DescriptorDefinitionDTO("Co", Color.Green, "Compilation"),
-            new DescriptorDefinitionDTO("UL", Color.Red, "Unlicensed"),
+            new DescriptorDefinitionDTO("BL", Color.Red, "Bootleg"),
             new DescriptorDefinitionDTO("Af", Color.FromArgb(196, 7, 213), "Aftermarket"),
             new DescriptorDefinitionDTO("CD", Color.FromArgb(0, 30, 255), "Cover / Demo Disc"),
             new DescriptorDefinitionDTO("DA", Color.Gray, "DAT Artefact"),

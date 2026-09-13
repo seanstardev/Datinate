@@ -33,9 +33,9 @@ namespace com.RADIO.Datinate.RMVC
             view?.ShowViewPreview(searchName);
         }
 
-        public void ShowViewAssign(string searchName, IMediaCollection mediaCollection)
+        public void ShowViewAssign(string searchName, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
         {
-            view?.ShowViewAssign(searchName, mediaCollection);
+            view?.ShowViewAssign(searchName, mediaCollection, prompts);
         }
         public void SetMediaCardContent(
             ILookupSet lookupSet, 

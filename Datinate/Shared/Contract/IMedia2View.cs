@@ -17,7 +17,7 @@ namespace Datinate.Shared
         void StopReceiveMediaDrop();
         
         void TeardownView();
-        void ShowViewAssign(string searchName, IMediaCollection mediaCollection);
+        void ShowViewAssign(string searchName, IMediaCollection mediaCollection, IReadOnlyList<string> prompts);
         void ShowViewPreview(string searchName);
         void InitialiseView(IReadOnlyCollection<ILookupSet> lookupSets);
         void EmptyView();

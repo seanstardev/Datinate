@@ -30,6 +30,7 @@ namespace datinate.app
 
         private IMediaCollection? pendingMediaCollection = null;
         private string? pendingSearchName = null;
+        private IReadOnlyList<string>? pendingSearchPrompts = null;
 
         private bool activelyDisplayingContent = false;
         private bool readOnlyMode = false;
@@ -71,10 +72,12 @@ namespace datinate.app
 
             if (!string.IsNullOrWhiteSpace(pendingSearchName))
             {
-                ShowView(pendingSearchName, pendingMediaCollection);
+                ShowView(pendingSearchName, pendingMediaCollection, pendingSearchPrompts);
             }
+
             pendingMediaCollection = null;
             pendingSearchName = null;
+            pendingSearchPrompts = null;
         }
         public void SetCloseBtnPosition(bool left)
         {
@@ -89,12 +92,13 @@ namespace datinate.app
                 closeRightBtn.Visible = true;
             }
         }
-        private void ShowView(string filter, IMediaCollection? mediaCollection)
+        private void ShowView(string filter, IMediaCollection? mediaCollection, IReadOnlyList<string>? prompts)
         {
             if (awaitingInitialisationSets)
             {
                 pendingSearchName = filter;
                 pendingMediaCollection = mediaCollection;
+                pendingSearchPrompts = prompts;
                 return;
             }
 
@@ -142,7 +146,7 @@ namespace datinate.app
                             mediaContainer.Controls.Add(ui);
 
                             ui.PermitEnable();
-                            ui.SetUI(filter, readOnlyMode, mediaCollection);
+                            ui.SetUI(filter, readOnlyMode, mediaCollection, prompts);
                             ui.SetVisibleIfViable();
 
                             MaskUI.BringToFront();
@@ -156,7 +160,7 @@ namespace datinate.app
                         EnqueueShowWork(() =>
                         {
                             ui.PermitEnable();
-                            ui.SetUI(filter, readOnlyMode, mediaCollection);
+                            ui.SetUI(filter, readOnlyMode, mediaCollection, prompts);
                             ui.SetVisibleIfViable();
 
                             MaskUI.BringToFront();
@@ -232,15 +236,15 @@ namespace datinate.app
             }
         }
 
-        public void ShowViewAssign(string searchName, IMediaCollection mediaCollection)
+        public void ShowViewAssign(string searchName, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
         {
             readOnlyMode = false;
-            ShowView(searchName, mediaCollection);
+            ShowView(searchName, mediaCollection, prompts);
         }
         public void ShowViewPreview(string searchName)
         {
             this.readOnlyMode = true;
-            ShowView(searchName, null);
+            ShowView(searchName, null, null);
         }
 
         public void EmptyView()

@@ -9,21 +9,32 @@ namespace com.RADIO.Datinate.RMVC
 {
     public class DatGrouperModel : RModel
     {
-        public IReadOnlyList<IGameFamily> CuratedFamilies 
+        public IReadOnlyList<IGameFamily> CuratedFamilies
             => overlay?.GetCuratedFamiliesAlphaSorted() ?? [];
-        
+
         private CurationOverlay? overlay;
+
         public void CreateSession(
-            IReadOnlyList<IGameFamily> families, 
+            IReadOnlyList<IGameFamily> families,
             IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSet,
             IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary)
         {
             overlay = new CurationOverlay(
                 families, flagFilterSet, softwareIdDatGroupEnumDictionary);
         }
-        public DatGrouperEditDelta? ApplyUndo() => overlay?.ApplyUndo();
-        public DatGrouperEditDelta? ApplyRedo() => overlay?.ApplyRedo();
-        
+
+        public bool WouldUndoLoseMediaAssociations()
+            => overlay?.WouldUndoLoseMediaAssociations() ?? false;
+
+        public bool WouldRedoLoseMediaAssociations()
+            => overlay?.WouldRedoLoseMediaAssociations() ?? false;
+
+        public DatGrouperEditDelta? ApplyUndo()
+            => overlay?.ApplyUndo();
+
+        public DatGrouperEditDelta? ApplyRedo()
+            => overlay?.ApplyRedo();
+
         public DatGrouperEditDelta? PerformUpdate(DatGrouperEditRequestDTO dto)
         {
             if (overlay == null || dto.EditActionEnum == EDIT_ACTION_ENUM.NOT_SET)
@@ -38,10 +49,12 @@ namespace com.RADIO.Datinate.RMVC
                     if (dto.SourceFamily != null)
                         delta = overlay.TryResetFamily(dto.SourceFamily);
                     break;
+
                 case EDIT_ACTION_ENUM.GameReset:
                     if (dto.SourceGame != null)
                         delta = overlay.TryResetGame(dto.SourceGame);
                     break;
+
                 case EDIT_ACTION_ENUM.PartReset:
                     if (dto.SourcePart != null)
                         delta = overlay.TryResetPart(dto.SourcePart);
@@ -52,53 +65,84 @@ namespace com.RADIO.Datinate.RMVC
                     if (dto.SourceFamily != null)
                         delta = overlay.TryAddFamily(dto.SourceFamily);
                     break;
+
                 case EDIT_ACTION_ENUM.FamilyMergeAsMain:
                     if (dto.SourceFamily != null && dto.TargetFamily != null)
-                        delta = overlay.TryMoveAndMergeFamily(dto.SourceFamily, dto.TargetFamily, true);
+                        delta = overlay.TryMoveAndMergeFamily(
+                            dto.SourceFamily,
+                            dto.TargetFamily,
+                            true);
                     break;
+
                 case EDIT_ACTION_ENUM.FamilyMergeAsSub:
                     if (dto.SourceFamily != null && dto.TargetFamily != null)
-                        delta = overlay.TryMoveAndMergeFamily(dto.SourceFamily, dto.TargetFamily, false);
+                        delta = overlay.TryMoveAndMergeFamily(
+                            dto.SourceFamily,
+                            dto.TargetFamily,
+                            false);
                     break;
 
                 // Game
                 case EDIT_ACTION_ENUM.GameMoveAfter:
                     if (dto.SourceGame != null && dto.TargetGame != null)
-                        delta = overlay.TryAddOrMoveGameAfter(dto.SourceGame, dto.TargetGame);
+                        delta = overlay.TryAddOrMoveGameAfter(
+                            dto.SourceGame,
+                            dto.TargetGame);
                     break;
+
                 case EDIT_ACTION_ENUM.GameMoveBefore:
                     if (dto.SourceGame != null && dto.TargetGame != null)
-                        delta = overlay.TryAddOrMoveGameBefore(dto.SourceGame, dto.TargetGame);
+                        delta = overlay.TryAddOrMoveGameBefore(
+                            dto.SourceGame,
+                            dto.TargetGame);
                     break;
 
                 case EDIT_ACTION_ENUM.GameMoveToBottom:
-                    if (dto.SourceGame != null )
-                        delta = overlay.TryMoveGameToTopOrBottom(dto.SourceGame, false);
-                    break;
-                case EDIT_ACTION_ENUM.GameMoveToTop:
                     if (dto.SourceGame != null)
-                        delta = overlay.TryMoveGameToTopOrBottom(dto.SourceGame, true);
+                        delta = overlay.TryMoveGameToTopOrBottom(
+                            dto.SourceGame,
+                            false);
                     break;
 
+                case EDIT_ACTION_ENUM.GameMoveToTop:
+                    if (dto.SourceGame != null)
+                        delta = overlay.TryMoveGameToTopOrBottom(
+                            dto.SourceGame,
+                            true);
+                    break;
+
+                case EDIT_ACTION_ENUM.GameAddAsNewFamily:
+                    if (dto.SourceGame != null)
+                        delta = overlay.TryAddGameAsNewFamily(
+                            dto.SourceGame);
+                    break;
 
                 // Part
                 case EDIT_ACTION_ENUM.PartMoveAfter:
                     if (dto.SourcePart != null && dto.TargetPart != null)
-                        delta = overlay.TryAddOrMovePartAfter(dto.SourcePart, dto.TargetPart);
+                        delta = overlay.TryAddOrMovePartAfter(
+                            dto.SourcePart,
+                            dto.TargetPart);
                     break;
+
                 case EDIT_ACTION_ENUM.PartMoveBefore:
                     if (dto.SourcePart != null && dto.TargetPart != null)
-                        delta = overlay.TryAddOrMovePartBefore(dto.SourcePart, dto.TargetPart);
+                        delta = overlay.TryAddOrMovePartBefore(
+                            dto.SourcePart,
+                            dto.TargetPart);
                     break;
 
                 // Part Include / Exclude
                 case EDIT_ACTION_ENUM.PartSetAsInclude:
                     if (dto.SourcePart != null)
-                        delta = overlay.SetCuratedPartAsInclude(dto.SourcePart);
+                        delta = overlay.SetCuratedPartAsInclude(
+                            dto.SourcePart);
                     break;
+
                 case EDIT_ACTION_ENUM.PartSetAsExclude:
                     if (dto.SourcePart != null)
-                        delta = overlay.SetCuratedPartAsExclude(dto.SourcePart);
+                        delta = overlay.SetCuratedPartAsExclude(
+                            dto.SourcePart);
                     break;
             }
 
@@ -115,11 +159,94 @@ namespace com.RADIO.Datinate.RMVC
                 return null;
             }
 
-            return overlay.ImportCurated(importedFamilies, out errorReport);
+            return overlay.ImportCurated(
+                importedFamilies,
+                out errorReport);
         }
+
+        public bool WouldPerformUpdateLoseMediaAssociations(
+            DatGrouperEditRequestDTO dto)
+        {
+            if (overlay == null)
+                return false;
+
+            switch (dto.EditActionEnum)
+            {
+                case EDIT_ACTION_ENUM.FamilyReset:
+                    return dto.SourceFamily != null &&
+                           overlay.WouldResetFamilyLoseMediaAssociations(
+                               dto.SourceFamily);
+
+                case EDIT_ACTION_ENUM.GameReset:
+                    return dto.SourceGame != null &&
+                           overlay.WouldResetGameLoseMediaAssociations(
+                               dto.SourceGame);
+
+                case EDIT_ACTION_ENUM.PartReset:
+                    return dto.SourcePart != null &&
+                           overlay.WouldResetPartLoseMediaAssociations(
+                               dto.SourcePart);
+
+                default:
+                    return false;
+            }
+        }
+
         public void Teardown()
         {
             overlay = null;
+        }
+
+        public IReadOnlySet<IGameFamily> GetUpdateMediaAssociationRisks(
+    DatGrouperEditRequestDTO dto)
+        {
+            if (overlay == null)
+            {
+                return new HashSet<IGameFamily>(
+                    ReferenceEqualityComparer.Instance);
+            }
+
+            switch (dto.EditActionEnum)
+            {
+                case EDIT_ACTION_ENUM.FamilyReset:
+                    return dto.SourceFamily != null
+                        ? overlay.GetResetFamilyMediaAssociationRisks(
+                            dto.SourceFamily)
+                        : new HashSet<IGameFamily>(
+                            ReferenceEqualityComparer.Instance);
+
+                case EDIT_ACTION_ENUM.GameReset:
+                    return dto.SourceGame != null
+                        ? overlay.GetResetGameMediaAssociationRisks(
+                            dto.SourceGame)
+                        : new HashSet<IGameFamily>(
+                            ReferenceEqualityComparer.Instance);
+
+                case EDIT_ACTION_ENUM.PartReset:
+                    return dto.SourcePart != null
+                        ? overlay.GetResetPartMediaAssociationRisks(
+                            dto.SourcePart)
+                        : new HashSet<IGameFamily>(
+                            ReferenceEqualityComparer.Instance);
+
+                default:
+                    return new HashSet<IGameFamily>(
+                        ReferenceEqualityComparer.Instance);
+            }
+        }
+
+        public IReadOnlySet<IGameFamily> GetUndoMediaAssociationRisks()
+        {
+            return overlay?.GetUndoMediaAssociationRisks()
+                   ?? new HashSet<IGameFamily>(
+                       ReferenceEqualityComparer.Instance);
+        }
+
+        public IReadOnlySet<IGameFamily> GetRedoMediaAssociationRisks()
+        {
+            return overlay?.GetRedoMediaAssociationRisks()
+                   ?? new HashSet<IGameFamily>(
+                       ReferenceEqualityComparer.Instance);
         }
     }
 }

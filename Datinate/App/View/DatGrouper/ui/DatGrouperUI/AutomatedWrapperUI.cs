@@ -175,6 +175,9 @@ namespace datinate.app
             SetTitle("Queued");
             primaryUI.AllowInteraction = true;
             surrogateUI.AllowInteraction = true;
+
+            primaryUI.AllowGameAddAsFamilyMenuItem = true;
+            surrogateUI.AllowGameAddAsFamilyMenuItem = true;
         }
         public void SetModeCurated()
         {

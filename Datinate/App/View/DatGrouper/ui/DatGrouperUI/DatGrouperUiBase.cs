@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using static app.datinate.DatGrouperEditDelta;
+using static com.RADIO.Datinate.RMVC.Shared.DatGrouperEditRequestDTO;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 using static datinate.app.DatGrouperTreeView;
 
@@ -38,6 +39,8 @@ namespace datinate.app
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool AllowInteraction { get; internal set; } = true;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool AllowGameAddAsFamilyMenuItem { get; internal set; } = false;
 
         public bool IsSurrogateUI => isSurrogate;
 
@@ -134,6 +137,7 @@ namespace datinate.app
             contextMenu.ToggleExcludedFamiliesShowHideEvt += OnToggleExcludedFamiliesShowHide;
             contextMenu.ToggleAliasesShowHideEvt += OnToggleAliasesShowHide;
             contextMenu.CopyNameEvt += OnCopyNameEvt;
+            contextMenu.GameAddAsNewFamilyEvt += OnGameAddAsNewFamily;
         }
         public void SetView(
             IGameFamily[] gameFamilies,
@@ -311,6 +315,15 @@ namespace datinate.app
                     : DatGrouperEditRequestDTO.EDIT_ACTION_ENUM.GameMoveToBottom;
 
             var dto = new DatGrouperEditRequestDTO(requestEnum)
+            {
+                SourceGame = game
+            };
+
+            EditRequestEvt?.Invoke(dto);
+        }
+        private void OnGameAddAsNewFamily(IGame game)
+        {
+            var dto = new DatGrouperEditRequestDTO(DatGrouperEditRequestDTO.EDIT_ACTION_ENUM.GameAddAsNewFamily)
             {
                 SourceGame = game
             };
@@ -1054,6 +1067,8 @@ namespace datinate.app
             mediaCache = null;
             mediaModeEnum = DAT_GROUPER_MEDIA_MODE.NOT_SET;
 
+            AllowGameAddAsFamilyMenuItem = false;
+
             try
             {
                 treeView.ResetToEmptyRoot();
@@ -1431,6 +1446,16 @@ namespace datinate.app
                     contextMenu.SetPartIncludeExclude(part.Exclude);
                 else
                     contextMenu.DisableSetPartIncludeExclude();
+
+                if (node != null && isAutoUI && node.Tag is IGame game &&
+                    mediaModeEnum == DAT_GROUPER_MEDIA_MODE.NOT_SET &&
+                    AllowGameAddAsFamilyMenuItem &&
+                    !IsExcludedAutoNode(game))
+                {
+                    contextMenu.SetGameAddAsNewFamilyEnabled(true);
+                }
+                else
+                    contextMenu.SetGameAddAsNewFamilyEnabled(false);
 
                 contextMenu.SetAliasesShowHide(!renderAliases);
                 contextMenu.SetExcludedFamiliesShowHide(isSurrogate);

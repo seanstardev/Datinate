@@ -149,10 +149,11 @@ namespace datinate.app
                 form.StartPosition = FormStartPosition.Manual;
                 form.ShowInTaskbar = false;
 
-                PositionFormInScreen(form, owner);
-
-                form.ShowDialog(owner);
-
+                if (owner != null)
+                {
+                    PositionFormInScreen(form, owner);
+                    form.ShowDialog(owner);
+                }
                 return;
             }
 
@@ -163,7 +164,7 @@ namespace datinate.app
             }
         }
 
-        private Form GetCenteredModalDialogOwner(Form dialog)
+        private Form? GetCenteredModalDialogOwner(Form dialog)
         {
             if (IsValidCenteredModalDialogOwner(ProjectsForm, dialog))
                 return ProjectsForm;
@@ -173,7 +174,7 @@ namespace datinate.app
 
             for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
             {
-                Form form = Application.OpenForms[i];
+                Form? form = Application.OpenForms[i];
 
                 if (IsValidCenteredModalDialogOwner(form, dialog))
                     return form;
@@ -433,7 +434,7 @@ namespace datinate.app
 
             for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
             {
-                Form form = Application.OpenForms[i];
+                Form? form = Application.OpenForms[i];
                 if (IsValidProgressOwner(form))
                     return form;
             }

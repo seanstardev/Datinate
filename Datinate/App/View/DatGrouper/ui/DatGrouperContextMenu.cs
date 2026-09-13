@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using RadioLibCore.RadioDat;
+using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace datinate.app
@@ -11,6 +12,7 @@ namespace datinate.app
         public event Action<bool, IGame>? GameMoveTopOrBottomEvt;
         public event Action<bool, IGamePart>? PartIncludeExcludeEvt;
         public event Action? ToggleAliasesShowHideEvt;
+        public event Action<IGame>? GameAddAsNewFamilyEvt;
         public event Action? ToggleExcludedFamiliesShowHideEvt;
         public event Action<string>? CopyNameEvt;
 
@@ -21,13 +23,15 @@ namespace datinate.app
 
         private readonly ToolStripMenuItem _gameMoveTopItem = new("Move Game to Top");
         private readonly ToolStripMenuItem _gameMoveBottomItem = new("Move Game to Bottom");
+        private readonly ToolStripMenuItem _gameAddAsNewFamilyItem = new("Add Game as New Family (Advanced)");
+
         private readonly ToolStripMenuItem _partIncludeExcludeItem = new("Exclude Part");
 
         private readonly ToolStripMenuItem _copyNameItem = new("Copy Name to Clipboard");
         private readonly ToolStripMenuItem _copyNameFullItem = new("Copy Fullname to Clipboard");
 
         private readonly ToolStripMenuItem _aliasesShowHideItem = new("Show Aliases");
-        private readonly ToolStripMenuItem _excludedFamiliesShowHideItem = new("Show Excluded FamiliesAliases");
+        private readonly ToolStripMenuItem _excludedFamiliesShowHideItem = new("Show Excluded Families");
 
         private const string TEXT_PART_INCLUDE = "Include Part";
         private const string TEXT_PART_EXCLUDE = "Exclude Part";
@@ -55,6 +59,7 @@ namespace datinate.app
                 _copyNameItem,
                 _copyNameFullItem
             };
+
             if (isCurated)
             {
                 items.AddRange(new List<ToolStripItem>()
@@ -66,6 +71,15 @@ namespace datinate.app
                     _partIncludeExcludeItem
                 });
             }
+            else
+            {
+                items.AddRange(new List<ToolStripItem>()
+                {
+                    new ToolStripSeparator(),
+                    _gameAddAsNewFamilyItem
+                });
+            }
+
             _menu.Items.AddRange(items.ToArray());
 
             _menu.Opening += Menu_Opening;
@@ -82,6 +96,7 @@ namespace datinate.app
             _copyNameFullItem.Enabled = false;
 
             _partIncludeExcludeItem.Enabled = false;
+            _gameAddAsNewFamilyItem.Enabled = false;
 
             _gameMoveTopItem.Enabled = false;
             _gameMoveBottomItem.Enabled = false;
@@ -112,6 +127,11 @@ namespace datinate.app
                 : TEXT_EXCLUDED_FAMILIES_HIDE;
         }
 
+        public void SetGameAddAsNewFamilyEnabled(bool doEnable)
+        {
+            _gameAddAsNewFamilyItem.Enabled = doEnable;
+        }
+
         internal void SetCopyNameEnabled(bool doEnable)
         {
             _copyNameItem.Enabled = doEnable;
@@ -133,6 +153,7 @@ namespace datinate.app
             _undoItem.Enabled = false;
             _redoItem.Enabled = false;
             _partIncludeExcludeItem.Enabled = false;
+            _gameAddAsNewFamilyItem.Enabled = false;
             _excludedFamiliesShowHideItem.Enabled = false;
             _aliasesShowHideItem.Enabled = false;
             _copyNameFullItem.Enabled = false;
@@ -158,6 +179,7 @@ namespace datinate.app
             _gameMoveTopItem.Click -= OnGameMoveTop;
             _gameMoveBottomItem.Click -= OnGameMoveBottom;
             _partIncludeExcludeItem.Click -= OnPartIncludeExclude;
+            _gameAddAsNewFamilyItem.Click -= OnGameAddAsNewFamily;
 
             _undoItem.Click += OnUndo;
             _redoItem.Click += OnRedo;
@@ -168,7 +190,9 @@ namespace datinate.app
             _gameMoveTopItem.Click += OnGameMoveTop;
             _gameMoveBottomItem.Click += OnGameMoveBottom; 
             _partIncludeExcludeItem.Click += OnPartIncludeExclude;
+            _gameAddAsNewFamilyItem.Click += OnGameAddAsNewFamily;
         }
+
         private void OnAliasesShowHide(object? sender, EventArgs e)
             => ToggleAliasesShowHideEvt?.Invoke();
 
@@ -193,6 +217,15 @@ namespace datinate.app
                     CopyNameEvt?.Invoke(name);
             }
         }
+
+        private void OnGameAddAsNewFamily(object? sender, EventArgs e)
+        {
+            if (_activeEntity is IGame game)
+            {
+                GameAddAsNewFamilyEvt?.Invoke(game);
+            }
+        }
+
         private void OnPartIncludeExclude(object? sender, EventArgs e)
         {
             if (_activeEntity is IGamePart part)

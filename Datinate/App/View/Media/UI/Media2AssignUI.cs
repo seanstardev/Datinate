@@ -181,7 +181,8 @@ namespace datinate.app
         public void SetUI(
             string filterText, 
             bool readOnlyMode, 
-            IMediaCollection? mediaCollection)
+            IMediaCollection? mediaCollection,
+            IReadOnlyList<string>? searchPrompts)
         {
             ActivelyLoadedMediaItem = null;
 
@@ -211,6 +212,8 @@ namespace datinate.app
                     assignControls.ShowNamePage();
                     SetSelectedTab(mediaPage);
                 }
+
+                assignControls.SetSearchPrompts(searchPrompts);
 
                 var info = entryListUI.GetSingleHighConfidenceMatch();
                 oneOrMoreHighConfidenceMatchesFound = false;

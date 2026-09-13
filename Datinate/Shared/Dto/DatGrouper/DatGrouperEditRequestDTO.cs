@@ -23,6 +23,8 @@ namespace com.RADIO.Datinate.RMVC.Shared
             GameMoveToBottom,
             GameMoveToTop,
 
+            GameAddAsNewFamily,
+
             PartReset,
             PartMoveBefore,
             PartMoveAfter,

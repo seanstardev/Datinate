@@ -180,7 +180,8 @@ namespace app.datinate
             out Dictionary<string, IGamePart?> errorReport)
         {
             errorReport = new Dictionary<string, IGamePart?>();
-            if (curationImportPerformed) return null;
+            if (curationImportPerformed)
+                return null;
 
             curationImportPerformed = true;
 
@@ -189,7 +190,8 @@ namespace app.datinate
 
             // --- Build a strict auto part lookup: (PartName + PartFingerprint) -> AutoPartId
             // If any key maps to more than 1 AutoPartId, import becomes ambiguous -> fail.
-            var autoPartIdByKey = new Dictionary<(string Name, string Fp, string? Source, string? Tag, string? LaunchName), AutoPartId>();
+            var autoPartIdByKey =
+                new Dictionary<(string Name, string Fp, string? Source, string? Tag, string? LaunchName), AutoPartId>();
 
             // Also keep auto family refs by id so we can create ReplacementReferences + auto removals.
             var autoFamilyRefById = new Dictionary<AutoFamilyId, IGameFamily>();
@@ -199,12 +201,14 @@ namespace app.datinate
             for (int fi = 0; fi < auto.FamilyCount; fi++)
             {
                 var famId = new AutoFamilyId(fi);
+
                 if (!auto.TryResolve(famId, out var autoFamily) || autoFamily is null)
                     continue;
 
                 autoFamilyRefById[famId] = autoFamily;
 
                 var games = autoFamily.GetAllGames();
+
                 for (int gi = 0; gi < games.Length; gi++)
                 {
                     var game = games[gi];
@@ -223,10 +227,10 @@ namespace app.datinate
 
                         if (autoPartIdByKey.TryGetValue(key, out var existing))
                         {
-                            // Ambiguous: same (name+fp) exists in multiple places in auto.
+                            // Ambiguous: same key exists in multiple places in auto.
                             // We have a “perfect match” rule so this is treated as a hard failure.
-
-                            string error = $"Ambiguous part key '{name}'." +
+                            string error =
+                                $"Ambiguous part key '{name}'." +
                                 $"Already mapped to {existing}, also found {id}.";
 
                             Debug.WriteLine(error);
@@ -240,34 +244,44 @@ namespace app.datinate
                 }
             }
 
-            // --- We will build curated plans exactly following the imported structure.
-            // While doing that, we track which auto families contribute any parts to each curated family
-            // so we can later build ReplacementReferences (auto family ref -> curated clone ref).
-            var contributingAutoFamiliesByPlanId = new Dictionary<Guid, HashSet<AutoFamilyId>>();
+            // Track which auto families actually contribute parts to each curated family.
+            //
+            // One AutoFamilyId is allowed to contribute to multiple curated families.
+            // This is intentional: an incorrectly generated auto family may have been
+            // manually split during curation.
+            var contributingAutoFamiliesByPlanId =
+                new Dictionary<Guid, HashSet<AutoFamilyId>>();
 
-            // Strict guard: one AutoFamilyId must not be split across multiple imported curated families
-            // (otherwise “where does its media go?” becomes ambiguous).
-            var ownerPlanIdByAutoFamilyId = new Dictionary<AutoFamilyId, Guid>();
+            // Delta payloads.
+            var replacements =
+                new Dictionary<IGameFamily, IGameFamily>(ReferenceEqualityComparer.Instance);
 
-            // Delta payloads
-            var replacements = new Dictionary<IGameFamily, IGameFamily>(ReferenceEqualityComparer.Instance);
             var curatedToAdd = new List<IGameFamily>();
             var curatedToRemove = new List<IGameFamily>(); // empty for import
             var autoToAdd = new List<IGameFamily>();       // empty for import
             var autoToRemove = new List<IGameFamily>();
-                
-            var importedFamiliesByPlanId = new Dictionary<Guid, List<IGameFamily>>();
 
-            // --- Build plans
+            // The same auto family may contribute to several curated families.
+            // Prevent it being added to AutoFamiliesToRemove more than once.
+            var autoFamilyIdsToRemove = new HashSet<AutoFamilyId>();
+
+            var importedFamiliesByPlanId =
+                new Dictionary<Guid, List<IGameFamily>>();
+
+            // --- Build plans.
             foreach (var importedFamily in importedFamilies)
             {
-                // Family display name for ordering / UI (not identity)
+                // Family display name for ordering / UI (not identity).
                 var familyName = importedFamily.GetFamilyDisplayName();
-                    
+
                 var gamePlans = new List<CuratedGamePlan>();
 
-                // Collect all resolved part ids for this imported family so we can decide OriginAutoFamilyId (optional).
-                var familyAutoIds = new List<AutoFamilyId>();
+                // All successfully imported part ids belonging to this particular
+                // curated family.
+                //
+                // We use this later to decide whether this family represents the
+                // COMPLETE original auto family.
+                var familyPartIds = new HashSet<AutoPartId>();
 
                 foreach (var importedGame in importedFamily.GetAllGames())
                 {
@@ -278,10 +292,11 @@ namespace app.datinate
                     var autoGameIdCounts = new Dictionary<AutoGameId, int>();
 
                     var importedParts = importedGame.GetGameParts(false);
+
                     for (int i = 0; i < importedParts.Length; i++)
                     {
                         var p = importedParts[i];
-                        
+
                         var name = p.GetName();
                         var sourceId = p.GetDirectoryId();
 
@@ -290,10 +305,13 @@ namespace app.datinate
 
                         if (!autoPartIdByKey.TryGetValue(key, out var autoPartId))
                         {
-                            string error = $"Missing auto match for part '{name}', source='{sourceId}', Tag='{p.Tag ?? "[Null]"}' Launch={p.LaunchName ?? "[Null]"}.";
+                            string error =
+                                $"Missing auto match for part '{name}', source='{sourceId}', " +
+                                $"Tag='{p.Tag ?? "[Null]"}' Launch={p.LaunchName ?? "[Null]"}.";
+
                             Debug.WriteLine(error);
                             errorReport[error] = p;
-                            
+
                             continue;
                         }
 
@@ -302,10 +320,10 @@ namespace app.datinate
                         if (auto.TryResolve(autoPartId, out var matchedAutoPart))
                             matchedAutoPart.Exclude = p.Exclude;
 
-                        var af = new AutoFamilyId(autoPartId.FamilyIndex);
-                        familyAutoIds.Add(af);
+                        var ag = new AutoGameId(
+                            autoPartId.FamilyIndex,
+                            autoPartId.GameIndex);
 
-                        var ag = new AutoGameId(autoPartId.FamilyIndex, autoPartId.GameIndex);
                         autoGameIdCounts.TryGetValue(ag, out var c);
                         autoGameIdCounts[ag] = c + 1;
                     }
@@ -315,10 +333,12 @@ namespace app.datinate
 
                     // Pick an AutoGameId for the CuratedGamePlan:
                     // - This is mostly metadata used by merge logic and fast matching.
-                    // - It cannot represent mixed-origin parts perfectly, so we choose the dominant origin.
+                    // - It cannot represent mixed-origin parts perfectly, so choose
+                    //   the dominant origin.
                     AutoGameId chosenAutoGameId = default;
                     {
                         var bestCount = -1;
+
                         foreach (var kv in autoGameIdCounts)
                         {
                             if (kv.Value > bestCount)
@@ -329,99 +349,132 @@ namespace app.datinate
                         }
                     }
 
-                    var gp = new CuratedGamePlan(gameName, chosenAutoGameId);
+                    var gp = new CuratedGamePlan(
+                        gameName,
+                        chosenAutoGameId);
 
-                    // Apply parts in imported order (this is the curated truth).
+                    // Apply parts in imported order.
                     for (int i = 0; i < resolvedPartIdsInOrder.Count; i++)
                     {
                         var pid = resolvedPartIdsInOrder[i];
 
-                        // AddCuratedPart maintains:
-                        // - CuratedPartsInternal
-                        // - CuratedAutoPartsInternal
-                        // We also store pid in the plan.
-                        gp.Parts.Add(pid);
+                        // Duplicate AutoPartIds across curated families/games remain invalid.
                         if (!AddCuratedPart(pid))
                         {
-                            string error = $"Duplicate part id encountered: {pid}.";
-                            // Duplicate part id across curated import (invalid).
+                            string error =
+                                $"Duplicate part id encountered: {pid}.";
+
                             Debug.WriteLine(error);
                             errorReport[error] = null;
+
                             continue;
                         }
+
+                        // Only add the part to the plan after AddCuratedPart succeeds.
+                        // This keeps the plan and CuratedPartsInternal in sync.
+                        gp.Parts.Add(pid);
+                        familyPartIds.Add(pid);
                     }
 
-                    gamePlans.Add(gp);
+                    if (gp.Parts.Count > 0)
+                        gamePlans.Add(gp);
                 }
 
                 if (gamePlans.Count == 0)
                     continue;
 
-                // Determine OriginAutoFamilyId for the plan:
-                // - If all parts came from the same auto family, set it.
-                // - If mixed origins (merged curated family), set null.
+                // Determine OriginAutoFamilyId.
+                //
+                // OriginAutoFamilyId means that this curated family represents the
+                // COMPLETE original auto family.
+                //
+                // A partial family - even when all its parts came from the same auto
+                // family - must have OriginAutoFamilyId == null.
                 AutoFamilyId? origin = null;
+
+                if (familyPartIds.Count > 0)
                 {
-                    AutoFamilyId? first = null;
-                    for (int i = 0; i < familyAutoIds.Count; i++)
+                    AutoFamilyId? candidateOrigin = null;
+                    var singleAutoFamily = true;
+
+                    foreach (var pid in familyPartIds)
                     {
-                        if (!first.HasValue)
-                            first = familyAutoIds[i];
-                        else if (!first.Value.Equals(familyAutoIds[i]))
+                        var autoFamilyId =
+                            new AutoFamilyId(pid.FamilyIndex);
+
+                        if (!candidateOrigin.HasValue)
                         {
-                            first = null;
+                            candidateOrigin = autoFamilyId;
+                        }
+                        else if (!candidateOrigin.Value.Equals(autoFamilyId))
+                        {
+                            singleAutoFamily = false;
                             break;
                         }
                     }
 
-                    origin = first;
+                    if (singleAutoFamily && candidateOrigin.HasValue)
+                    {
+                        var totalAutoParts =
+                            auto.GetTotalPartCount(candidateOrigin.Value);
+
+                        if (totalAutoParts > 0 &&
+                            familyPartIds.Count == totalAutoParts)
+                        {
+                            origin = candidateOrigin;
+                        }
+                    }
                 }
 
                 CuratedFamilyPlan plan =
                     origin.HasValue
-                        ? new CuratedFamilyPlan(familyName, origin.Value)
-                        : new CuratedFamilyPlan(familyName);
+                        ? new CuratedFamilyPlan(
+                            familyName,
+                            origin.Value)
+                        : new CuratedFamilyPlan(
+                            familyName);
 
-                if (!importedFamiliesByPlanId.TryGetValue(plan.Id, out var list))
-                    importedFamiliesByPlanId[plan.Id] = list = new List<IGameFamily>();
+                if (!importedFamiliesByPlanId.TryGetValue(
+                        plan.Id,
+                        out var importedList))
+                {
+                    importedFamiliesByPlanId[plan.Id] =
+                        importedList = new List<IGameFamily>();
+                }
 
-                list.Add(importedFamily);
+                importedList.Add(importedFamily);
 
                 for (int i = 0; i < gamePlans.Count; i++)
                     plan.Games.Add(gamePlans[i]);
 
-                // Insert alpha-sorted:
-                var insertIndex = GetCuratedFamilyInsertIndex(CuratedFamiliesInternal, plan.Name);
-                CuratedFamiliesInternal.Insert(insertIndex, plan);
+                // Insert alpha-sorted.
+                var insertIndex =
+                    GetCuratedFamilyInsertIndex(
+                        CuratedFamiliesInternal,
+                        plan.Name);
+
+                CuratedFamiliesInternal.Insert(
+                    insertIndex,
+                    plan);
+
                 MarkCuratedIndexDirty();
 
-                // Track contributing auto families -> this plan (for replacement mapping)
+                // Track the auto families which actually contribute parts to this plan.
                 var contrib = new HashSet<AutoFamilyId>();
+
                 for (int gi = 0; gi < plan.Games.Count; gi++)
                 {
                     var gp = plan.Games[gi];
+
                     for (int pi = 0; pi < gp.Parts.Count; pi++)
-                        contrib.Add(new AutoFamilyId(gp.Parts[pi].FamilyIndex));
+                    {
+                        contrib.Add(
+                            new AutoFamilyId(
+                                gp.Parts[pi].FamilyIndex));
+                    }
                 }
 
                 contributingAutoFamiliesByPlanId[plan.Id] = contrib;
-
-                foreach (var af in contrib)
-                {
-                    if (ownerPlanIdByAutoFamilyId.TryGetValue(af, out var existingOwner) && existingOwner != plan.Id)
-                    {
-                        // Ambiguous for media: one auto family was split across multiple curated families.
-                        string error = $"Auto family {af} appears in multiple imported curated families. " +
-                            $"Existing owner plan={existingOwner}, new owner plan={plan.Id}.";
-
-                        Debug.WriteLine(error);
-                        errorReport[error] = null;
-
-                        continue;
-                    }
-
-                    ownerPlanIdByAutoFamilyId[af] = plan.Id;
-                }
             }
 
             // Make all loc maps valid.
@@ -430,33 +483,73 @@ namespace app.datinate
             // Materialise clones and build delta + replacement references.
             foreach (var plan in CuratedFamiliesInternal)
             {
-                var clone = materialiseCuratedFamilyCloneByPlanId(plan.Id);
+                var clone =
+                    materialiseCuratedFamilyCloneByPlanId(plan.Id);
+
                 if (clone is null)
-                    throw new InvalidOperationException($"ImportCurated: failed to materialise plan {plan.Id}.");
+                {
+                    throw new InvalidOperationException(
+                        $"ImportCurated: failed to materialise plan {plan.Id}.");
+                }
 
                 curatedToAdd.Add(clone);
 
-                if (importedFamiliesByPlanId.TryGetValue(plan.Id, out var importedRefs))
+                // Replace the imported/saved family reference with the newly
+                // materialised curated family.
+                if (importedFamiliesByPlanId.TryGetValue(
+                        plan.Id,
+                        out var importedRefs))
                 {
                     for (int i = 0; i < importedRefs.Count; i++)
                         replacements[importedRefs[i]] = clone;
                 }
 
-                if (!contributingAutoFamiliesByPlanId.TryGetValue(plan.Id, out var contrib))
+                // An auto family itself only has a single curated replacement when
+                // this plan represents that COMPLETE auto family.
+                //
+                // Partial/split families deliberately have no OriginAutoFamilyId,
+                // so they cannot incorrectly replace the whole queued auto family.
+                if (plan.OriginAutoFamilyId.HasValue)
+                {
+                    var originAutoFamilyId =
+                        plan.OriginAutoFamilyId.Value;
+
+                    if (!IsAutoFamilyVisible(originAutoFamilyId) &&
+                        autoFamilyRefById.TryGetValue(
+                            originAutoFamilyId,
+                            out var autoFamilyRef))
+                    {
+                        replacements[autoFamilyRef] = clone;
+                    }
+                }
+
+                if (!contributingAutoFamiliesByPlanId.TryGetValue(
+                        plan.Id,
+                        out var contrib))
+                {
                     continue;
+                }
 
                 foreach (var af in contrib)
                 {
-                    if (autoFamilyRefById.TryGetValue(af, out var autoFamilyRef))
-                        replacements[autoFamilyRef] = clone;
-
-                    // If the auto family is now fully hidden, it disappears from auto UI.
-                    if (!IsAutoFamilyVisible(af) && autoFamilyRefById.TryGetValue(af, out var autoRef))
+                    // If every part from this auto family has now been curated,
+                    // remove it from the queued list.
+                    //
+                    // A split auto family can contribute to several curated plans,
+                    // so only add it to the removal list once.
+                    if (!IsAutoFamilyVisible(af) &&
+                        autoFamilyRefById.TryGetValue(
+                            af,
+                            out var autoRef) &&
+                        autoFamilyIdsToRemove.Add(af))
+                    {
                         autoToRemove.Add(autoRef);
+                    }
                 }
             }
 
             PurgeOrphanedMaterialisationCaches();
+
 #if DEBUG
             ValidateStateOrThrow();
 #endif
@@ -469,7 +562,7 @@ namespace app.datinate
                 autoToAdd,
                 autoToRemove,
                 curatedAutoParts,
-                undosCount, 
+                undosCount,
                 redosCount,
                 new HashSet<IGameEntity>(),     // Can always be empty as import changes are not animated.
                 new HashSet<IGameEntity>());    // Can always be empty as import changes are not animated.
@@ -673,6 +766,38 @@ namespace app.datinate
 
             return TryAddOrMoveGameAfter(game, lastGame);
         }
+
+        public DatGrouperEditDelta? TryAddGameAsNewFamily(IGame game)
+        {
+            if (!auto.TryGetGameId(game, out var gameId))
+                return null;
+
+            var sourceAutoFamilyId = new AutoFamilyId(gameId.FamilyIndex);
+            var newFamilyPlanId = Guid.NewGuid();
+
+            return ApplyMutation(
+                new[] { newFamilyPlanId },
+                new[] { sourceAutoFamilyId },
+                () => TryAddGameAsNewFamily(gameId, newFamilyPlanId),
+                (_, __) =>
+                {
+                    var autoAffected =
+                        new HashSet<IGameEntity>(ReferenceEqualityComparer.Instance);
+
+                    var curatedAffected =
+                        new HashSet<IGameEntity>(ReferenceEqualityComparer.Instance);
+
+                    if (curatedFamilyCloneByPlanId.TryGetValue(
+                            newFamilyPlanId,
+                            out var familyClone))
+                    {
+                        AddFamilyAndDescendants(curatedAffected, familyClone);
+                    }
+
+                    return (autoAffected, curatedAffected);
+                });
+        }
+
         public DatGrouperEditDelta? TryResetFamily(IGameFamily family)
         {
             if (!TryResolveCuratedFamilyPlanId(family, out var familyPlanId))
@@ -862,82 +987,140 @@ namespace app.datinate
                 () => TryMergeAutoFamilyIntoCuratedFamily(sourceAutoFamilyId, targetFamilyPlanId, mergeAsMain),
                 BuildAffected);
         }
-        private bool TryMergeAutoFamilyIntoCuratedFamily(AutoFamilyId sourceAutoFamilyId, Guid targetFamilyPlanId, bool mergeAsMain)
+        private bool TryMergeAutoFamilyIntoCuratedFamily(
+            AutoFamilyId sourceAutoFamilyId,
+            Guid targetFamilyPlanId,
+            bool mergeAsMain)
         {
-            if (!auto.TryResolve(sourceAutoFamilyId, out var sourceFamily) || sourceFamily is null)
+            if (!auto.TryResolve(sourceAutoFamilyId, out var sourceFamily) ||
+                sourceFamily is null)
+            {
                 return false;
+            }
 
-            var targetIndex = CuratedFamiliesInternal.FindIndex(f => f.Id == targetFamilyPlanId);
+            var targetIndex =
+                CuratedFamiliesInternal.FindIndex(
+                    f => f.Id == targetFamilyPlanId);
+
             if (targetIndex < 0)
                 return false;
 
-            var targetPlan = CuratedFamiliesInternal[targetIndex];
+            var targetPlan =
+                CuratedFamiliesInternal[targetIndex];
 
-            var newGamePlans = new List<CuratedGamePlan>();
+            var newGamePlans =
+                new List<CuratedGamePlan>();
 
-            var sourceGames = sourceFamily.GetAllGames();
+            var addedAnything = false;
+
+            var sourceGames =
+                sourceFamily.GetAllGames();
+
             for (int gi = 0; gi < sourceGames.Length; gi++)
             {
                 var sourceGame = sourceGames[gi];
 
-                if (!auto.TryGetGameId(sourceGame, out var gameId))
+                if (!auto.TryGetGameId(
+                        sourceGame,
+                        out var gameId))
+                {
                     continue;
+                }
 
-                var parts = sourceGame.GetGameParts(false);
+                var parts =
+                    sourceGame.GetGameParts(false);
+
                 if (parts.Length == 0)
                     continue;
 
                 CuratedGamePlan? existing = null;
-                for (int tgi = 0; tgi < targetPlan.Games.Count; tgi++)
+
+                for (int tgi = 0;
+                     tgi < targetPlan.Games.Count;
+                     tgi++)
                 {
-                    var gp = targetPlan.Games[tgi];
-                    if (gp.AutoGameId.HasValue && gp.AutoGameId.Value.Equals(gameId))
+                    var gp =
+                        targetPlan.Games[tgi];
+
+                    if (gp.AutoGameId.HasValue &&
+                        gp.AutoGameId.Value.Equals(gameId))
                     {
                         existing = gp;
                         break;
                     }
                 }
 
-                var addedAny = false;
-
+                // The target family already contains a curated representation
+                // of this auto game. Add any still-uncurated parts to it.
                 if (existing is not null)
                 {
-                    for (int pi = 0; pi < parts.Length; pi++)
+                    for (int pi = 0;
+                         pi < parts.Length;
+                         pi++)
                     {
-                        var pid = new AutoPartId(gameId.FamilyIndex, gameId.GameIndex, pi);
+                        var pid = new AutoPartId(
+                            gameId.FamilyIndex,
+                            gameId.GameIndex,
+                            pi);
+
                         if (CuratedPartsInternal.Contains(pid))
                             continue;
 
                         existing.Parts.Add(pid);
                         _ = AddCuratedPart(pid);
-                        addedAny = true;
+
+                        addedAnything = true;
                     }
 
                     continue;
                 }
 
-                var gpNew = new CuratedGamePlan(sourceGame.GetNameWithoutExt(), gameId);
+                // No matching curated game exists in the target family.
+                // Build a new game containing only parts which have not already
+                // been curated elsewhere.
+                var gpNew =
+                    new CuratedGamePlan(
+                        sourceGame.GetNameWithoutExt(),
+                        gameId);
 
-                for (int pi = 0; pi < parts.Length; pi++)
+                for (int pi = 0;
+                     pi < parts.Length;
+                     pi++)
                 {
-                    var pid = new AutoPartId(gameId.FamilyIndex, gameId.GameIndex, pi);
+                    var pid = new AutoPartId(
+                        gameId.FamilyIndex,
+                        gameId.GameIndex,
+                        pi);
+
                     if (CuratedPartsInternal.Contains(pid))
                         continue;
 
                     gpNew.Parts.Add(pid);
                     _ = AddCuratedPart(pid);
-                    addedAny = true;
+
+                    addedAnything = true;
                 }
 
-                if (addedAny && gpNew.Parts.Count > 0)
+                if (gpNew.Parts.Count > 0)
                     newGamePlans.Add(gpNew);
             }
 
-            if (newGamePlans.Count == 0)
+            // Nothing was actually added to either an existing game
+            // or a newly-created game.
+            if (!addedAnything)
                 return false;
 
-            var insertIndex = mergeAsMain ? 0 : targetPlan.Games.Count;
-            targetPlan.Games.InsertRange(insertIndex, newGamePlans);
+            if (newGamePlans.Count > 0)
+            {
+                var insertIndex =
+                    mergeAsMain
+                        ? 0
+                        : targetPlan.Games.Count;
+
+                targetPlan.Games.InsertRange(
+                    insertIndex,
+                    newGamePlans);
+            }
 
             MarkCuratedIndexDirty();
 
@@ -1144,33 +1327,48 @@ namespace app.datinate
         private void ValidateStateOrThrow()
         {
             var partsFromPlans = new HashSet<AutoPartId>();
+
             for (int fi = 0; fi < CuratedFamiliesInternal.Count; fi++)
             {
                 var fam = CuratedFamiliesInternal[fi];
+
                 for (int gi = 0; gi < fam.Games.Count; gi++)
                 {
                     var gp = fam.Games[gi];
+
                     for (int pi = 0; pi < gp.Parts.Count; pi++)
                     {
                         var pid = gp.Parts[pi];
+
                         if (!partsFromPlans.Add(pid))
-                            throw new InvalidOperationException("Duplicate part id referenced across curated plans.");
+                            throw new InvalidOperationException(
+                                "Duplicate part id referenced across curated plans.");
                     }
                 }
             }
 
-            if (partsFromPlans.Count != CuratedPartsInternal.Count || !partsFromPlans.SetEquals(CuratedPartsInternal))
-                throw new InvalidOperationException("CuratedPartsInternal is out of sync with curated plans.");
+            if (partsFromPlans.Count != CuratedPartsInternal.Count ||
+                !partsFromPlans.SetEquals(CuratedPartsInternal))
+            {
+                throw new InvalidOperationException(
+                    "CuratedPartsInternal is out of sync with curated plans.");
+            }
 
             foreach (var pid in CuratedPartsInternal)
             {
                 if (!auto.TryResolve(pid, out _))
-                    throw new InvalidOperationException("Curated plan references part id not resolvable in auto snapshot.");
+                {
+                    throw new InvalidOperationException(
+                        "Curated plan references part id not resolvable in auto snapshot.");
+                }
             }
 
-            for (int i = 0; i < curatedPartCountByAutoFamilyIndex.Length; i++)
+            for (int i = 0;
+                 i < curatedPartCountByAutoFamilyIndex.Length;
+                 i++)
             {
                 var expected = 0;
+
                 foreach (var pid in CuratedPartsInternal)
                 {
                     if (pid.FamilyIndex == i)
@@ -1178,7 +1376,37 @@ namespace app.datinate
                 }
 
                 if (curatedPartCountByAutoFamilyIndex[i] != expected)
-                    throw new InvalidOperationException("curatedPartCountByAutoFamilyIndex out of sync.");
+                {
+                    throw new InvalidOperationException(
+                        "curatedPartCountByAutoFamilyIndex out of sync.");
+                }
+            }
+
+            // OriginAutoFamilyId is derived metadata.
+            //
+            // A curated family may only claim an origin when it currently represents
+            // the COMPLETE original auto family. Partial, split or mixed families
+            // must have OriginAutoFamilyId == null.
+            for (int fi = 0;
+                 fi < CuratedFamiliesInternal.Count;
+                 fi++)
+            {
+                var familyPlan =
+                    CuratedFamiliesInternal[fi];
+
+                var expectedOrigin =
+                    CalculateOriginAutoFamilyId(
+                        familyPlan);
+
+                if (!Nullable.Equals(
+                        familyPlan.OriginAutoFamilyId,
+                        expectedOrigin))
+                {
+                    throw new InvalidOperationException(
+                        $"Curated family '{familyPlan.Name}' has an invalid OriginAutoFamilyId. " +
+                        $"Actual={familyPlan.OriginAutoFamilyId?.ToString() ?? "[null]"}, " +
+                        $"Expected={expectedOrigin?.ToString() ?? "[null]"}.");
+                }
             }
         }
 
@@ -1406,9 +1634,17 @@ namespace app.datinate
             if (!mutate())
                 return null;
 
+            // A mutation may have changed which auto family, if any, a curated
+            // family completely represents.
+            //
+            // Do this before capturing the after-state so undo/redo also captures
+            // the corrected OriginAutoFamilyId.
+            RefreshOriginAutoFamilyIds(planIds);
+
             EnsureCuratedIndex();
 
             var afterPlanStates = new Dictionary<Guid, PlanState>();
+
             for (int i = 0; i < planIds.Length; i++)
                 afterPlanStates[planIds[i]] = CapturePlanState(planIds[i]);
 
@@ -1584,6 +1820,66 @@ namespace app.datinate
 
             return delta;
         }
+        private bool TryAddGameAsNewFamily(
+    AutoGameId gameId,
+    Guid newFamilyPlanId)
+        {
+            if (!auto.TryResolve(gameId, out var sourceGame))
+                return false;
+
+            var name = sourceGame.GetNameWithoutExt();
+
+            // Deliberately DO NOT set OriginAutoFamilyId here.
+            //
+            // This operation is used to split a game out of an automatically-created
+            // family. More than one curated family may therefore originate from the
+            // same auto family, so the one-to-one OriginAutoFamilyId relationship
+            // would not be valid.
+            var familyPlan = new CuratedFamilyPlan(
+                newFamilyPlanId,
+                name);
+
+            var gamePlan = new CuratedGamePlan(
+                name,
+                gameId);
+
+            var parts = sourceGame.GetGameParts(false);
+
+            for (int pi = 0; pi < parts.Length; pi++)
+            {
+                var partId = new AutoPartId(
+                    gameId.FamilyIndex,
+                    gameId.GameIndex,
+                    pi);
+
+                // This part has already been added somewhere in the curated
+                // structure, so it must not be added again.
+                if (CuratedPartsInternal.Contains(partId))
+                    continue;
+
+                gamePlan.Parts.Add(partId);
+                _ = AddCuratedPart(partId);
+            }
+
+            // Every part belonging to this game has already been curated.
+            // There is therefore nothing to add.
+            if (gamePlan.Parts.Count == 0)
+                return false;
+
+            familyPlan.Games.Add(gamePlan);
+
+            var insertIndex = GetCuratedFamilyInsertIndex(
+                CuratedFamiliesInternal,
+                familyPlan.Name);
+
+            CuratedFamiliesInternal.Insert(
+                insertIndex,
+                familyPlan);
+
+            MarkCuratedIndexDirty();
+
+            return true;
+        }
         private bool TryMoveAndMergeCuratedFamily(Guid sourceFamilyPlanId, Guid targetFamilyPlanId, bool mergeAsMain)
         {
             if (sourceFamilyPlanId == Guid.Empty || targetFamilyPlanId == Guid.Empty)
@@ -1657,50 +1953,101 @@ namespace app.datinate
         private bool TryAddFamily(AutoFamilyId familyId, AutoRegistry auto)
             => TryAddFamily(familyId, auto, Guid.NewGuid());
 
-        private bool TryAddFamily(AutoFamilyId familyId, AutoRegistry auto, Guid newPlanId)
+        private bool TryAddFamily(
+            AutoFamilyId familyId,
+            AutoRegistry auto,
+            Guid newPlanId)
         {
-            if (!auto.TryResolve(familyId, out var family) || family is null)
+            if (!auto.TryResolve(familyId, out var family) ||
+                family is null)
+            {
                 return false;
+            }
 
             EnsureCuratedIndex();
+
+            // If a curated family already represents this COMPLETE auto family,
+            // there is nothing valid to add.
             if (curatedFamilyPlanIdByOriginAutoFamilyId.ContainsKey(familyId))
                 return false;
 
             var name = family.GetFamilyDisplayName();
-            var newFamily = new CuratedFamilyPlan(newPlanId, name, familyId);
 
             var sourceGames = family.GetAllGames();
+
+            // Build the game plans first. We cannot decide whether this new family
+            // represents the complete auto family until we know how many parts were
+            // actually available to add.
+            var newGames = new List<CuratedGamePlan>();
+
             var partsAdded = 0;
 
             for (int gi = 0; gi < sourceGames.Length; gi++)
             {
                 var game = sourceGames[gi];
+
                 if (!auto.TryGetGameId(game, out var gameId))
                     continue;
 
-                var gp = new CuratedGamePlan(game.GetNameWithoutExt(), gameId);
+                var gp = new CuratedGamePlan(
+                    game.GetNameWithoutExt(),
+                    gameId);
 
                 var parts = game.GetGameParts(false);
+
                 for (int pi = 0; pi < parts.Length; pi++)
                 {
-                    var partId = new AutoPartId(gameId.FamilyIndex, gameId.GameIndex, pi);
+                    var partId = new AutoPartId(
+                        gameId.FamilyIndex,
+                        gameId.GameIndex,
+                        pi);
+
+                    // Parts already curated elsewhere remain where they are.
                     if (CuratedPartsInternal.Contains(partId))
                         continue;
 
                     gp.Parts.Add(partId);
-                    AddCuratedPart(partId);
+
+                    _ = AddCuratedPart(partId);
+
                     partsAdded++;
                 }
 
                 if (gp.Parts.Count > 0)
-                    newFamily.Games.Add(gp);
+                    newGames.Add(gp);
             }
 
             if (partsAdded == 0)
                 return false;
 
-            var insertIndex = GetCuratedFamilyInsertIndex(CuratedFamiliesInternal, name);
-            CuratedFamiliesInternal.Insert(insertIndex, newFamily);
+            var totalAutoParts =
+                auto.GetTotalPartCount(familyId);
+
+            // OriginAutoFamilyId is only valid when this new curated family contains
+            // every part of the original auto family.
+            //
+            // If some parts were already curated elsewhere then this is another
+            // partial/split family, so it deliberately has no OriginAutoFamilyId.
+            CuratedFamilyPlan newFamily =
+                partsAdded == totalAutoParts
+                    ? new CuratedFamilyPlan(
+                        newPlanId,
+                        name,
+                        familyId)
+                    : new CuratedFamilyPlan(
+                        newPlanId,
+                        name);
+
+            newFamily.Games.AddRange(newGames);
+
+            var insertIndex =
+                GetCuratedFamilyInsertIndex(
+                    CuratedFamiliesInternal,
+                    name);
+
+            CuratedFamiliesInternal.Insert(
+                insertIndex,
+                newFamily);
 
             MarkCuratedIndexDirty();
 
@@ -2074,7 +2421,122 @@ namespace app.datinate
 
             curatedIndexDirty = false;
         }
+        private AutoFamilyId? CalculateOriginAutoFamilyId(
+    CuratedFamilyPlan familyPlan)
+        {
+            AutoFamilyId? candidateOrigin = null;
 
+            var partIds =
+                new HashSet<AutoPartId>();
+
+            for (int gi = 0;
+                 gi < familyPlan.Games.Count;
+                 gi++)
+            {
+                var gamePlan =
+                    familyPlan.Games[gi];
+
+                for (int pi = 0;
+                     pi < gamePlan.Parts.Count;
+                     pi++)
+                {
+                    var partId =
+                        gamePlan.Parts[pi];
+
+                    // Duplicate parts are invalid anyway, but do not allow them
+                    // to accidentally make a family appear "complete".
+                    if (!partIds.Add(partId))
+                        return null;
+
+                    var autoFamilyId =
+                        new AutoFamilyId(
+                            partId.FamilyIndex);
+
+                    if (!candidateOrigin.HasValue)
+                    {
+                        candidateOrigin =
+                            autoFamilyId;
+
+                        continue;
+                    }
+
+                    // A curated family containing parts from more than one auto
+                    // family cannot represent one complete original auto family.
+                    if (!candidateOrigin.Value.Equals(autoFamilyId))
+                        return null;
+                }
+            }
+
+            if (!candidateOrigin.HasValue)
+                return null;
+
+            var totalAutoParts =
+                auto.GetTotalPartCount(
+                    candidateOrigin.Value);
+
+            if (totalAutoParts <= 0)
+                return null;
+
+            // OriginAutoFamilyId only exists when this curated family contains
+            // every part belonging to that original auto family.
+            if (partIds.Count != totalAutoParts)
+                return null;
+
+            return candidateOrigin;
+        }
+
+        private void RefreshOriginAutoFamilyIds(
+            IReadOnlyCollection<Guid> familyPlanIds)
+        {
+            if (familyPlanIds.Count == 0)
+                return;
+
+            var changed = false;
+
+            foreach (var familyPlanId in familyPlanIds.Distinct())
+            {
+                var familyIndex =
+                    CuratedFamiliesInternal.FindIndex(
+                        f => f.Id == familyPlanId);
+
+                // The mutation may have removed this family entirely.
+                if (familyIndex < 0)
+                    continue;
+
+                var familyPlan =
+                    CuratedFamiliesInternal[familyIndex];
+
+                var expectedOrigin =
+                    CalculateOriginAutoFamilyId(
+                        familyPlan);
+
+                if (Nullable.Equals(
+                        familyPlan.OriginAutoFamilyId,
+                        expectedOrigin))
+                {
+                    continue;
+                }
+
+                // OriginAutoFamilyId is deliberately immutable, so rebuild the
+                // lightweight plan wrapper while preserving its identity and games.
+                var replacementPlan =
+                    new CuratedFamilyPlan(
+                        familyPlan.Id,
+                        familyPlan.Name,
+                        expectedOrigin);
+
+                replacementPlan.Games.AddRange(
+                    familyPlan.Games);
+
+                CuratedFamiliesInternal[familyIndex] =
+                    replacementPlan;
+
+                changed = true;
+            }
+
+            if (changed)
+                MarkCuratedIndexDirty();
+        }
         private bool TryResolveAutoPartIdFromAny(IGamePart part, out AutoPartId partId)
         {
             if (curatedPartByPartRef.TryGetValue(part, out var info))

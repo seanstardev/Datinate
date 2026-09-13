@@ -13,11 +13,16 @@ namespace datinate.app
         public string? EntryName => entryNameTxt.Text == "<Unassigned>" ? null : entryNameTxt.Text;
         internal MEDIA_ASSIGNMENT_ENUM AssignmentStatus => assignmentBtnStrip.AssignmentStatus;
 
+        private IReadOnlyList<string> searchPrompts = new List<string>();
+        private readonly ContextMenuStrip searchPromptMenu = new();
+
         public Media2AssignControlsUI()
         {
             InitializeComponent();
             DatinateHelper.HideTabs(tabControl);
             assignmentBtnStrip.SelectedChanged += OnSegmentChange;
+
+            filterTxt.Click += filterTxt_Click;
 
             var tt = new ToolTip
             {
@@ -26,11 +31,16 @@ namespace datinate.app
                 ReshowDelay = 200,
                 ShowAlways = true
             };
-            tt.SetToolTip(filterTxt, "Double-click to clear Search text and toggle sorting (alphabetical / best match).");
+
+            tt.SetToolTip(
+                filterTxt,
+                "Double-click to clear Search text and toggle sorting (alphabetical / best match).");
         }
 
         internal void ResetUI()
         {
+            searchPromptMenu.Close();
+
             entryNameTxt.Text = string.Empty;
             filterTxt.Text = string.Empty;
             matchPercentageLabel.Text = string.Empty;
@@ -44,6 +54,12 @@ namespace datinate.app
             matchPercentageLabel.Text = bestScorePercentage.ToString() + "%";
             matchBarsUI.PercentMinWarning = 49;
             matchBarsUI.PercentFull = bestScorePercentage;
+        }
+
+        internal void SetSearchPrompts(IReadOnlyList<string>? searchPrompts)
+        {
+            this.searchPrompts = searchPrompts ?? new List<string>();
+            searchPromptMenu.Close();
         }
 
         internal void ShowNamePage()
@@ -92,6 +108,40 @@ namespace datinate.app
                 tabControl.ResumeLayout(false);
             }
         }
+        private void filterTxt_Click(object? sender, EventArgs e)
+        {
+            ShowSearchPrompts();
+        }
+
+        private void ShowSearchPrompts()
+        {
+            // NOTE: Prompts are only offered as shortcuts when the field is empty.
+            if (filterTxt.Text.Length != 0)
+                return;
+
+            if (searchPrompts.Count == 0)
+                return;
+
+            searchPromptMenu.Items.Clear();
+
+            foreach (var prompt in searchPrompts)
+            {
+                var item = new ToolStripMenuItem(prompt);
+
+                item.Click += (_, _) =>
+                {
+                    filterTxt.Text = prompt;
+                    filterTxt.SelectionStart = filterTxt.Text.Length;
+                    filterTxt.Focus();
+                };
+
+                searchPromptMenu.Items.Add(item);
+            }
+
+            searchPromptMenu.Show(
+                filterTxt,
+                new Point(0, filterTxt.Height));
+        }
         private void OnSegmentChange(MEDIA_ASSIGNMENT_ENUM segment)
         {
             AssignmentChangeEvt?.Invoke(segment);
@@ -120,6 +170,9 @@ namespace datinate.app
 
         private void filterTxt_TextChanged(object sender, EventArgs e)
         {
+            if (filterTxt.Text.Length > 0)
+                searchPromptMenu.Close();
+
             PerformSearchEvt?.Invoke(filterTxt.Text);
         }
 
