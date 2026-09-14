@@ -13,6 +13,7 @@
             projectListHostPanel = new Panel();
             projectListBox = new ListBox();
             createProjectPanel = new Panel();
+            saveNewProjectBtn = new Button();
             cancelNewProjectBtn = new Button();
             label1 = new Label();
             projectNameText = new TextBox();
@@ -60,6 +61,7 @@
             // gamesIncludeContainer
             // 
             gamesIncludeContainer.AutoScroll = true;
+            gamesIncludeContainer.BackColor = SystemColors.Control;
             gamesIncludeContainer.Dock = DockStyle.Fill;
             gamesIncludeContainer.Location = new Point(4, 19);
             gamesIncludeContainer.Margin = new Padding(4, 3, 4, 3);
@@ -138,6 +140,7 @@
             // createProjectPanel
             // 
             createProjectPanel.BackColor = Color.White;
+            createProjectPanel.Controls.Add(saveNewProjectBtn);
             createProjectPanel.Controls.Add(cancelNewProjectBtn);
             createProjectPanel.Controls.Add(label1);
             createProjectPanel.Controls.Add(projectNameText);
@@ -148,6 +151,19 @@
             createProjectPanel.Size = new Size(347, 510);
             createProjectPanel.TabIndex = 10;
             createProjectPanel.Visible = false;
+            // 
+            // saveNewProjectBtn
+            // 
+            saveNewProjectBtn.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            saveNewProjectBtn.Cursor = Cursors.Hand;
+            saveNewProjectBtn.Location = new Point(0, 46);
+            saveNewProjectBtn.Margin = new Padding(4, 3, 4, 3);
+            saveNewProjectBtn.Name = "saveNewProjectBtn";
+            saveNewProjectBtn.Size = new Size(347, 27);
+            saveNewProjectBtn.TabIndex = 8;
+            saveNewProjectBtn.Text = "Save New Project";
+            saveNewProjectBtn.UseVisualStyleBackColor = true;
+            saveNewProjectBtn.Click += saveBtn_Click;
             // 
             // cancelNewProjectBtn
             // 
@@ -183,6 +199,7 @@
             // 
             // includeGroup
             // 
+            includeGroup.BackColor = SystemColors.ControlLight;
             includeGroup.Controls.Add(gamesIncludeContainer);
             includeGroup.Dock = DockStyle.Fill;
             includeGroup.Location = new Point(4, 3);
@@ -196,6 +213,7 @@
             // 
             // includeMediaGroup
             // 
+            includeMediaGroup.BackColor = SystemColors.ControlLight;
             includeMediaGroup.Controls.Add(mediaIncludeContainer);
             includeMediaGroup.Dock = DockStyle.Fill;
             includeMediaGroup.Location = new Point(4, 415);
@@ -418,6 +436,7 @@
         private System.Windows.Forms.Button saveProjectBtn;
         private System.Windows.Forms.GroupBox selectProjectGroup;
         private System.Windows.Forms.Panel createProjectPanel;
+        private System.Windows.Forms.Button saveNewProjectBtn;
         private System.Windows.Forms.Button cancelNewProjectBtn;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox projectNameText;

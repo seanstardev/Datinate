@@ -1506,7 +1506,7 @@ namespace datinate.app
             {
                 TreeRenderUtil.DrawOverlay(
                     "Drag a Family here to Curate",
-                    "Drop from Queued → Here",
+                    "Drag from Queued → Here",
                     e.Graphics,
                     treeView,
                     e.Bounds);
@@ -1515,7 +1515,7 @@ namespace datinate.app
             {
                 TreeRenderUtil.DrawOverlay(
                     "Drag an Entity here to Reset",
-                    "Drop from Curated → Here",
+                    "Drag from Curated → Here",
                     e.Graphics,
                     treeView,
                     e.Bounds);
@@ -1922,11 +1922,31 @@ namespace datinate.app
             treeView.DragDrop += treeView_DragDrop;
             treeView.DragLeave += treeView_DragLeave;
         }
-        protected static void ClearDragCaption() =>
+        private string? lastDragCaptionMain;
+        private string? lastDragCaptionSub;
+
+        protected void ClearDragCaption()
+        {
+            if (lastDragCaptionMain == null && lastDragCaptionSub == null)
+                return;
+
+            lastDragCaptionMain = null;
+            lastDragCaptionSub = null;
+
             DragDropPreviewForm.UpdateCaption(null);
-        
-        protected static void UpdateDragCaption(string main, string? sub = null) =>
+        }
+
+        protected void UpdateDragCaption(string main, string? sub = null)
+        {
+            if (string.Equals(lastDragCaptionMain, main, StringComparison.Ordinal) &&
+                string.Equals(lastDragCaptionSub, sub, StringComparison.Ordinal))
+                return;
+
+            lastDragCaptionMain = main;
+            lastDragCaptionSub = sub;
+
             DragDropPreviewForm.UpdateCaption(main, sub);
+        }
 
         protected static DRAG_INSERT_MODE GetInsertMode(TreeNode node, int mouseYClient)
         {

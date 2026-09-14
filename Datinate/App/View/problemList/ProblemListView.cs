@@ -16,7 +16,7 @@ namespace com.RADIO.Datinate.App.View.problemList
 
             duplicatesUI.setView(
                 "Matching DAT files found"
-                , "You may want to remove the below duplicates.They have matching checksums."
+                , "You may want to remove the below duplicates. They have matching checksums."
             );
 
             ClearView();

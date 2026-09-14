@@ -26,7 +26,7 @@ namespace datinate.app
         private readonly ToolStripMenuItem _gameMoveBottomItem = new("Move Game to Bottom");
         private readonly ToolStripMenuItem _gameAddAsNewFamilyItem = new("Add Game as New Family (Advanced)");
 
-        private readonly ToolStripMenuItem _partIncludeExcludeItem = new("Exclude Part");
+        private readonly ToolStripMenuItem _partIncludeExcludeItem = new(TEXT_PART_EXCLUDE);
 
         private readonly ToolStripMenuItem _copyNameItem = new("Copy Name to Clipboard");
         private readonly ToolStripMenuItem _copyNameFullItem = new("Copy Fullname to Clipboard");
@@ -34,8 +34,8 @@ namespace datinate.app
         private readonly ToolStripMenuItem _aliasesShowHideItem = new("Show Aliases");
         private readonly ToolStripMenuItem _excludedFamiliesShowHideItem = new("Show Excluded Families");
 
-        private const string TEXT_PART_INCLUDE = "Include Part";
-        private const string TEXT_PART_EXCLUDE = "Exclude Part";
+        private const string TEXT_PART_INCLUDE = "Mark Part as Good";
+        private const string TEXT_PART_EXCLUDE = "Mark Part as Bad";
 
         private const string TEXT_ALIASES_SHOW = "Show Aliases";
         private const string TEXT_ALIASES_HIDE = "Hide Aliases";

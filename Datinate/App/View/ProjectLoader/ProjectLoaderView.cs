@@ -60,6 +60,7 @@ namespace datinate.app
             UIHelper.PopButton(saveProjectBtn);
             UIHelper.PopButton(buildProjectBtn);
             UIHelper.PopButton(newProjectBtn);
+            UIHelper.PopButton(saveNewProjectBtn);
             UIHelper.PopButton(cancelNewProjectBtn);
 
             ConfigureProjectBrowser();
@@ -421,7 +422,7 @@ namespace datinate.app
             SetCommentEditActive(false);
             SetProjectCommentShowing();
 
-            if (!GetAllDatsHaveOkNames())
+            if (!GetAllDatsHaveOkNames("Cannot run DAT Grouper. No Project is loaded."))
                 return;
 
             var project = GetProject();
@@ -465,12 +466,12 @@ namespace datinate.app
             }
         }
 
-        private bool GetAllDatsHaveOkNames()
+        private bool GetAllDatsHaveOkNames(string noProjectLoadedErrorMsg)
         {
             var project = GetProject();
             if (project == null)
             {
-                ShowError("No Project is loaded.");
+                ShowError(noProjectLoadedErrorMsg);
                 return false;
             }
 
@@ -525,8 +526,13 @@ namespace datinate.app
 
         void saveBtn_Click(object sender, EventArgs e)
         {
-            if (!GetAllDatsHaveOkNames())
+    var errorMsg = isCreatingNewProject
+        ? "Cannot proceed. Please enter a Project name."
+        : "Cannot proceed. No Project is loaded.";
+
+            if (!GetAllDatsHaveOkNames(errorMsg))
                 return;
+
 
             var project = GetProject();
             if (project == null)

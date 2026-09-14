@@ -26,7 +26,7 @@
             new DescriptorDefinitionDTO("BL", Color.Red, "Bootleg"),
             new DescriptorDefinitionDTO("Af", Color.FromArgb(196, 7, 213), "Aftermarket"),
             new DescriptorDefinitionDTO("CD", Color.FromArgb(0, 30, 255), "Cover / Demo Disc"),
-            new DescriptorDefinitionDTO("DA", Color.Gray, "DAT Artefact"),
+            new DescriptorDefinitionDTO("WS", Color.Gray, "Wrong Set"),
             new DescriptorDefinitionDTO("WIP", Color.HotPink, "TODO"),
             new DescriptorDefinitionDTO("Ad", Color.MidnightBlue, "Adult"),
         };

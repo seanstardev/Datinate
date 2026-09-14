@@ -488,7 +488,7 @@ namespace datinate.app
             {
                 new DragPromptOverlayRenderer.OverlayCardSpec(
                     "Drag an Entity here to Search",
-                    "Drop from " + autoSource + " → Here",
+                    "Drag from " + autoSource + " → Here",
                     [Resources.search_game_icon],
                     Drag: new DragPromptOverlayRenderer.OverlayDragHandlers(
                         DragEnter: (s, e) =>
@@ -509,7 +509,7 @@ namespace datinate.app
                 ),
                 new DragPromptOverlayRenderer.OverlayCardSpec(
                     "Drag an Entity here to Preview Media",
-                    "Drop from " + autoSource+ " → Here",
+                    "Drag from " + autoSource+ " → Here",
                     [Resources.media_icons_Family, Resources.media_icons_Game, Resources.media_icons_GamePart],
                     Drag: new DragPromptOverlayRenderer.OverlayDragHandlers(
                         DragEnter: (s, e) =>
@@ -529,7 +529,7 @@ namespace datinate.app
                 ),
                 new DragPromptOverlayRenderer.OverlayCardSpec(
                     "Drag here to Assign Media",
-                    "Drop from " + autoSource+ " → Here",
+                    "Drag from " + autoSource+ " → Here",
                     [Resources.media_icons_Family],
                     Drag: new DragPromptOverlayRenderer.OverlayDragHandlers(
                         DragEnter: (s, e) => {
@@ -556,7 +556,7 @@ namespace datinate.app
                 ),
                 new DragPromptOverlayRenderer.OverlayCardSpec(
                     "Drag a Game Part here to View Reports",
-                    "Drop from " + autoSource+ " → Here",
+                    "Drag from " + autoSource+ " → Here",
                     [Resources.media_icons_GamePart],
                     Drag: new DragPromptOverlayRenderer.OverlayDragHandlers(
                         DragEnter: (s, e) => {
