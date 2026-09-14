@@ -47,10 +47,8 @@ namespace com.RADIO.Datinate.RMVC.Shared
         public const string WEB_BROWSER_MEDIA_ShowMediaCard = "WEB_BROWSER_MEDIA_337a6c2e-1d0a-4c5d-91c0-7d1f0d2e8d87";
         public static bool IsMediaLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM layoutEnum)
         {
-            return layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign
-                || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign
-                || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly
-                || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly;
+            return layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign
+                || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly;
         }
         
         public static bool IsDebugBuild { get { 

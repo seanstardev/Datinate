@@ -56,7 +56,6 @@ namespace com.RADIO.Datinate.RMVC
                         false);
             }
 
-
             Facade.Instance?.MediaAssignmentMediator?.SetViewMediaItem(entryName, source);
 
             if (!string.IsNullOrWhiteSpace(resourceHtml))
@@ -64,9 +63,8 @@ namespace com.RADIO.Datinate.RMVC
             else
                 base.ExecuteCommand(new LoadWebMediaUrlCmd(url));
 
-            // TODO: Might need to rename this, but trialing the tech:
             if (!isAutoLoaded)
-                Facade.Instance?.MediaAssignmentMediator?.SetMediaCardDragStart();
+                Facade.Instance?.MediaAssignmentMediator?.SetScoringActive(false);
         }
     }
 }

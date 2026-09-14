@@ -189,7 +189,7 @@ namespace datinate.app
 
                             MessageBox.Show(
                                 this,
-                                "No Media was found for this Item",
+                                "No Media was found for this Entity",
                                 "Attention",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Information);
@@ -562,7 +562,7 @@ namespace datinate.app
 
             dragDropOverlay = DragPromptOverlayRenderer.CreateOverlayControlDark(
                 source: dragDropContainer,
-                title: "Drag a Game Family here",
+                title: "Drag an Entity here",
                 hint: "Drop to view Media Cards");
 
             dragDropOverlay.AllowDrop = true;

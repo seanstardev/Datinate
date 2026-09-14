@@ -355,7 +355,9 @@ namespace datinate.app
             ClearCache();
             Invalidate();
         }
-        public int SetEntryToScoreAgainst(string textToMatch)
+        public int SetEntryToScoreAgainst(
+            string textToMatch,
+            bool excludeAlreadyAssigned)
         {
             alphaSort = false;
 
@@ -399,7 +401,7 @@ namespace datinate.app
             lastAutoBackingIndex = -1;
             lastAutoScore = -1;
 
-            IdentifyHighConfidenceMatches();
+            IdentifyHighConfidenceMatches(excludeAlreadyAssigned);
 
             return bestScore;
         }
@@ -748,7 +750,7 @@ namespace datinate.app
 
             return CompareAlpha(a, b);
         }
-        private void IdentifyHighConfidenceMatches()
+        private void IdentifyHighConfidenceMatches(bool excludeAlreadyAssigned)
         {
             singleHighConfidenceMatch = null;
             highConfidenceMatches = Array.Empty<EntryInfo>();
@@ -774,7 +776,7 @@ namespace datinate.app
                 if (score < HighConfidenceThresholdPct)
                     continue;
 
-                if (assigned[backingIndex])
+                if (excludeAlreadyAssigned && assigned[backingIndex])
                     continue;
 
                 if (countHigh == 0)
@@ -805,7 +807,7 @@ namespace datinate.app
                 if (score < HighConfidenceThresholdPct)
                     continue;
 
-                if (assigned[backingIndex])
+                if (excludeAlreadyAssigned && assigned[backingIndex])
                     continue;
 
                 matches[w++] = new EntryInfo(

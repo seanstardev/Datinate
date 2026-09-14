@@ -134,10 +134,10 @@
             AutoGrouper,
             Curated_Standard,
             Curated_WebInMiddle,
-            Media_Auto_Assign,
+            //Media_Auto_Assign,
             Media_Curated_Assign,
             Media_Auto_ReadOnly,
-            Media_Curated_ReadOnly
+            //Media_Curated_ReadOnly
         }
 
         public enum DAT_GROUP_TARGET_ENUM 

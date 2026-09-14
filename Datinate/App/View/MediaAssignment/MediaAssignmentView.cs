@@ -3,6 +3,7 @@ using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Datinate.Shared.Rb;
 using RadioLibCore.RadioDat;
+using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace datinate.app
@@ -18,7 +19,7 @@ namespace datinate.app
 
         private Timer? hoverTimer;
         private bool lastDescriptorGrayscale = false;
-
+        private bool restoreScoringAfterMediaDrag;
 
         private RowStyleState[]? readOnlyRowCache;
         private Control[]? readOnlyControls;
@@ -181,13 +182,7 @@ namespace datinate.app
 
                 scoringUI.SetUI(scoring);
 
-                scoringUI.Visible = scoringBtn.Checked;
-
-                if (scoringUI.Visible)
-                {
-                    scoringUI.BringToFront();
-                    LayoutScoringOverlay();
-                }
+                SetScoringActive(scoringBtn.Checked);
             });
         }
         public void SetViewMediaItem(string entryName, RadioSourceDTO radioSource)
@@ -228,7 +223,8 @@ namespace datinate.app
 
                 try
                 {
-                    scoringUI.Visible = false;
+                    SetScoringActive(false);
+
                     if (readOnlyControls != null)
                     {
                         for (int i = 0; i < readOnlyControls.Length; i++)
@@ -267,6 +263,7 @@ namespace datinate.app
             });
         }
 
+
         public void ClearView()
         {
 
@@ -302,7 +299,7 @@ namespace datinate.app
                 }
                 suppressMetaChangeEvents = false;
 
-                scoringUI.Visible = false;
+                SetScoringActive(false);
                 scoringUI.ClearUI();
 
                 datChipUI.Visible = false;
@@ -323,28 +320,22 @@ namespace datinate.app
 
         public void SetMediaCardDragStart()
         {
-            if (scoringUI.Visible == false)
+            Ui(() =>
             {
-                return;
-            }
-            else
-            {
-                Ui(() =>
-                {
-                    scoringUI.Visible = false;
-                });
-            }
+                restoreScoringAfterMediaDrag = scoringBtn.Checked;
+                ApplyScoringActive(false);
+            });
         }
 
         public void SetMediaCardDragStop()
         {
-            if (scoringBtn.Checked && scoringUI.Visible == false)
+            Ui(() =>
             {
-                Ui(() =>
-                {
-                    scoringUI.Visible = true;
-                });
-            }
+                bool restore = restoreScoringAfterMediaDrag;
+                restoreScoringAfterMediaDrag = false;
+
+                ApplyScoringActive(restore);
+            });
         }
         private void CacheReadOnlyLayout()
         {
@@ -387,6 +378,32 @@ namespace datinate.app
             UpdateDescriptorGrayscaleFromMouse();
         }
 
+        private void ApplyScoringActive(bool active)
+        {
+            if (lastReadOnlyMode)
+                active = false;
+
+            scoringBtn.Checked = active;
+            scoringUI.Visible = active;
+
+            if (active)
+            {
+                scoringUI.BringToFront();
+                LayoutScoringOverlay();
+            }
+        }
+
+        public void SetScoringActive(bool active)
+        {
+            Ui(() =>
+            {
+                // An explicit OFF means don't resurrect scoring when a drag ends.
+                if (!active)
+                    restoreScoringAfterMediaDrag = false;
+
+                ApplyScoringActive(active);
+            });
+        }
         private void UpdateDescriptorGrayscaleFromMouse()
         {
             if (IsDisposed || !IsHandleCreated)
@@ -510,29 +527,15 @@ namespace datinate.app
 
         private void scoringUI_Click(object sender, EventArgs e)
         {
-            scoringBtn.Checked = false;
-            ToggleScoringUiVisible();
+            SetScoringActive(false);
         }
+
         private void scoringBtn_Click(object sender, EventArgs e)
-            => ToggleScoringUiVisible();
-
-        private void ToggleScoringUiVisible()
         {
-            bool show = scoringBtn.Checked;
-
-            scoringUI.Visible = show;
-
-            if (show)
-            {
-                scoringUI.BringToFront();
-                LayoutScoringOverlay();
-                return;
-            }
-
-            if (scoringBtn.CanFocus)
-                scoringBtn.Focus();
+            SetScoringActive(scoringBtn.Checked);
         }
 
+        
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -677,11 +680,16 @@ namespace datinate.app
 
             try
             {
-                tableLayoutPanel.RowStyles[DescriptorRowIndex].SizeType = SizeType.Absolute;
-                tableLayoutPanel.RowStyles[DescriptorRowIndex].Height = descriptorHeight;
+                // In read-only mode these rows have deliberately been collapsed.
+                // Do not allow notes state changes to re-open them.
+                if (!lastReadOnlyMode)
+                {
+                    tableLayoutPanel.RowStyles[DescriptorRowIndex].SizeType = SizeType.Absolute;
+                    tableLayoutPanel.RowStyles[DescriptorRowIndex].Height = descriptorHeight;
 
-                tableLayoutPanel.RowStyles[NotesRowIndex].SizeType = SizeType.Absolute;
-                tableLayoutPanel.RowStyles[NotesRowIndex].Height = notesHeight;
+                    tableLayoutPanel.RowStyles[NotesRowIndex].SizeType = SizeType.Absolute;
+                    tableLayoutPanel.RowStyles[NotesRowIndex].Height = notesHeight;
+                }
 
                 descriptorContainer.MinimumSize = new Size(0, (int)Math.Round(descriptorHeight));
                 descriptorContainer.MaximumSize = new Size(0, (int)Math.Round(descriptorHeight));

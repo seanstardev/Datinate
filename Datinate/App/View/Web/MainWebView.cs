@@ -216,16 +216,21 @@ namespace datinate.app
             if (stack == null)
                 return;
 
-            string hint = $"Drop from {autoSource} → Here";
+            string hint = $"Drag from {autoSource} → Here";
 
             if (stack.TryGetCard(PromptCardIx_Search, out var searchCard))
                 stack.TrySetCard(PromptCardIx_Search, searchCard with { Hint = hint });
 
-            if (stack.TryGetCard(PromptCardIx_PreviewMedia, out var previewCard))
-                stack.TrySetCard(PromptCardIx_PreviewMedia, previewCard with { Hint = hint });
+            //if (stack.TryGetCard(PromptCardIx_PreviewMedia, out var previewCard))
+            //    stack.TrySetCard(PromptCardIx_PreviewMedia, previewCard with { Hint = hint });
 
-            if (stack.TryGetCard(PromptCardIx_AssignMedia, out var assignCard))
-                stack.TrySetCard(PromptCardIx_AssignMedia, assignCard with { Hint = hint });
+            //if (stack.TryGetCard(PromptCardIx_AssignMedia, out var assignCard))
+            //    stack.TrySetCard(PromptCardIx_AssignMedia, assignCard with { Hint = hint });
+
+            if (curationModeIsActive == false)
+                hint = $"Drag from {autoSource} → Here";
+            else 
+                hint = $"Drag from {autoSource} or Curated → Here";
 
             if (stack.TryGetCard(PromptCardIx_Reports, out var reportsCard))
                 stack.TrySetCard(PromptCardIx_Reports, reportsCard with { Hint = hint });
@@ -529,7 +534,7 @@ namespace datinate.app
                 ),
                 new DragPromptOverlayRenderer.OverlayCardSpec(
                     "Drag here to Assign Media",
-                    "Drag from " + autoSource+ " → Here",
+                    "Drag a Family from Curated → Here",
                     [Resources.media_icons_Family],
                     Drag: new DragPromptOverlayRenderer.OverlayDragHandlers(
                         DragEnter: (s, e) => {
@@ -594,8 +599,22 @@ namespace datinate.app
 
         private bool dragDataValid => pendingPayload != null;
         private bool dragDataValidForReports => dragDataValid && pendingPayload?.Entity is IGamePart;
-        private bool dragDataValidForMediaPreview => dragDataValid;
-        private bool dragDataValidForMediaAssign => curationModeIsActive && dragDataValid && pendingPayload?.Entity is IGameFamily;
+
+        private bool dragDataValidForMediaPreview =>
+            dragDataValid &&
+            pendingPayload!.IsFromAuto &&
+            (
+                pendingPayload.Entity is IGameFamily ||
+                pendingPayload.Entity is IGame ||
+                pendingPayload.Entity is IGamePart
+            );
+
+        private bool dragDataValidForMediaAssign =>
+            curationModeIsActive &&
+            dragDataValid &&
+            !pendingPayload!.IsFromAuto &&
+            pendingPayload.Entity is IGameFamily;
+
         private const int PromptCardIx_Search = 0;
         private const int PromptCardIx_PreviewMedia = 1;
         private const int PromptCardIx_AssignMedia = 2;
@@ -640,53 +659,85 @@ namespace datinate.app
                 visible: true,
                 placeholder: false);
 
-            // -----------------------------------------------------------------
+            // -------------------------------------------------------------
             // MEDIA SLOT
             //
-            // Preview and Assign deliberately share one physical stack position.
+            // Preview and Assign share the same physical slot.
             //
-            // Until media availability has actually been announced, neither card
-            // exists in the layout at all.
-            // -----------------------------------------------------------------
+            // If media has never been made available to this view, the slot
+            // does not exist at all.
+            // -------------------------------------------------------------
 
-            bool previewMode =
-                mediaIsAvailable &&
-                !curationModeIsActive;
+            if (!mediaIsAvailable)
+            {
+                SetCardState(
+                    PromptCardIx_PreviewMedia,
+                    visible: false,
+                    placeholder: false);
 
-            bool assignMode =
-                mediaIsAvailable &&
-                curationModeIsActive;
+                SetCardState(
+                    PromptCardIx_AssignMedia,
+                    visible: false,
+                    placeholder: false);
+            }
+            else if (!dragSessionActive)
+            {
+                // Default state when nothing is being dragged.
+                //
+                // Normal/automated mode -> Preview
+                // Curation mode         -> Assign
+                SetCardState(
+                    PromptCardIx_PreviewMedia,
+                    visible: !curationModeIsActive,
+                    placeholder: false);
 
-            bool previewVisible =
-                previewMode &&
-                (!dragSessionActive || dragDataValidForMediaPreview);
+                SetCardState(
+                    PromptCardIx_AssignMedia,
+                    visible: curationModeIsActive,
+                    placeholder: false);
+            }
+            else if (pendingPayload?.IsFromAuto == true)
+            {
+                // Auto / Queued drag.
+                //
+                // Preview is the only media action available.
+                // Assign disappears completely because Preview occupies
+                // the shared media slot.
+                bool showPreview = dragDataValidForMediaPreview;
 
-            bool previewPlaceholder =
-                previewMode &&
-                dragSessionActive &&
-                !dragDataValidForMediaPreview;
+                SetCardState(
+                    PromptCardIx_PreviewMedia,
+                    visible: showPreview,
+                    placeholder: !showPreview);
 
-            bool assignVisible =
-                assignMode &&
-                (!dragSessionActive || dragDataValidForMediaAssign);
+                SetCardState(
+                    PromptCardIx_AssignMedia,
+                    visible: false,
+                    placeholder: false);
+            }
+            else
+            {
+                // Curated drag.
+                //
+                // Only a curated family can be dropped for media assignment.
+                // Preview must never appear for a curated drag.
+                bool showAssign = dragDataValidForMediaAssign;
 
-            bool assignPlaceholder =
-                assignMode &&
-                dragSessionActive &&
-                !dragDataValidForMediaAssign;
+                SetCardState(
+                    PromptCardIx_PreviewMedia,
+                    visible: false,
+                    placeholder: false);
 
-            SetCardState(
-                PromptCardIx_PreviewMedia,
-                visible: previewVisible,
-                placeholder: previewPlaceholder);
+                SetCardState(
+                    PromptCardIx_AssignMedia,
+                    visible: showAssign,
+                    placeholder: !showAssign);
+            }
 
-            SetCardState(
-                PromptCardIx_AssignMedia,
-                visible: assignVisible,
-                placeholder: assignPlaceholder);
+            // -------------------------------------------------------------
+            // REPORTS SLOT
+            // -------------------------------------------------------------
 
-            // Reports always owns its slot. When the current drag cannot be
-            // accepted, retain the slot as an inert placeholder.
             bool reportsVisible =
                 !dragSessionActive ||
                 dragDataValidForReports;

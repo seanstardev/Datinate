@@ -118,10 +118,10 @@ namespace datinate.app
             {
                 switch (layoutEnum)
                 {
-                    case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign:
-                        titleContainer.BackColor = Color.Black;
-                        ActiveDatGrouperUI.EnterMediaMode(false);
-                        break;
+                    //case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign:
+                    //    titleContainer.BackColor = Color.Black;
+                    //    ActiveDatGrouperUI.EnterMediaMode(false);
+                    //    break;
                     
                     case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly:
                         titleContainer.BackColor = Color.Black;
@@ -143,10 +143,10 @@ namespace datinate.app
                         ActiveDatGrouperUI.EnterMediaMode(false);
                         break;
 
-                    case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly:
-                        titleContainer.BackColor = Color.Black;
-                        ActiveDatGrouperUI.EnterMediaMode(true);
-                        break;
+                    //case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly:
+                    //    titleContainer.BackColor = Color.Black;
+                    //    ActiveDatGrouperUI.EnterMediaMode(true);
+                    //    break;
 
                     default:
                         titleContainer.BackColor = SystemColors.Control;

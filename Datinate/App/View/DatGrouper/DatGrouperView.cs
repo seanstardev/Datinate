@@ -202,7 +202,7 @@ namespace datinate.app
                         SetMainControlsVisible(true);
                         break;
 
-                    case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign:
+                    //case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign:
                     case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly:
                         ControlManagementUtil.EnsureParent(autoGrouperUI, leftPanel, true);
                         ControlManagementUtil.EnsureParent(mediaView, middlePanel, true);
@@ -218,7 +218,7 @@ namespace datinate.app
                         break;
 
                     case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign:
-                    case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly:
+                    //case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly:
                         ControlManagementUtil.EnsureParent(webAndMainControlsContainer, leftPanel, true);
                         ControlManagementUtil.EnsureParent(mediaView, middlePanel, true);
                         ControlManagementUtil.EnsureParent(curatedGrouperUI, rightPanel, true);
@@ -335,10 +335,8 @@ namespace datinate.app
 
         private void ApplyMediaSurfaceVisibility(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM layoutEnum)
         {
-            bool isMedia = layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign
-                           || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign
-                           || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly
-                           || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly;
+            bool isMedia = layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign
+                           || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly;
 
             mediaView.Visible = isMedia;
             webMediaPanel.Visible = isMedia;

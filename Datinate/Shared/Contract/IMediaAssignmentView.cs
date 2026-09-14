@@ -3,6 +3,7 @@ using datinate.app;
 using Datinate.Shared.Rb;
 using RadioLibCore.RadioDat;
 using RMVC;
+using System.Windows.Forms;
 
 namespace Datinate.Shared
 {
@@ -15,6 +16,7 @@ namespace Datinate.Shared
         void SetViewMediaItem(string entryName, RadioSourceDTO radioSource);
         void SetReadOnlyModeActive(bool readOnlyMode);
         void SetScoring(DatGrouperScoring scoring);
+        void SetScoringActive(bool active);
         void SetDescriptorDefinitions(IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions);
         void SetMediaCardDragStart();
         void SetMediaCardDragStop();

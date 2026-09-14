@@ -14,18 +14,14 @@ namespace com.RADIO.Datinate.RMVC
         public DAT_GROUPER_LAYOUT_ENUM CurrentLayout { get; private set; } = DAT_GROUPER_LAYOUT_ENUM.AutoGrouper;
 
         public bool IsInMediaReadOnlyMode =>
-            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly ||
-            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly;
+            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly;
     
         public bool IsInMediaAssignmentMode =>
-            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign ||
             CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign;
-        
+
         public bool IsInMediaMode =>
             CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly ||
-            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly ||
-            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign || 
-            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign;
+            CurrentLayout == DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign;
 
         private DAT_GROUPER_LAYOUT_ENUM LastStandardLayout = DAT_GROUPER_LAYOUT_ENUM.Curated_Standard;
 
@@ -51,37 +47,41 @@ namespace com.RADIO.Datinate.RMVC
         {
             if (isFromAuto)
             {
-                if (enterPreviewMode)
-                {
-                    if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly)
-                        CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly;
-                    
-                    return CurrentLayout;
-                }
-                else
-                {
-                    if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign)
-                        CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign;
+                if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly)
+                    CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly;
 
-                    return CurrentLayout;
-                }
+                return CurrentLayout;
+                //if (enterPreviewMode)
+                //{
+                //    if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly)
+                //        CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly;
+
+                //    return CurrentLayout;
+                //}
+                //else
+                //{
+                //    if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign)
+                //        CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign;
+
+                //    return CurrentLayout;
+                //}
             }
             else
             {
-                if (enterPreviewMode)
-                {
-                    if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly)
-                        CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly;
+                //if (enterPreviewMode)
+                //{
+                //    if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly)
+                //        CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly;
 
-                    return CurrentLayout;
-                }
-                else
-                {
+                //    return CurrentLayout;
+                //}
+                //else
+                //{
                     if (CurrentLayout != DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign)
                         CurrentLayout = DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign;
 
                     return CurrentLayout;
-                }
+                //}
             }
         }
 

@@ -6,8 +6,9 @@ namespace com.RADIO.Datinate.RMVC
     {
         protected override void Run()
         {
-            Facade.Instance?.MediaWebMediator?.StartReceiveMediaDrop();
+            // NOTE: Order is critical:
             Facade.Instance?.MediaAssignmentMediator?.SetMediaCardDragStart();
+            Facade.Instance?.MediaWebMediator?.StartReceiveMediaDrop();
         }
     }
 }

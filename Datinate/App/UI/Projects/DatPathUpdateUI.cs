@@ -93,7 +93,8 @@ namespace datinate.app
 
             string? bestMatch = LevenshteinDistanceUtil.GetBestMatch(targetFilename, dic.Keys.ToArray());
             
-            if (string.IsNullOrWhiteSpace(bestMatch)) 
+            // TODO: document this RomVault phenomenon
+            if (string.IsNullOrWhiteSpace(bestMatch) || bestMatch.ToLower().EndsWith(".dat.old")) 
             {
                 FormsHelper.ShowWarningDialog("Could not find a similar file.");
                 return;

@@ -204,7 +204,10 @@ namespace datinate.app
                 assignControls.SetAssignment(MEDIA_ASSIGNMENT_ENUM.None);
                 SetAssignmentBannersVisible(false, false);
 
-                var bestScorePercentage = entryListUI.SetEntryToScoreAgainst(filterText);
+                var bestScorePercentage = entryListUI.SetEntryToScoreAgainst(
+                    filterText,
+                    excludeAlreadyAssigned: !readOnlyMode);
+
                 assignControls.SetBestScore(bestScorePercentage);
 
                 if (!readOnlyMode)
@@ -266,7 +269,7 @@ namespace datinate.app
                         oneOrMoreHighConfidenceMatchesFound = true;
                         EntrySelectedEvt?.Invoke(this, lookupSet, (EntryInfo)info, false);
                     }
-                    else if (readOnlyMode && entryListUI.GetAllHighConfidenceMatches().Any() && performBestGuess)
+                    else if (readOnlyMode && entryListUI.GetAllHighConfidenceMatches().Any()/* && performBestGuess*/)
                     {
                         oneOrMoreHighConfidenceMatchesFound = true;
                         EntrySelectedEvt?.Invoke(

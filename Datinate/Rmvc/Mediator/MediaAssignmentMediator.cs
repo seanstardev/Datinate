@@ -59,6 +59,10 @@ namespace com.RADIO.Datinate.RMVC
             view.LoadMediaInBrowserEvt -= OnLoadMediaInBrowser;
         }
 
+        public void SetScoringActive(bool activate)
+        {
+            view?.SetScoringActive(activate);
+        }
         protected override void Initialsed()
         {
             if (view == null) return;
