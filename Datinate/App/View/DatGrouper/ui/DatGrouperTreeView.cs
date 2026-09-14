@@ -29,11 +29,21 @@ namespace datinate.app
 
         private const bool HotTrackingEnabled = true;
         private const int HoverScrollPollIntervalMs = 200;
-        private const int TVS_NOHSCROLL = 0x8000;
         private bool appliedVScrollVisible;
         private bool enforcingVScroll;
 
+        private const int TVS_NOHSCROLL = 0x8000;
+        private const int WM_NOTIFY = 0x004E;
 
+        private const int TTN_FIRST = -520;
+        private const int TTN_GETDISPINFOW = TTN_FIRST - 10;
+
+        private const int TVM_GETTOOLTIPS = TVM_FIRST + 25;
+
+        private const int TTM_SETDELAYTIME = 0x0400 + 3;
+        private const int TTM_POP = 0x0400 + 28;
+
+        private const int TTDT_AUTOPOP = 2;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Predicate<object?>? IsNodeInteractableTag { get; set; }
@@ -247,7 +257,16 @@ namespace datinate.app
         {
             base.OnHandleCreated(e);
 
-            _ = SendMessage(Handle, TVM_SETEXTENDEDSTYLE, (IntPtr)TVS_EX_DOUBLEBUFFER, (IntPtr)TVS_EX_DOUBLEBUFFER);
+            _ = SendMessage(
+                Handle,
+                TVM_SETEXTENDEDSTYLE,
+                (IntPtr)TVS_EX_DOUBLEBUFFER,
+                (IntPtr)TVS_EX_DOUBLEBUFFER);
+
+            // NOTE: Keep node tooltips visible longer while the cursor remains
+            // over the node image. They can still be popped immediately when
+            // the mouse leaves the image.
+            SetNodeToolTipAutoPopDelay(15000);
 
             appliedVScrollVisible = false;
             ApplyVScrollVisible(false, force: true);
@@ -535,8 +554,13 @@ namespace datinate.app
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
+
             UpdateHotNodeFromPoint(e.Location);
             PollAndApplyVScroll(force: false);
+
+            // NOTE: Node tooltips are only allowed while directly over the node image.
+            if (!IsPointOverNodeImage(e.Location))
+                PopNodeToolTip();
         }
 
         protected override void OnMouseLeave(EventArgs e)
@@ -559,6 +583,21 @@ namespace datinate.app
 
         protected override void WndProc(ref Message m)
         {
+            // NOTE: TreeView asks for tooltip text via TTN_GETDISPINFOW.
+            // Do not allow it to obtain tooltip text unless the mouse is over a node image.
+            if (m.Msg == WM_NOTIFY &&
+                m.LParam != IntPtr.Zero &&
+                Marshal.ReadInt32(m.LParam, IntPtr.Size * 2) == TTN_GETDISPINFOW)
+            {
+                var mousePoint = PointToClient(Cursor.Position);
+
+                if (!IsPointOverNodeImage(mousePoint))
+                {
+                    m.Result = IntPtr.Zero;
+                    return;
+                }
+            }
+
             bool ncSensitive =
                 m.Msg == WM_NCCALCSIZE ||
                 m.Msg == WM_NCPAINT ||
@@ -850,7 +889,57 @@ namespace datinate.app
                 enforcingVScroll = false;
             }
         }
+        private bool IsPointOverNodeImage(Point point)
+        {
+            if (!ClientRectangle.Contains(point))
+                return false;
 
+            var hit = HitTest(point);
+
+            return hit.Node != null &&
+                   (hit.Location & TreeViewHitTestLocations.Image) != 0;
+        }
+
+        private void PopNodeToolTip()
+        {
+            if (!IsHandleCreated)
+                return;
+
+            var toolTipHandle = SendMessage(
+                Handle,
+                TVM_GETTOOLTIPS,
+                IntPtr.Zero,
+                IntPtr.Zero);
+
+            if (toolTipHandle != IntPtr.Zero)
+            {
+                _ = SendMessage(
+                    toolTipHandle,
+                    TTM_POP,
+                    IntPtr.Zero,
+                    IntPtr.Zero);
+            }
+        }
+        private void SetNodeToolTipAutoPopDelay(int milliseconds)
+        {
+            if (!IsHandleCreated)
+                return;
+
+            var toolTipHandle = SendMessage(
+                Handle,
+                TVM_GETTOOLTIPS,
+                IntPtr.Zero,
+                IntPtr.Zero);
+
+            if (toolTipHandle == IntPtr.Zero)
+                return;
+
+            _ = SendMessage(
+                toolTipHandle,
+                TTM_SETDELAYTIME,
+                (IntPtr)TTDT_AUTOPOP,
+                (IntPtr)milliseconds);
+        }
         public sealed class SpacerNodeTag : IGameEntityProxy
         {
             public static readonly SpacerNodeTag Instance = new();

@@ -114,7 +114,7 @@ namespace datinate.app
         {
             InitializeComponent();
 
-            treeView.ShowNodeToolTips = false;
+            treeView.ShowNodeToolTips = true;
             treeView.HideSelection = false;
 
             PartNodeFont = new Font(treeView.Font.FontFamily, 10f, FontStyle.Regular);
@@ -885,7 +885,8 @@ namespace datinate.app
             var gameFamilyNode = new TreeNode(gameFamily.GetFamilyDisplayName())
             {
                 Tag = gameFamily,
-                NodeFont = familyNodeFont
+                NodeFont = familyNodeFont,
+                ToolTipText = TreeNodeNameUtil.CreateTooltip(gameFamily)
             };
 
             hasGreenCandidate = false;
@@ -906,6 +907,7 @@ namespace datinate.app
 
                 var gameNode = gameFamilyNode.Nodes.Add(string.Empty);
                 gameNode.Tag = game;
+                gameNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(game);
                 gameNode.ForeColor = Color.DarkSlateGray;
 
                 var partsForCounts = new List<IGamePart>(parts.Length);
@@ -929,13 +931,14 @@ namespace datinate.app
                             _ = uniquePointerIds.Add(pointer);
                     }
 
-                    var partNode = gameNode.Nodes.Add(DatinateHelper.GetGamePartNameRender(gamePart));
+                    var partNode = gameNode.Nodes.Add(TreeNodeNameUtil.GetGamePartNameRender(gamePart));
                     partNode.Tag = gamePart;
-
+                    partNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(gamePart);
+                    
                     ApplyPartNodeVisual(partNode, gamePart);
                 }
 
-                gameNode.Text = GetGameNameRender(partsForCounts, game.GetNameWithoutExt());
+                gameNode.Text = TreeNodeNameUtil.GetGameNameRender(partsForCounts, game.GetNameWithoutExt());
 
                 var gameStatus = EvaluateGameStatus(partsForCounts);
 
@@ -967,7 +970,8 @@ namespace datinate.app
             var gameFamilyNode = new TreeNode(gameFamily.GetFamilyDisplayName())
             {
                 Tag = gameFamily,
-                NodeFont = familyNodeFont
+                NodeFont = familyNodeFont,
+                ToolTipText = TreeNodeNameUtil.CreateTooltip(gameFamily)
             };
 
             hasGreenCandidate = false;
@@ -980,8 +984,10 @@ namespace datinate.app
                 var game = games[i];
 
                 var gameNode = gameFamilyNode.Nodes.Add(
-                    GetGameNameRender(game.GetGameParts(false), game.GetNameWithoutExt()));
+                    TreeNodeNameUtil.GetGameNameRender(game.GetGameParts(false), game.GetNameWithoutExt()));
+                
                 gameNode.Tag = game;
+                gameNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(game);
                 gameNode.ForeColor = Color.DarkSlateGray;
 
                 var parts = game.GetGameParts(false);
@@ -990,8 +996,9 @@ namespace datinate.app
                 {
                     var gamePart = parts[pi];
 
-                    var partNode = gameNode.Nodes.Add(DatinateHelper.GetGamePartNameRender(gamePart));
+                    var partNode = gameNode.Nodes.Add(TreeNodeNameUtil.GetGamePartNameRender(gamePart));
                     partNode.Tag = gamePart;
+                    partNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(gamePart);
 
                     ApplyPartNodeVisual(partNode, gamePart);
                 }
@@ -1086,34 +1093,7 @@ namespace datinate.app
                 suppressOverlayEvents = prevSuppress;
             }
         }
-        private string GetGameNameRender(IReadOnlyList<IGamePart> partsArr, string? gameName)
-        {
-            var sb = new StringBuilder();
-
-            int roms = 0;
-            int aliases = 0;
-
-            for (int i = 0; i < partsArr.Count; i++)
-            {
-                var p = partsArr[i];
-                roms += p.GetChecksums().Length;
-                aliases += p.GetSoftwareAliases().Length;
-            }
-
-            int parts = partsArr.Count;
-
-            sb.Append("ROMs: " + roms);
-            if (parts > 1) sb.Append(", Parts: " + parts);
-            if (aliases > 0) sb.Append(", Aliases: " + aliases);
-
-            var info = sb.ToString();
-
-            var result = !string.IsNullOrWhiteSpace(gameName)
-                ? gameName + " │ " + info
-                : info;
-
-            return result;
-        }
+        
         
         protected void HandleDisposing()
         {
@@ -1174,7 +1154,7 @@ namespace datinate.app
             treeView.ImageKey = treeView.SelectedImageKey = DatGrouperIconUtil.Instance.GameFamilyIcon;
 
             treeView.Indent = 0;
-            treeView.ShowNodeToolTips = false;
+            treeView.ShowNodeToolTips = true;
             treeView.HideSelection = true;
             treeView.FullRowSelect = true; 
 
@@ -1746,7 +1726,7 @@ namespace datinate.app
         {
             var (membership, isShallow) = GetPartVisualState(gamePart);
 
-            partNode.Text = DatinateHelper.GetGamePartNameRender(gamePart);
+            partNode.Text = TreeNodeNameUtil.GetGamePartNameRender(gamePart);
             partNode.ForeColor = DatFilterHelper.GetExpressionColour(membership);
 
             var partIconKey = GetPartIconKey(isShallow, membership);
@@ -1800,7 +1780,7 @@ namespace datinate.app
                 parts.Add(part);
             }
 
-            gameNode.Text = GetGameNameRender(parts, game.GetNameWithoutExt());
+            gameNode.Text = TreeNodeNameUtil.GetGameNameRender(parts, game.GetNameWithoutExt());
 
             bool isParent =
                 gameNode.Parent != null &&

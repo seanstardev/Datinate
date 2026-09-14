@@ -441,6 +441,13 @@ namespace datinate.app
                 return;
             }
 
+            var allExpressionFilesExist = DatGrouperProjectDTO.GetAllExpressionFilesExist(project);
+            if (allExpressionFilesExist == false)
+            {
+                ShowError("Dat Grouper cannot be run as one or more DAT Filter files do not exist.");
+                return;
+            }
+
             BuildProjectEvt?.Invoke(project);
         }
         private static void EnableDoubleBuffer(Control c)
@@ -477,7 +484,7 @@ namespace datinate.app
                 {
                     var reference = headline.FriendlyName;
 
-                    if (!DatinateHelper.IsDatFriendlyNameAcceptable(reference))
+                    if (!DatinatePointerHelper.IsDatFriendlyNameAcceptable(reference))
                     {
                         ShowError(
                             $"The Quick Reference Name '{reference}' in '{setName}' is not in the correct format." +

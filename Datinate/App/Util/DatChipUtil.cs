@@ -218,7 +218,7 @@ namespace datinate.app
             var datEnum = ParseEnumOrDefault(enumContender, DAT_GROUP_ENUM.NOT_SET);
             var enumKey = datEnum.ToString().ToLowerInvariant();
 
-            var friendly = DatinateHelper.GetDatFriendlyName(input) ?? string.Empty;
+            var friendly = DatinatePointerHelper.GetDatFriendlyName(input) ?? string.Empty;
             string? rightLabel = friendly.Length == 0 ? null : friendly;
 
             var cacheKey =

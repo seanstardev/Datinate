@@ -477,7 +477,7 @@ namespace com.RADIO.Datinate.RMVC
                 else if (string.Equals(el.LocalName, "resource_dat", StringComparison.OrdinalIgnoreCase))
                     collectionSetEnum = COLLECTION_SET_ENUM.Resource;
 
-                var pointer = DatinateHelper.BuildPointerId(
+                var pointer = DatinatePointerHelper.BuildPointerId(
                         collectionSetEnum,
                         datEnum,
                         internalDescriptor,

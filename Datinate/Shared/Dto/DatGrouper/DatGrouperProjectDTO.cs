@@ -1,4 +1,5 @@
-﻿using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+﻿using System.Diagnostics;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC.Shared
 {
@@ -59,6 +60,24 @@ namespace com.RADIO.Datinate.RMVC.Shared
                     return false;
                 }
 
+            return true;
+        }
+        public static bool GetAllExpressionFilesExist(DatGrouperProjectDTO project)
+        {
+            var allEntries = GetAllProjectEntries(project);
+
+            foreach (var entry in allEntries)
+            {
+                // Expression files are not always needed. We just want to catch the ones that have moved, been renamed, been deleted, etc.
+                if (string.IsNullOrWhiteSpace(entry.ExpressionsXmlFullpath))
+                    continue;
+
+                if (File.Exists(entry.ExpressionsXmlFullpath) == false)
+                {
+                    Debug.WriteLine("???: " + entry.ExpressionsXmlFullpath);
+                    return false;
+                }
+            }
             return true;
         }
 

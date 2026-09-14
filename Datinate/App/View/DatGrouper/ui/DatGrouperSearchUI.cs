@@ -36,7 +36,6 @@ namespace datinate.app
 
         private string? searchHighlightText;
         private string? lastSearchTerm = null;
-        private bool _searchAllSelectedOnMouseDown = false;
         private object? lastJumpedItem = null;
 
         private readonly SearchPromptContextMenu searchPromptMenu = new();
@@ -107,7 +106,6 @@ namespace datinate.app
             lastSearchTerm = null;
             searchList = null;
             lastJumpedItem = null;
-            _searchAllSelectedOnMouseDown = false;
         }
 
         private void EnsureSearchList()
@@ -317,19 +315,12 @@ namespace datinate.app
         }
         private void searchTxt_MouseDown(object sender, MouseEventArgs e)
         {
-            _searchAllSelectedOnMouseDown =
-                searchTextBox.TextLength > 0 &&
-                searchTextBox.SelectionLength == searchTextBox.TextLength;
+
         }
 
         private void searchTxt_MouseUp(object sender, MouseEventArgs e)
         {
-            if (_searchAllSelectedOnMouseDown)
-            {
-                searchTextBox.SelectionLength = 0;
-                searchTextBox.SelectionStart = searchTextBox.TextLength;
-                _searchAllSelectedOnMouseDown = false;
-            }
+
         }
 
         private void clearSearchBtn_Click(object sender, EventArgs e)

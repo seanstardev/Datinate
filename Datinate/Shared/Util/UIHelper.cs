@@ -19,5 +19,11 @@
         {
             btn.BackColor = POP_COLOUR;
         }
+        public static void HideTabs(TabControl tabControl)
+        {
+            tabControl.Appearance = TabAppearance.FlatButtons;
+            tabControl.ItemSize = new Size(0, 1);
+            tabControl.SizeMode = TabSizeMode.Fixed;
+        }
     }
 }

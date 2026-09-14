@@ -53,7 +53,7 @@ namespace com.RADIO.Datinate.RMVC
                                     mediaTypeEnum,
                                     lookupSet.RadioSource.DatGroupEnum,
                                     assignment.SourceId,
-                                    DatinateHelper.GetDatFriendlyName(lookupSet.RadioSource.Id));
+                                    DatinatePointerHelper.GetDatFriendlyName(lookupSet.RadioSource.Id));
 
                                 AddAssignedLookup(
                                     assignedLookupsByKey,

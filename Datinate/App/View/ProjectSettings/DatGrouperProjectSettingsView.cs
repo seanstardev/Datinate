@@ -318,7 +318,7 @@ namespace datinate.app
                     var pointer = emuCtrl.PointerId;
                     if (!string.IsNullOrWhiteSpace(pointer))
                     {
-                        var subset = DatinateHelper.GetPointerSubset(pointer);
+                        var subset = DatinatePointerHelper.GetPointerSubset(pointer);
                         if (!string.IsNullOrWhiteSpace(subset)) {
                             var path = Path.Combine(knownGoodPath, subset);
                             if (Directory.Exists(path))

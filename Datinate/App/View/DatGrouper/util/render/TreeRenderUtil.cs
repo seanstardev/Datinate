@@ -3,7 +3,6 @@ using Datinate.App.View.projects.gameFamily;
 using RadioLibCore.RadioDat;
 using System.Drawing.Drawing2D;
 using System.Runtime.CompilerServices;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 using static datinate.app.DatGrouperTreeView;
 
 namespace datinate.app
@@ -654,8 +653,7 @@ namespace datinate.app
             Rectangle rowBounds, 
             Rectangle nodeBounds,
             int rowWidth,
-            bool suppressSelectionHighlight
-            )
+            bool suppressSelectionHighlight)
         {
             var clipState = g.Save();
             try
@@ -1392,7 +1390,7 @@ namespace datinate.app
 
                 var labelKey = CreateDatReferenceLabel(ap);
 
-                tmp.Add((labelKey, DatinateHelper.GetGamePartNameRender(ap)));
+                tmp.Add((labelKey, TreeNodeNameUtil.GetGamePartNameRender(ap)));
             }
 
             return tmp.Count == 0 ? null : tmp;

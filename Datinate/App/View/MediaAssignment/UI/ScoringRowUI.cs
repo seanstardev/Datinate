@@ -50,7 +50,7 @@ namespace datinate.app
                         else
                             _ = addedSourceIDs.Add(sourceId);
 
-                        var group = DatinateHelper.GetDatGroup(sourceId);
+                        var group = DatinatePointerHelper.GetDatGroup(sourceId);
                         
                         if (group == DAT_GROUP_ENUM.R2DAT_WEB)
                         {

@@ -159,7 +159,7 @@ namespace datinate.app
             // Software:
             if (projectEntry.CollectionSetEnum == COLLECTION_SET_ENUM.Software)
             {
-                pointer = DatinateHelper.BuildPointerId(
+                pointer = DatinatePointerHelper.BuildPointerId(
                     COLLECTION_SET_ENUM.Software,
                     datEnum,
                     null,
@@ -174,7 +174,7 @@ namespace datinate.app
             {
                 var typeEnum = projectEntry.InternalDescriptor?.ToString() ?? string.Empty;
 
-                pointer = DatinateHelper.BuildPointerId(
+                pointer = DatinatePointerHelper.BuildPointerId(
                     COLLECTION_SET_ENUM.Resource,
                     datEnum,
                     typeEnum,
@@ -193,7 +193,7 @@ namespace datinate.app
 
                 var typeEnum = DatinateHelper.GetEnumFromString<MEDIA_TYPE_ENUM>(typeStr);
 
-                pointer = DatinateHelper.BuildPointerId(
+                pointer = DatinatePointerHelper.BuildPointerId(
                     COLLECTION_SET_ENUM.Media,
                     datEnum,
                     typeEnum.ToString(),

@@ -54,7 +54,7 @@ namespace datinate.app
         public Media2AssignUI()
         {
             InitializeComponent();
-            DatinateHelper.HideTabs(tabControl);
+            UIHelper.HideTabs(tabControl);
 
             pageCurlDefaultSize = pageCurl.Size;
             pageCurl.Visible = false;
@@ -110,7 +110,7 @@ namespace datinate.app
                     ? radioSource.Source.Replace("_", ": ")
                     : string.Empty;
 
-                var friendly = DatinateHelper.GetDatFriendlyName(radioSource.Id);
+                var friendly = DatinatePointerHelper.GetDatFriendlyName(radioSource.Id);
 
                 if (!string.IsNullOrWhiteSpace(friendly))
                     mediaNameTextBox.Text += " - " + friendly;

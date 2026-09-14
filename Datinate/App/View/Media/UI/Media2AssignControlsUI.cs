@@ -17,8 +17,9 @@ namespace datinate.app
 
         public Media2AssignControlsUI()
         {
+            
             InitializeComponent();
-            DatinateHelper.HideTabs(tabControl);
+            UIHelper.HideTabs(tabControl);
             assignmentBtnStrip.SelectedChanged += OnSegmentChange;
 
             searchPromptMenu.Attach(filterTxt);
