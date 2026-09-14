@@ -616,28 +616,85 @@ namespace datinate.app
 
         private void ApplyPromptOverlayCardVisibility()
         {
-
             var stack = PromptStack;
             if (stack == null)
                 return;
 
-            bool showSearch = true;
-            bool showReports = !dragSessionActive || dragDataValidForReports;
+            void SetCardState(int index, bool visible, bool placeholder)
+            {
+                if (!stack.TryGetCard(index, out var card))
+                    return;
 
-            bool showPreview =
+                stack.TrySetCard(
+                    index,
+                    card with
+                    {
+                        Visible = visible,
+                        Placeholder = placeholder
+                    });
+            }
+
+            // Search is always available.
+            SetCardState(
+                PromptCardIx_Search,
+                visible: true,
+                placeholder: false);
+
+            // -----------------------------------------------------------------
+            // MEDIA SLOT
+            //
+            // Preview and Assign deliberately share one physical stack position.
+            //
+            // Until media availability has actually been announced, neither card
+            // exists in the layout at all.
+            // -----------------------------------------------------------------
+
+            bool previewMode =
                 mediaIsAvailable &&
-                curationModeIsActive == false &&
+                !curationModeIsActive;
+
+            bool assignMode =
+                mediaIsAvailable &&
+                curationModeIsActive;
+
+            bool previewVisible =
+                previewMode &&
                 (!dragSessionActive || dragDataValidForMediaPreview);
 
-            bool showAssign =
-                mediaIsAvailable &&
-                curationModeIsActive &&
+            bool previewPlaceholder =
+                previewMode &&
+                dragSessionActive &&
+                !dragDataValidForMediaPreview;
+
+            bool assignVisible =
+                assignMode &&
                 (!dragSessionActive || dragDataValidForMediaAssign);
 
-            stack.SetCardVisible(PromptCardIx_Search, showSearch);
-            stack.SetCardVisible(PromptCardIx_PreviewMedia, showPreview);
-            stack.SetCardVisible(PromptCardIx_AssignMedia, showAssign);
-            stack.SetCardVisible(PromptCardIx_Reports, showReports);
+            bool assignPlaceholder =
+                assignMode &&
+                dragSessionActive &&
+                !dragDataValidForMediaAssign;
+
+            SetCardState(
+                PromptCardIx_PreviewMedia,
+                visible: previewVisible,
+                placeholder: previewPlaceholder);
+
+            SetCardState(
+                PromptCardIx_AssignMedia,
+                visible: assignVisible,
+                placeholder: assignPlaceholder);
+
+            // Reports always owns its slot. When the current drag cannot be
+            // accepted, retain the slot as an inert placeholder.
+            bool reportsVisible =
+                !dragSessionActive ||
+                dragDataValidForReports;
+
+            SetCardState(
+                PromptCardIx_Reports,
+                visible: reportsVisible,
+                placeholder: !reportsVisible);
         }
     }
 }

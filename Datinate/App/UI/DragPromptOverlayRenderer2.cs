@@ -27,6 +27,10 @@ namespace datinate.app
         private const int STACK_CARD_ICON_MULTI_GAP_PX_202602xx = 10;
         private const int STACK_DEFAULT_OFFSET_Y_202602xx = 0;
 
+        private static readonly Color STACK_PLACEHOLDER_BORDER_COLOR =
+            Color.FromArgb(150, 110, 110, 110);
+
+        private const float STACK_PLACEHOLDER_BORDER_WIDTH = 3f;
         private static void DrawImageWithAlpha(Graphics g, Image img, Rectangle dst, int alphaPercent)
         {
             if (alphaPercent >= 100)
@@ -88,7 +92,8 @@ namespace datinate.app
             IReadOnlyList<Bitmap>? Icons = null,
             OverlayDragHandlers Drag = default,
             Color? BackgroundColor = null,
-            bool Visible = true);
+            bool Visible = true,
+            bool Placeholder = false);
 
         public interface IOverlayCardStack
         {
@@ -439,7 +444,7 @@ namespace datinate.app
                 var visibleIndices = new List<int>(cards.Count);
                 for (int i = 0; i < cards.Count; i++)
                 {
-                    if (cards[i].Visible)
+                    if (cards[i].Visible || cards[i].Placeholder)
                         visibleIndices.Add(i);
                 }
 
@@ -731,6 +736,25 @@ namespace datinate.app
 
                     if (cardRect.Width <= 0 || cardRect.Height <= 0)
                         continue;
+
+                    if (spec.Placeholder)
+                    {
+                        var placeholderRect = Rectangle.Inflate(cardRect, -2, -2);
+
+                        using var placeholderPath =
+                            CreateRoundRectPath(placeholderRect, EmptyOverlayCardRadius);
+
+                        using var placeholderPen =
+                            new Pen(STACK_PLACEHOLDER_BORDER_COLOR, STACK_PLACEHOLDER_BORDER_WIDTH)
+                            {
+                                DashStyle = DashStyle.Dash,
+                                DashCap = DashCap.Round,
+                                LineJoin = LineJoin.Round
+                            };
+
+                        g.DrawPath(placeholderPen, placeholderPath);
+                        continue;
+                    }
 
                     bool hasHint = !string.IsNullOrWhiteSpace(spec.Hint);
 

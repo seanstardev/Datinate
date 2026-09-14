@@ -74,11 +74,11 @@ namespace datinate.app
             }
             else
             {
-                items.AddRange(new List<ToolStripItem>()
-                {
-                    new ToolStripSeparator(),
-                    _gameAddAsNewFamilyItem
-                });
+                //items.AddRange(new List<ToolStripItem>()
+                //{
+                //    new ToolStripSeparator(),
+                //    _gameAddAsNewFamilyItem
+                //});
             }
 
             _menu.Items.AddRange(items.ToArray());
