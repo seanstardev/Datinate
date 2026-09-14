@@ -47,6 +47,7 @@
             okPic = new PictureBox();
             innerContainer = new Panel();
             outerContainer = new Panel();
+            notFoundPic_bg = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)mediaIconUI).BeginInit();
             tabControl.SuspendLayout();
             mediaPage.SuspendLayout();
@@ -60,6 +61,7 @@
             ((System.ComponentModel.ISupportInitialize)okPic).BeginInit();
             innerContainer.SuspendLayout();
             outerContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)notFoundPic_bg).BeginInit();
             SuspendLayout();
             // 
             // mediaIconUI
@@ -278,6 +280,16 @@
             outerContainer.Size = new Size(280, 302);
             outerContainer.TabIndex = 3;
             // 
+            // notFoundPic_bg
+            // 
+            notFoundPic_bg.BackColor = Color.Black;
+            notFoundPic_bg.Location = new Point(14, 93);
+            notFoundPic_bg.Margin = new Padding(0);
+            notFoundPic_bg.Name = "notFoundPic_bg";
+            notFoundPic_bg.Size = new Size(252, 195);
+            notFoundPic_bg.TabIndex = 3;
+            notFoundPic_bg.TabStop = false;
+            // 
             // Media2AssignUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -285,6 +297,7 @@
             BackColor = SystemColors.Control;
             Controls.Add(notFoundPic);
             Controls.Add(okPic);
+            Controls.Add(notFoundPic_bg);
             Controls.Add(outerContainer);
             Margin = new Padding(6);
             Name = "Media2AssignUI";
@@ -304,6 +317,7 @@
             ((System.ComponentModel.ISupportInitialize)okPic).EndInit();
             innerContainer.ResumeLayout(false);
             outerContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)notFoundPic_bg).EndInit();
             ResumeLayout(false);
         }
 
@@ -327,5 +341,6 @@
         private BorderlessTabControl tabControl;
         private Panel innerContainer;
         private Panel outerContainer;
+        private PictureBox notFoundPic_bg;
     }
 }

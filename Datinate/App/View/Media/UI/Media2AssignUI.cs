@@ -9,7 +9,6 @@ namespace datinate.app
 {
     public partial class Media2AssignUI : UserControl
     {
-
         public event Action<Media2AssignUI>? DragStartEvt;
         public event Action<Media2AssignUI>? DragEndEvt;
 
@@ -158,10 +157,22 @@ namespace datinate.app
         private void SetAssignmentBannersVisible(bool okPicVisble, bool notFoundPicVisible)
         {
             okPic.Visible = okPicVisble;
-            notFoundPic.Visible = notFoundPicVisible;
-            
-            const int Pad = 10; 
+            notFoundPic.Visible = notFoundPic_bg.Visible = notFoundPicVisible;
 
+            // Don't block user from searching for an item marked as not found.
+            if (tabControl.SelectedTab == listPage)
+                notFoundPic_bg.Visible = false;
+
+            if (notFoundPicVisible)
+            {
+                notFoundPic_bg.BringToFront();
+                notFoundPic.BringToFront();
+            }
+
+            if (okPicVisble)
+                okPic.BringToFront();
+
+            const int Pad = 10;
 
             if (okPicVisble || notFoundPicVisible)
             {
@@ -229,8 +240,13 @@ namespace datinate.app
                         SetAssignmentBannersVisible(showOK, showNotFound);
 
                         if (showNotFound)
+                        {
                             assignControls.SetAssignment(MEDIA_ASSIGNMENT_ENUM.NotFound);
 
+                            // NOTE: Override what SetAssignmentBannersVisible(...) sets here
+                            // as this UI is currently out of focus:
+                            notFoundPic_bg.Visible = true;
+                        }
                         if (assignment.AssignmentEnum == MEDIA_ASSIGNMENT_ENUM.Assigned && assignment.EntryName != null)
                         {
                             bool selected = entryListUI.TrySelectEntry(assignment.EntryName);
@@ -407,6 +423,11 @@ namespace datinate.app
                         assignControls.ShowBestScorePage();
                 }
             }
+
+            if (isInFocus)
+                notFoundPic_bg.Visible = false;
+            else if (assignControls.AssignmentStatus == MEDIA_ASSIGNMENT_ENUM.NotFound)
+                notFoundPic_bg.Visible = true;
         }
 
         private void ApplyExternalSuppression()
@@ -535,7 +556,7 @@ namespace datinate.app
         private void GeneratePageCurl()
         {
             var right = pageCurl.Right;
-            double factor = 0.5 + (Random.Shared.NextDouble() * 0.4);
+            double factor = 0.5 + 0.2;// (Random.Shared.NextDouble() * 0.4);
             var w = (int)Math.Round(pageCurlDefaultSize.Width * factor);
             var h = (int)Math.Round(pageCurlDefaultSize.Height * factor);
             pageCurl.Size = new Size(w, h);
