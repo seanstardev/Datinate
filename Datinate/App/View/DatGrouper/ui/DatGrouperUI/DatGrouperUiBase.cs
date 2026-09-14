@@ -97,6 +97,8 @@ namespace datinate.app
 
         private IReadOnlyDictionary<IGameFamily, IMediaCollection>? mediaCache;
 
+        private HashSet<IGameFamily> scoringExemptFamilies = new();
+
         private DatGrouperTreeView? oldTreeView = null;
         
         private bool isDraggedOver = false;
@@ -265,8 +267,30 @@ namespace datinate.app
         }
         public void SetMediaCache(IReadOnlyDictionary<IGameFamily, IMediaCollection> mediaCache)
         {
+            var newScoringExemptFamilies = new HashSet<IGameFamily>();
+
+            foreach (var family in familyOrder)
+            {
+                if (mediaCache.TryGetValue(family, out var collection) &&
+                    collection.IsScoringExempt)
+                {
+                    _ = newScoringExemptFamilies.Add(family);
+                }
+            }
+
+            var changedFamilies = new HashSet<IGameFamily>(scoringExemptFamilies);
+            changedFamilies.SymmetricExceptWith(newScoringExemptFamilies);
+
             this.mediaCache = mediaCache;
-            treeView.Invalidate();
+            scoringExemptFamilies = newScoringExemptFamilies;
+
+            Ui(() =>
+            {
+                if (isSurrogate && changedFamilies.Count > 0)
+                    ReconcileScoringExemptFamilies(changedFamilies);
+
+                treeView.Invalidate();
+            });
         }
 
         internal void EnterMediaMode(bool isReadOnlyMode)
@@ -459,8 +483,10 @@ namespace datinate.app
 
                 var shouldAdd =
                     !isSurrogate ||
-                    hasGreenCandidate ||
-                    hasAmberCandidate;
+                    (
+                        (hasGreenCandidate || hasAmberCandidate) &&
+                        !IsFamilyScoringExempt(family)
+                    );
 
                 if (!shouldAdd)
                     continue;
@@ -476,7 +502,12 @@ namespace datinate.app
                 DatChipsRefreshEvt?.Invoke(uniquePointers);
             }
         }
-
+        private bool IsFamilyScoringExempt(IGameFamily family)
+        {
+            return mediaCache != null &&
+                   mediaCache.TryGetValue(family, out var collection) &&
+                   collection.IsScoringExempt;
+        }
         protected static IReadOnlyCollection<TreeNode> CollectGameEntityNodesAndDescendants(TreeNode? node)
         {
             if (node == null) return [];
@@ -782,13 +813,16 @@ namespace datinate.app
 
             return list;
         }
-        
+
         /// <summary>
         /// Create node and add to tree. Update records on index position and location in tree.
         /// </summary>
         /// <param name="newFamily"></param>
         /// <param name="expandNow"></param>
-        private TreeNode? InsertFamilyAndNode(IGameFamily newFamily, bool expandNow = true)
+        private TreeNode? InsertFamilyAndNode(
+            IGameFamily newFamily,
+            bool expandNow = true,
+            bool updateFamilyOrder = true)
         {
             var newNode = BuildGameFamilyNode(
                 newFamily,
@@ -803,8 +837,10 @@ namespace datinate.app
 
             var shouldAdd =
                 !isSurrogate ||
-                hasGreenCandidate ||
-                hasAmberCandidate;
+                (
+                    (hasGreenCandidate || hasAmberCandidate) &&
+                    !IsFamilyScoringExempt(newFamily)
+                );
 
             if (!shouldAdd)
                 return null;
@@ -844,34 +880,103 @@ namespace datinate.app
 
             nodesDictionary[newFamily] = newNode;
 
-            if (insertBefore == null)
-                familyOrder.Add(newFamily);
-
-            else
+            if (updateFamilyOrder)
             {
-                int familyOrdinal = 0;
-                int listInsert = familyOrder.Count;
-
-                for (int i = 0; i < Nodes.Count; i++)
+                if (insertBefore == null)
+                    familyOrder.Add(newFamily);
+                else
                 {
-                    var n = Nodes[i];
-                    if (ReferenceEquals(n, newNode))
+                    int familyOrdinal = 0;
+                    int listInsert = familyOrder.Count;
+
+                    for (int i = 0; i < Nodes.Count; i++)
                     {
-                        listInsert = familyOrdinal;
-                        break;
+                        var n = Nodes[i];
+
+                        if (ReferenceEquals(n, newNode))
+                        {
+                            listInsert = familyOrdinal;
+                            break;
+                        }
+
+                        if (n.Tag is IGameFamily)
+                            familyOrdinal++;
                     }
 
-                    if (n.Tag is IGameFamily) familyOrdinal++;
+                    listInsert = Math.Max(0, Math.Min(listInsert, familyOrder.Count));
+                    familyOrder.Insert(listInsert, newFamily);
                 }
-
-                listInsert = Math.Max(0, Math.Min(listInsert, familyOrder.Count));
-                familyOrder.Insert(listInsert, newFamily);
             }
 
             if (expandNow)
                 newNode.ExpandAll();
 
             return newNode;
+        }
+        private void ReconcileScoringExemptFamilies(IReadOnlySet<IGameFamily> changedFamilies)
+        {
+            if (!isSurrogate || changedFamilies.Count == 0)
+                return;
+
+            bool treeChanged = false;
+
+            treeView.BeginUpdate();
+
+            try
+            {
+                foreach (var family in changedFamilies)
+                {
+                    // The family may have disappeared from this UI through
+                    // some other model/delta operation since the previous
+                    // media-cache update.
+                    if (!familyOrder.Contains(family))
+                        continue;
+
+                    if (IsFamilyScoringExempt(family))
+                    {
+                        if (RemoveSurrogateFamilyNode(family))
+                            treeChanged = true;
+
+                        continue;
+                    }
+
+                    // It is no longer scoring-exempt.
+                    // If it is already materialised there is nothing to do.
+                    if (nodesDictionary.ContainsKey(family))
+                        continue;
+
+                    // Attempt to restore it without modifying familyOrder.
+                    //
+                    // InsertFamilyAndNode performs the existing natural
+                    // green/amber surrogate test as well, so a naturally
+                    // excluded family will simply remain absent.
+                    var restoredNode = InsertFamilyAndNode(
+                        family,
+                        expandNow: true,
+                        updateFamilyOrder: false);
+
+                    if (restoredNode != null)
+                        treeChanged = true;
+                }
+            }
+            finally
+            {
+                treeView.EndUpdate();
+            }
+
+            if (treeChanged)
+                OnFamiliesChanged();
+        }
+        private bool RemoveSurrogateFamilyNode(IGameFamily family)
+        {
+            if (!nodesDictionary.TryGetValue(family, out var node))
+                return false;
+
+            _ = nodesDictionary.Remove(family);
+
+            treeView.RemoveContentNodeAndTrailingSpacer(node);
+
+            return true;
         }
 
         private TreeNode? BuildFamilyNode(
@@ -1073,6 +1178,8 @@ namespace datinate.app
             isBeingDragged = false;
 
             mediaCache = null;
+            scoringExemptFamilies.Clear();
+
             mediaModeEnum = DAT_GROUPER_MEDIA_MODE.NOT_SET;
 
             AllowGameAddAsFamilyMenuItem = false;

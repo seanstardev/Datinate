@@ -25,5 +25,16 @@
             tabControl.ItemSize = new Size(0, 1);
             tabControl.SizeMode = TabSizeMode.Fixed;
         }
+        public static bool ShowDialogYesNo(string message, string title = "Attention")
+        {
+            return MessageBox.Show(
+                message,
+                title,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+        }
+
+
     }
 }

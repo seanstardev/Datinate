@@ -57,21 +57,19 @@ namespace com.RADIO.Datinate.RMVC
             IReadOnlyDictionary<string, DatVO> sourceIdDatDictionary,
             RadioDatMeta datMeta)
         {
-            SaveFileDialog f = new SaveFileDialog();
-            f.InitialDirectory = projectsPath;
-            f.FileName = radioDatNameWithoutExt + ".xml";
+            //SaveFileDialog f = new SaveFileDialog();
+            //f.InitialDirectory = projectsPath;
+            //f.FileName = radioDatNameWithoutExt + ".xml";
 
-            if (f.ShowDialog() == DialogResult.OK)
-            {
-                radioDatNameWithoutExt = Path.GetFileNameWithoutExtension(f.FileName);
-
+            //if (f.ShowDialog() == DialogResult.OK)
+            //{
                 var exportDelegate = new RadioDatExporterDelegate(
                     radioDatNameWithoutExt,
                     collection,
                     sourceIdContentDictionary,
                     sourceIdDatDictionary,
                     datMeta,
-                    Path.GetDirectoryName(f.FileName)!);
+                    ProjectsPath);
 
                 exportDelegate.Export();
 
@@ -82,7 +80,7 @@ namespace com.RADIO.Datinate.RMVC
                     , MessageBoxButtons.OK
                     , MessageBoxIcon.Information
                 );
-            }
+            //}
         }
         private string GetDatFullpath(string projectName)
         {

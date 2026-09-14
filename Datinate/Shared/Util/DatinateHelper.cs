@@ -66,17 +66,7 @@ namespace com.RADIO.Datinate.RMVC.Shared
         public static bool IsDesignTime =>
             LicenseManager.UsageMode == LicenseUsageMode.Designtime;
         
-        public static bool ShowDialogYesNo(string message, string title = "Attention")
-        {
-            return MessageBox.Show(
-                message,
-                title,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2) == DialogResult.Yes;
-        }
-
-
+        
         /// <summary>
         /// For showing the parts of MAME names
         /// </summary>

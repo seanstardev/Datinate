@@ -371,7 +371,7 @@ namespace datinate.app
                     proceed = true;
                 else
                 {
-                    proceed = DatinateHelper.ShowDialogYesNo(
+                    proceed = UIHelper.ShowDialogYesNo(
                         "Any unsaved changes will be lost if you return to the Projects View. Do you wish to proceed?");
                 }
                 if (proceed)
@@ -388,9 +388,10 @@ namespace datinate.app
 
                 if (CurrentLayoutIsAuto)
                     proceed = true;
+
                 else
                 {
-                    proceed = DatinateHelper.ShowDialogYesNo(
+                    proceed = UIHelper.ShowDialogYesNo(
                         "Any unsaved changes will be lost if you visit the Project Settings View. Do you wish to proceed?");
                 }
                 if (proceed)
@@ -416,7 +417,7 @@ namespace datinate.app
                     return;
                 else
                 {
-                    proceed = DatinateHelper.ShowDialogYesNo(
+                    proceed = UIHelper.ShowDialogYesNo(
                         "Any unsaved changes will be lost if you visit the Export View. Do you wish to proceed?");
                 }
                 if (proceed)
@@ -426,7 +427,18 @@ namespace datinate.app
                 }
             };
 
-            saveBtn.Click += (_, __) => SaveEvt?.Invoke();
+        saveBtn.Click += (_, __) =>
+        {
+            var result = MessageBox.Show(
+                this,
+                "Do you want to Save this Project?",
+                "Attention",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+                SaveEvt?.Invoke();
+        };
 
             autoGrouperUI.DatChipsRefreshEvt += pointerIds => OnDatChipsRefresh(pointerIds);
 
