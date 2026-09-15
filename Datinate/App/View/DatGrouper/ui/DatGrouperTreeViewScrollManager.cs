@@ -17,11 +17,16 @@ namespace datinate.app
 
         private Size lastParentClientSize = Size.Empty;
         private bool applyingScrollbarPresentation;
+        private bool dragOverTree;
 
-        public DatGrouperTreeViewScrollManager(
-            DatGrouperTreeView treeView)
+        public DatGrouperTreeViewScrollManager(DatGrouperTreeView treeView)
         {
             this.treeView = treeView;
+
+            treeView.DragEnter += TreeView_DragEnter;
+            treeView.DragOver += TreeView_DragOver;
+            treeView.DragLeave += TreeView_DragLeave;
+            treeView.DragDrop += TreeView_DragDrop;
         }
 
 
@@ -77,10 +82,13 @@ namespace datinate.app
         }
         public void Dispose()
         {
+            treeView.DragEnter -= TreeView_DragEnter;
+            treeView.DragOver -= TreeView_DragOver;
+            treeView.DragLeave -= TreeView_DragLeave;
+            treeView.DragDrop -= TreeView_DragDrop;
+
             DisposeTimer();
         }
-
-
         private void StartPolling()
         {
             if (!ShouldPoll())
@@ -212,9 +220,8 @@ namespace datinate.app
                 Control.MouseButtons != MouseButtons.None;
 
             bool mouseOverTreeArea =
-                mouseCaptured ||
-                IsMouseOverVisibleTreeArea(parent);
-
+                !dragOverTree &&
+                (mouseCaptured || IsMouseOverVisibleTreeArea(parent));
 
             int desiredRight =
                 parent.ClientSize.Width +
@@ -357,6 +364,35 @@ namespace datinate.app
                 point.X < parent.ClientSize.Width &&
                 point.Y >= top &&
                 point.Y < bottom;
+        }
+
+        private void TreeView_DragEnter(object? sender, DragEventArgs e)
+        {
+            SetDragOverTree(true);
+        }
+
+        private void TreeView_DragOver(object? sender, DragEventArgs e)
+        {
+            SetDragOverTree(true);
+        }
+
+        private void TreeView_DragLeave(object? sender, EventArgs e)
+        {
+            SetDragOverTree(false);
+        }
+
+        private void TreeView_DragDrop(object? sender, DragEventArgs e)
+        {
+            SetDragOverTree(false);
+        }
+
+        private void SetDragOverTree(bool value)
+        {
+            if (dragOverTree == value)
+                return;
+
+            dragOverTree = value;
+            UpdateScrollbarPresentation();
         }
     }
 }

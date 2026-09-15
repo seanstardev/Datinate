@@ -294,7 +294,16 @@ namespace datinate.app
         {
             MessageBoxButtons messageBoxButtons = isYesNo ? MessageBoxButtons.OKCancel : MessageBoxButtons.OK;
             MessageBoxIcon messageBoxIcon = MessageBoxIcon.Information;
-            var result = MessageBox.Show(message, title, messageBoxButtons, messageBoxIcon);
+
+            Form? owner = Form.ActiveForm;
+
+            if (owner == null && Application.OpenForms.Count > 0)
+                owner = Application.OpenForms[0];
+
+            var result = owner != null
+                ? MessageBox.Show(owner, message, title, messageBoxButtons, messageBoxIcon)
+                : MessageBox.Show(message, title, messageBoxButtons, messageBoxIcon);
+
             return Task.FromResult(result == DialogResult.OK);
         }
 

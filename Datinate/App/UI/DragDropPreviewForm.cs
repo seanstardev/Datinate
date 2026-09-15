@@ -720,10 +720,8 @@ namespace datinate.app
                     return;
                 }
 
-                EnsureClearCaptionTimer();
-
-                if (!clearCaptionTimer!.Enabled)
-                    clearCaptionTimer.Start();
+                StopClearCaptionTimer();
+                CommitPendingCaption();
             }
 
             if (InvokeRequired)
