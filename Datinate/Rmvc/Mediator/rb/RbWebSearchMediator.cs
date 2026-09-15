@@ -1,5 +1,7 @@
-﻿using Datinate.Shared;
+﻿using datinate.app;
+using Datinate.Shared;
 using RMVC;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
@@ -15,6 +17,18 @@ namespace com.RADIO.Datinate.RMVC
         public void ClearView() =>
             view?.ClearView();
 
+        public void SetSearchEngine()
+        {
+
+        }
+        public void SetSearchEngine(WEB_SOURCE_ENUM engine, bool invokeSearchNow)
+        {
+            view?.SetSearchEngine(engine, invokeSearchNow);
+        }
+        public void SearchCurrent()
+        {
+            view?.SearchCurrent();
+        }
         protected override void Disposing()
         {
             if (view == null) return;
@@ -32,11 +46,6 @@ namespace com.RADIO.Datinate.RMVC
             if (view == null) return;
 
             view.LoadUrlEvt += OnLoadUrl;
-        }
-
-        internal void SearchCurrent()
-        {
-            view?.SearchCurrent();
         }
     }
 }

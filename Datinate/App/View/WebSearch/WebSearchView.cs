@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate;
 using Datinate.Shared;
 using System.Text.RegularExpressions;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 using static datinate.app.WebSourcesUI;
 
 namespace datinate.app
@@ -17,11 +18,6 @@ namespace datinate.app
             webSourcesUI.SourceSelectedEvt += OnSourceSelected;
         }
 
-        private void OnSourceSelected(WEB_SOURCE_ENUM webSourceEnum)
-        {
-            Search();
-        }
-
         public void SetSearchTerms(string? gameName, string? systemName)
         {
             Ui(() =>
@@ -33,7 +29,17 @@ namespace datinate.app
                     searchSystemText.Text = NormaliseSytemName(systemName);
             });
         }
-
+        public void SetSearchEngine(WEB_SOURCE_ENUM engine, bool invokeSearchNow)
+        {
+            Ui(() =>
+            {
+                webSourcesUI.SetSourceSelected(WEB_SOURCE_ENUM.Google, invokeSearchNow);
+            });
+        }
+        public void SearchCurrent()
+        {
+            Search();
+        }
         public void ClearView()
         {
             Ui(() =>
@@ -41,6 +47,11 @@ namespace datinate.app
                 searchSystemText.Text = string.Empty;
                 searchGameText.Text = string.Empty;
             });
+        }
+
+        private void OnSourceSelected(WEB_SOURCE_ENUM webSourceEnum)
+        {
+            Search();
         }
 
         private void Search()
@@ -133,11 +144,6 @@ namespace datinate.app
                 ## Notes / uncertainty
                 - List any unclear points and what would confirm them.
                 """;
-        }
-
-        public void SearchCurrent()
-        {
-            Search();
         }
     }
 }

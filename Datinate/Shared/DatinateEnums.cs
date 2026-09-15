@@ -3,6 +3,13 @@
     public static class DatinateEnums
     {
 
+        public enum WEB_SOURCE_ENUM
+        {
+            Google,
+            Youtube,
+            ChatGPT,
+            Wikipedia
+        }
         public enum MEDIA_TYPE_ENUM
         {
             NOT_SET

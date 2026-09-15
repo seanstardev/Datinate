@@ -1,4 +1,5 @@
 ﻿using System.Drawing.Imaging;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace datinate.app
 {
@@ -10,13 +11,6 @@ namespace datinate.app
 
         private const float UnselectedAlpha = 0.45f;
 
-        public enum WEB_SOURCE_ENUM
-        {
-            Google,
-            Youtube,
-            ChatGPT,
-            Wikipedia
-        }
 
         public event Action<WEB_SOURCE_ENUM>? SourceSelectedEvt;
 
@@ -49,12 +43,13 @@ namespace datinate.app
             EnsureDimImageList();
         }
 
-        public void SetSourceSelected(WEB_SOURCE_ENUM source)
+        public void SetSourceSelected(WEB_SOURCE_ENUM source, bool invokeSearchNow = true)
         {
             selectedSource = source;
             ApplySelectionVisuals();
 
-            SourceSelectedEvt?.Invoke(selectedSource);
+            if (invokeSearchNow)
+                SourceSelectedEvt?.Invoke(selectedSource);
         }
 
         private void OnSourceBtnClick(object? sender, EventArgs e)

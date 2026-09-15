@@ -573,6 +573,9 @@ namespace datinate.app
                 var src = Source ?? Parent ?? this;
                 EnsureLayout(src);
 
+                // Default to reject. Only an active card may handle the drop.
+                drgevent.Effect = DragDropEffects.None;
+
                 if (activeCardIndex >= 0 && activeCardIndex < cards.Count)
                     cards[activeCardIndex].Drag.DragDrop?.Invoke(this, drgevent);
 
@@ -587,8 +590,10 @@ namespace datinate.app
                 var src = Source ?? Parent ?? this;
                 EnsureLayout(src);
 
-                var pt = PointToClient(new Point(e.X, e.Y));
+                // Default to cannot-drop. An active card must explicitly promote this.
+                e.Effect = DragDropEffects.None;
 
+                var pt = PointToClient(new Point(e.X, e.Y));
                 int newActive = -1;
 
                 for (int i = 0; i < cards.Count; i++)

@@ -1,4 +1,5 @@
 ﻿using RMVC;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace Datinate.Shared
 {
@@ -8,5 +9,6 @@ namespace Datinate.Shared
         void SetSearchTerms(string? gameName, string? systemName);
         void ClearView();
         void SearchCurrent();
+        void SetSearchEngine(WEB_SOURCE_ENUM engine, bool invokeSearchNow);
     }
 }

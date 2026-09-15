@@ -1,4 +1,5 @@
-﻿using datinate.app;
+﻿using com.RADIO.Datinate.RMVC.Shared;
+using datinate.app;
 using datinate.shared;
 using Datinate.Shared;
 using RadioLibCore.RadioDat;
@@ -86,7 +87,8 @@ namespace com.RADIO.Datinate.RMVC
 
         private void OnSearchEntityName(string searchName)
         {
-            base.ExecuteCommand(new SetWebSearchTermsCmd(searchName, null, true));
+            base.ExecuteCommand(new SetWebSearchTermsCmd(searchName, null, false));
+            base.ExecuteCommand(new SetWebSearchEngineCmd(DatinateEnums.WEB_SOURCE_ENUM.Google, true));
         }
 
         internal void StartReceiveGameEntityDrop(DatGrouperEntryDTO datGrouperEntryDTO)
