@@ -1,7 +1,6 @@
 ﻿using RadioLibCore.RadioDat;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using Timer = System.Windows.Forms.Timer;
 
 namespace datinate.app
 {
@@ -25,12 +24,8 @@ namespace datinate.app
     {        
         public event Action? SelectionCleared;
         
-        private Timer? hoverScrollPollTimer;
 
         private const bool HotTrackingEnabled = true;
-        private const int HoverScrollPollIntervalMs = 200;
-        private bool appliedVScrollVisible;
-        private bool enforcingVScroll;
 
         private const int TVS_NOHSCROLL = 0x8000;
         private const int WM_NOTIFY = 0x004E;
@@ -45,8 +40,7 @@ namespace datinate.app
 
         private const int TTDT_AUTOPOP = 2;
 
-        private readonly DatGrouperTreeViewScrollManager scrollManager = 
-            new DatGrouperTreeViewScrollManager(); 
+        private readonly DatGrouperTreeViewScrollManager scrollManager;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Predicate<object?>? IsNodeInteractableTag { get; set; }
@@ -102,94 +96,20 @@ namespace datinate.app
 
         public DatGrouperTreeView()
         {
+            scrollManager =
+                new DatGrouperTreeViewScrollManager(this);
+
             defaultBackColour = BackColor;
 
             if (IsNodeInteractableTag == null)
-                IsNodeInteractableTag = static tag => tag is not SpacerNodeTag;
+                IsNodeInteractableTag =
+                    static tag => tag is not SpacerNodeTag;
 
             if (IsSelectableTag == null)
-                IsSelectableTag = static tag => tag is IGameEntity;
+                IsSelectableTag =
+                    static tag => tag is IGameEntity;
 
             Scrollable = true;
-        }
-
-        private void EnsureHoverScrollPollTimer()
-        {
-            if (hoverScrollPollTimer != null)
-                return;
-
-            hoverScrollPollTimer = new System.Windows.Forms.Timer
-            {
-                Interval = HoverScrollPollIntervalMs
-            };
-
-            hoverScrollPollTimer.Tick += HoverScrollPollTimer_Tick;
-        }
-
-        private void StartHoverScrollPoll()
-        {
-            if (IsDesignTime() || !IsHandleCreated)
-                return;
-
-            EnsureHoverScrollPollTimer();
-
-            if (hoverScrollPollTimer != null && !hoverScrollPollTimer.Enabled)
-                hoverScrollPollTimer.Start();
-        }
-
-        private void StopHoverScrollPoll()
-        {
-            if (hoverScrollPollTimer != null && hoverScrollPollTimer.Enabled)
-                hoverScrollPollTimer.Stop();
-        }
-        
-        private bool ShouldPoll()
-        {
-            if (IsDesignTime())
-                return false;
-
-            if (!IsHandleCreated)
-                return false;
-
-            if (Parent == null)
-                return false;
-
-            if (!Visible || !Enabled)
-                return false;
-
-            return true;
-        }
-
-        private void UpdatePollingStateAndApplyImmediate()
-        {
-            if (!ShouldPoll())
-            {
-                StopHoverScrollPoll();
-                ApplyVScrollVisible(false, force: true);
-                return;
-            }
-
-            StartHoverScrollPoll();
-            PollAndApplyVScroll(force: true);
-        }
-
-        private void HoverScrollPollTimer_Tick(object? sender, EventArgs e)
-        {
-            if (!ShouldPoll())
-            {
-                StopHoverScrollPoll();
-                ApplyVScrollVisible(false, force: true);
-                return;
-            }
-
-            PollAndApplyVScroll(force: false);
-        }
-
-        private void PollAndApplyVScroll(bool force)
-        {
-            bool over = IsCursorActuallyOverThisTreeOrChild();
-            bool canScroll = CanTreeActuallyScrollVertically();
-            ApplyVScrollVisible(over && canScroll, force: force);
         }
 
         public void SetFocusNode(TreeNode? node)
@@ -271,21 +191,12 @@ namespace datinate.app
             // the mouse leaves the image.
             SetNodeToolTipAutoPopDelay(15000);
 
-            appliedVScrollVisible = false;
-            ApplyVScrollVisible(false, force: true);
-
-            UpdatePollingStateAndApplyImmediate();
+            scrollManager.HandleHostHandleCreated();
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
         {
-            if (hoverScrollPollTimer != null)
-            {
-                hoverScrollPollTimer.Stop();
-                hoverScrollPollTimer.Tick -= HoverScrollPollTimer_Tick;
-                hoverScrollPollTimer.Dispose();
-                hoverScrollPollTimer = null;
-            }
+            scrollManager.HandleHostHandleDestroyed();
 
             base.OnHandleDestroyed(e);
         }
@@ -293,15 +204,7 @@ namespace datinate.app
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
-                if (hoverScrollPollTimer != null)
-                {
-                    hoverScrollPollTimer.Stop();
-                    hoverScrollPollTimer.Tick -= HoverScrollPollTimer_Tick;
-                    hoverScrollPollTimer.Dispose();
-                    hoverScrollPollTimer = null;
-                }
-            }
+                scrollManager.Dispose();
 
             base.Dispose(disposing);
         }
@@ -313,7 +216,7 @@ namespace datinate.app
             if (!IsHandleCreated)
                 return;
 
-            UpdatePollingStateAndApplyImmediate();
+            scrollManager.HandleHostStateChanged();
         }
 
         protected override void OnVisibleChanged(EventArgs e)
@@ -323,7 +226,7 @@ namespace datinate.app
             if (!IsHandleCreated)
                 return;
 
-            UpdatePollingStateAndApplyImmediate();
+            scrollManager.HandleHostStateChanged();
         }
 
         protected override void OnEnabledChanged(EventArgs e)
@@ -333,7 +236,7 @@ namespace datinate.app
             if (!IsHandleCreated)
                 return;
 
-            UpdatePollingStateAndApplyImmediate();
+            scrollManager.HandleHostStateChanged();
         }
 
         protected override CreateParams CreateParams
@@ -552,6 +455,8 @@ namespace datinate.app
         protected override void OnMouseEnter(EventArgs e)
         {
             base.OnMouseEnter(e);
+
+            scrollManager.HandleHostMouseEnter();
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -559,7 +464,7 @@ namespace datinate.app
             base.OnMouseMove(e);
 
             UpdateHotNodeFromPoint(e.Location);
-            PollAndApplyVScroll(force: false);
+            scrollManager.HandleHostMouseMove();
 
             // NOTE: Node tooltips are only allowed while directly over the node image.
             if (!IsPointOverNodeImage(e.Location))
@@ -572,21 +477,7 @@ namespace datinate.app
 
             SetHotNode(null);
 
-            // Do not blindly hide here. The mouse may simply have moved from
-            // the client area onto this TreeView's native scrollbar.
-            PollAndApplyVScroll(force: false);
-
-            // Recheck once Windows has completed the mouse transition.
-            // This catches rapid movement into another TreeView where the
-            // synchronous check above may still see this TreeView's HWND.
-            if (IsHandleCreated && !IsDisposed)
-            {
-                BeginInvoke(new Action(() =>
-                {
-                    if (!IsDisposed && IsHandleCreated)
-                        PollAndApplyVScroll(force: false);
-                }));
-            }
+            scrollManager.HandleHostMouseLeave();
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -597,7 +488,7 @@ namespace datinate.app
                 Invalidate();
 
             UpdateHotNodeFromCursor();
-            PollAndApplyVScroll(force: true);
+            scrollManager.HandleHostSizeChanged();
         }
 
         protected override void WndProc(ref Message m)
@@ -606,9 +497,12 @@ namespace datinate.app
             // Do not allow it to obtain tooltip text unless the mouse is over a node image.
             if (m.Msg == WM_NOTIFY &&
                 m.LParam != IntPtr.Zero &&
-                Marshal.ReadInt32(m.LParam, IntPtr.Size * 2) == TTN_GETDISPINFOW)
+                Marshal.ReadInt32(
+                    m.LParam,
+                    IntPtr.Size * 2) == TTN_GETDISPINFOW)
             {
-                var mousePoint = PointToClient(Cursor.Position);
+                var mousePoint =
+                    PointToClient(Cursor.Position);
 
                 if (!IsPointOverNodeImage(mousePoint))
                 {
@@ -617,53 +511,8 @@ namespace datinate.app
                 }
             }
 
-            bool ncSensitive =
-                m.Msg == WM_NCCALCSIZE ||
-                m.Msg == WM_NCPAINT ||
-                m.Msg == WM_NCACTIVATE ||
-                m.Msg == WM_WINDOWPOSCHANGED ||
-                m.Msg == WM_WINDOWPOSCHANGING ||
-                m.Msg == WM_STYLECHANGED ||
-                m.Msg == WM_SIZE;
-
-            bool scrollSensitive =
-                m.Msg == WM_VSCROLL ||
-                m.Msg == WM_MOUSEWHEEL ||
-                m.Msg == WM_MOUSEHWHEEL;
-
-            // Client mouse movement is already handled by OnMouseMove/OnMouseLeave.
-            // We specifically need non-client movement here so the native vertical
-            // scrollbar remains visible and interactive while the mouse is over it.
-            bool nonClientMouseSensitive =
-                m.Msg == WM_NCMOUSEMOVE ||
-                m.Msg == WM_NCMOUSELEAVE;
-
-            if (!IsDesignTime() && IsHandleCreated &&
-                (ncSensitive || scrollSensitive))
-            {
-                if (!IsCursorActuallyOverThisTreeOrChild())
-                    ApplyVScrollVisible(false, force: true);
-            }
-
             base.WndProc(ref m);
-
-            if (!IsDesignTime() && IsHandleCreated)
-            {
-                if (ncSensitive || scrollSensitive)
-                {
-                    // Native layout/scroll operations can alter scrollbar state,
-                    // so deliberately reassert it here.
-                    PollAndApplyVScroll(force: true);
-                }
-                else if (nonClientMouseSensitive)
-                {
-                    // Required for scrollbar interaction, but do NOT redraw it
-                    // repeatedly when the desired visibility has not changed.
-                    PollAndApplyVScroll(force: false);
-                }
-            }
         }
-
         private bool IsEmptyTreeOverlayLikelyActive()
         {
             if (Nodes.Count == 1 &&
@@ -782,147 +631,6 @@ namespace datinate.app
             Invalidate(new Rectangle(0, b.Top, ClientSize.Width, b.Height));
         }
 
-        private const int WM_MOUSEWHEEL = 0x020A;
-        private const int WM_MOUSEHWHEEL = 0x020E;
-        private const int WM_VSCROLL = 0x0115;
-        private const int WM_HSCROLL = 0x0114;
-
-        private const int WM_MOUSEMOVE = 0x0200;
-        private const int WM_MOUSELEAVE = 0x02A3;
-        private const int WM_NCMOUSEMOVE = 0x00A0;
-        private const int WM_NCMOUSELEAVE = 0x02A2;
-
-        private const int WM_NCCALCSIZE = 0x0083;
-        private const int WM_NCPAINT = 0x0085;
-        private const int WM_NCACTIVATE = 0x0086;
-        private const int WM_SIZE = 0x0005;
-        private const int WM_WINDOWPOSCHANGED = 0x0047;
-        private const int WM_WINDOWPOSCHANGING = 0x0046;
-        private const int WM_STYLECHANGED = 0x007D;
-
-        private const int SB_VERT = 1;
-
-        private const uint SIF_RANGE = 0x0001;
-        private const uint SIF_PAGE = 0x0002;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct POINT
-        {
-            public int X;
-            public int Y;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct SCROLLINFO
-        {
-            public uint cbSize;
-            public uint fMask;
-            public int nMin;
-            public int nMax;
-            public uint nPage;
-            public int nPos;
-            public int nTrackPos;
-        }
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetCapture();
-
-        [DllImport("user32.dll")]
-        private static extern bool IsChild(IntPtr hWndParent, IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool GetCursorPos(out POINT lpPoint);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr WindowFromPoint(POINT pt);
-
-        [DllImport("user32.dll")]
-        private static extern bool GetScrollInfo(IntPtr hwnd, int fnBar, ref SCROLLINFO lpsi);
-
-        [DllImport("user32.dll")]
-        private static extern bool ShowScrollBar(IntPtr hWnd, int wBar, bool bShow);
-
-        [DllImport("user32.dll")]
-        private static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
-
-        private const uint RDW_INVALIDATE = 0x0001;
-        private const uint RDW_UPDATENOW = 0x0100;
-        private const uint RDW_FRAME = 0x0400;
-
-        private bool IsDesignTime()
-        {
-            return LicenseManager.UsageMode == LicenseUsageMode.Designtime || (Site?.DesignMode ?? false);
-        }
-
-        private bool IsCursorActuallyOverThisTreeOrChild()
-        {
-            if (!IsHandleCreated)
-                return false;
-
-            var cap = GetCapture();
-            if (cap != IntPtr.Zero)
-                return cap == Handle || IsChild(Handle, cap);
-
-            if (!GetCursorPos(out var p))
-                return false;
-
-            var hwnd = WindowFromPoint(p);
-            if (hwnd == IntPtr.Zero)
-                return false;
-
-            return hwnd == Handle || IsChild(Handle, hwnd);
-        }
-
-        private bool CanTreeActuallyScrollVertically()
-        {
-            if (!IsHandleCreated)
-                return false;
-
-            if (!Scrollable)
-                return false;
-
-            var si = new SCROLLINFO
-            {
-                cbSize = (uint)Marshal.SizeOf<SCROLLINFO>(),
-                fMask = SIF_RANGE | SIF_PAGE
-            };
-
-            if (!GetScrollInfo(Handle, SB_VERT, ref si))
-                return false;
-
-            long total = (long)si.nMax - si.nMin + 1;
-            long page = (long)si.nPage;
-
-            if (page <= 0)
-                return false;
-
-            return total > page;
-        }
-
-        private void ApplyVScrollVisible(bool visible, bool force)
-        {
-            if (!IsHandleCreated)
-                return;
-
-            if (enforcingVScroll)
-                return;
-
-            enforcingVScroll = true;
-            try
-            {
-                if (!force && appliedVScrollVisible == visible)
-                    return;
-
-                appliedVScrollVisible = visible;
-
-                _ = ShowScrollBar(Handle, SB_VERT, visible);
-                _ = RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, RDW_INVALIDATE | RDW_FRAME | RDW_UPDATENOW);
-            }
-            finally
-            {
-                enforcingVScroll = false;
-            }
-        }
         private bool IsPointOverNodeImage(Point point)
         {
             if (!ClientRectangle.Contains(point))

@@ -16,8 +16,6 @@ namespace datinate.app
         private const int STACK_CARD_TEXT_TO_DASH_GAP_PX_202602xx = 10;
         private const int STACK_CARD_DASH_BOTTOM_GAP_PX_202602xx = 12;
 
-        private const int STACK_CARD_BG_ALPHA_PERCENT_202602xx = 50;
-
         private const bool STACK_CARDS_DEFAULT_TRANSPARENT_FILL_202602xx = true;
 
         private const int STACK_CARDS_SHADOW_ALPHA_202602xx = 36;
@@ -409,10 +407,18 @@ namespace datinate.app
                 base.OnPaint(e);
             }
 
-            private void EnsureLayout(Control sourceControl)
+            private void EnsureLayout(
+                Control sourceControl)
             {
-                int w = sourceControl.ClientSize.Width;
-                int h = sourceControl.ClientSize.Height;
+                var stableClientSize =
+                    GetStableOverlayClientSize(
+                        sourceControl);
+
+                int w =
+                    stableClientSize.Width;
+
+                int h =
+                    stableClientSize.Height;
 
                 if (w <= 0 || h <= 0)
                     return;
@@ -422,7 +428,9 @@ namespace datinate.app
                     cachedOffsetX == offsetX &&
                     cachedOffsetY == offsetY &&
                     cachedCardsVersion == cardsVersion)
+                {
                     return;
+                }
 
                 cachedW = w;
                 cachedH = h;
@@ -430,47 +438,82 @@ namespace datinate.app
                 cachedOffsetY = offsetY;
                 cachedCardsVersion = cardsVersion;
 
-                cachedOverlayRect = ComputeOverlayRect(w, h, offsetX, offsetY);
+                cachedOverlayRect =
+                    ComputeOverlayRect(
+                        w,
+                        h,
+                        offsetX,
+                        offsetY);
 
                 cachedCompactLayout = false;
-                cachedStackCardHeight = EmptyOverlayCardHeight;
-                cachedStackGap = STACK_CARD_GAP_PX_202602xx;
+                cachedStackCardHeight =
+                    EmptyOverlayCardHeight;
+
+                cachedStackGap =
+                    STACK_CARD_GAP_PX_202602xx;
 
                 currentRects.Clear();
 
-                if (cachedOverlayRect.Width <= 0 || cachedOverlayRect.Height <= 0)
-                    return;
-
-                var visibleIndices = new List<int>(cards.Count);
-                for (int i = 0; i < cards.Count; i++)
+                if (cachedOverlayRect.Width <= 0 ||
+                    cachedOverlayRect.Height <= 0)
                 {
-                    if (cards[i].Visible || cards[i].Placeholder)
-                        visibleIndices.Add(i);
+                    return;
                 }
 
-                int count = visibleIndices.Count;
+                var visibleIndices =
+                    new List<int>(cards.Count);
+
+                for (int i = 0; i < cards.Count; i++)
+                {
+                    if (cards[i].Visible ||
+                        cards[i].Placeholder)
+                    {
+                        visibleIndices.Add(i);
+                    }
+                }
+
+                int count =
+                    visibleIndices.Count;
+
                 if (count <= 0)
                     return;
 
-                int gap = STACK_CARD_GAP_PX_202602xx;
+                int gap =
+                    STACK_CARD_GAP_PX_202602xx;
 
-                int fullH = EmptyOverlayCardHeight;
-                int fullTotalH = (count * fullH) + ((count - 1) * gap);
+                int fullH =
+                    EmptyOverlayCardHeight;
 
-                int layoutH = fullH;
-                bool compact = false;
+                int fullTotalH =
+                    (count * fullH) +
+                    ((count - 1) * gap);
 
-                if (fullTotalH > cachedOverlayRect.Height)
+                int layoutH =
+                    fullH;
+
+                bool compact =
+                    false;
+
+                if (fullTotalH >
+                    cachedOverlayRect.Height)
                 {
                     compact = true;
-                    layoutH = STACK_CARD_TEXT_ONLY_HEIGHT_PX_202602xx;
+
+                    layoutH =
+                        STACK_CARD_TEXT_ONLY_HEIGHT_PX_202602xx;
                 }
 
-                cachedCompactLayout = compact;
-                cachedStackCardHeight = layoutH;
-                cachedStackGap = gap;
+                cachedCompactLayout =
+                    compact;
 
-                var tmpRects = new List<Rectangle>(count);
+                cachedStackCardHeight =
+                    layoutH;
+
+                cachedStackGap =
+                    gap;
+
+                var tmpRects =
+                    new List<Rectangle>(count);
 
                 ComputeStackCardRects(
                     sourceControl,
@@ -483,7 +526,11 @@ namespace datinate.app
                     alignFirstCardTopGapToInterCardGap);
 
                 for (int i = 0; i < count; i++)
-                    currentRects[visibleIndices[i]] = tmpRects[i];
+                {
+                    currentRects[
+                        visibleIndices[i]] =
+                        tmpRects[i];
+                }
             }
 
             private bool TryGetDrawRect(int index, out Rectangle rect)
@@ -704,7 +751,7 @@ namespace datinate.app
 
             var baseFont = source.Font;
 
-            int bgAlpha = AlphaFromPercent(STACK_CARD_BG_ALPHA_PERCENT_202602xx);
+            int bgAlpha = AlphaFromPercent(50);
 
             Region? oldClip = null;
             var oldSmoothing = g.SmoothingMode;
@@ -712,7 +759,9 @@ namespace datinate.app
             try
             {
                 oldClip = g.Clip?.Clone();
-                g.SetClip(overlayRect, CombineMode.Replace);
+                g.SetClip(
+                    overlayRect,
+                    CombineMode.Intersect);
 
                 if (overlayBackgroundColor.HasValue && overlayBackgroundColor.Value.A > 0)
                 {

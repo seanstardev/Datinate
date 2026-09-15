@@ -1,5 +1,4 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.App.View.projects.gameFamily;
 using RadioLibCore.RadioDat;
 using System.Drawing.Drawing2D;
 using System.Runtime.CompilerServices;
@@ -74,8 +73,6 @@ namespace datinate.app
         private static Font? cachedSpacerMessageFont;
         private static string? cachedSpacerMessageFontSig;
         
-        private static readonly Color SpacerMessageColor = Color.FromArgb(255, 80, 80, 80);
-
         private static readonly ConditionalWeakTable<TreeNode, NodeRenderCache> RenderCache = [];
         private static readonly Color HOVER_ROW_FillRgb = Color.FromArgb(215, 228, 242);  // matches your selection family
         private static readonly Color HOVER_ROW_BorderRgb = Color.FromArgb(120, 145, 170); // neutral-ish
@@ -103,13 +100,6 @@ namespace datinate.app
             Bottom
         }
 
-        private static readonly TextFormatFlags SpacerMessageFlags =
-            TextFormatFlags.Left |
-            TextFormatFlags.VerticalCenter |
-            TextFormatFlags.SingleLine |
-            TextFormatFlags.NoPrefix |
-            TextFormatFlags.NoPadding |
-            TextFormatFlags.EndEllipsis;
 
         public static void DrawTreeNode(
             TreeView tv,
@@ -968,35 +958,6 @@ namespace datinate.app
             }
 
             return c.Chips ?? Array.Empty<string>();
-        }
-
-        private static Font GetSpacerMessageFont(Font source)
-        {
-            // Cache one scaled bold font per "signature" to avoid allocating per draw.
-            var fam = source.FontFamily;
-
-            var sig =
-                fam.Name + "|" +
-                source.SizeInPoints.ToString("R") + "|" +
-                SpacerMessageFontScale.ToString("R") + "|" +
-                source.GdiCharSet.ToString() + "|" +
-                source.GdiVerticalFont.ToString();
-
-            if (cachedSpacerMessageFont != null && string.Equals(cachedSpacerMessageFontSig, sig, StringComparison.Ordinal))
-                return cachedSpacerMessageFont;
-
-            cachedSpacerMessageFont?.Dispose();
-            cachedSpacerMessageFontSig = sig;
-
-            cachedSpacerMessageFont = new Font(
-                fam,
-                source.SizeInPoints * SpacerMessageFontScale,
-                FontStyle.Bold,
-                GraphicsUnit.Point,
-                source.GdiCharSet,
-                source.GdiVerticalFont);
-
-            return cachedSpacerMessageFont;
         }
 
         private static bool IsDisabled(

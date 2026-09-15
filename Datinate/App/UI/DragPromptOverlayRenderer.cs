@@ -221,8 +221,14 @@ namespace datinate.app
             int offsetY,
             bool useDarkTheme)
         {
-            int clientW = source.ClientSize.Width;
-            int clientH = source.ClientSize.Height;
+            var stableClientSize =
+                GetStableOverlayClientSize(source);
+
+            int clientW =
+                stableClientSize.Width;
+
+            int clientH =
+                stableClientSize.Height;
 
             if (clientW <= 0 || clientH <= 0)
                 return;
@@ -287,13 +293,59 @@ namespace datinate.app
             try
             {
                 oldClip = g.Clip?.Clone();
-                g.SetClip(overlayRect, CombineMode.Replace);
+                g.SetClip(
+                    overlayRect,
+                    CombineMode.Replace);
 
-                int cardW = (int)(overlayRect.Width * 0.62f);
-                if (cardW < EmptyOverlayCardMinWidth) cardW = EmptyOverlayCardMinWidth;
-                if (cardW > EmptyOverlayCardMaxWidth) cardW = EmptyOverlayCardMaxWidth;
+                /*
+                 * Keep the overlay card permanently clear of the TreeView's scrollbar
+                 * transition area.
+                 *
+                 * This is deliberately independent of whether the scrollbar is currently
+                 * visible. The card must never resize or move when scrollbar visibility
+                 * changes.
+                 *
+                 * Two scrollbar widths gives us enough room for the native scrollbar,
+                 * the small extra width used to clip it, and the narrow repaint strip.
+                 */
+                int horizontalSafetyInset =
+                    source is DatGrouperTreeView
+                        ? SystemInformation.VerticalScrollBarWidth * 2
+                        : 0;
 
-                int cardX = overlayRect.Left + (overlayRect.Width - cardW) / 2;
+                var cardLayoutRect =
+                    overlayRect;
+
+                if (horizontalSafetyInset > 0 &&
+                    cardLayoutRect.Width > horizontalSafetyInset * 2)
+                {
+                    cardLayoutRect.Inflate(
+                        -horizontalSafetyInset,
+                        0);
+                }
+
+
+                int cardW =
+                    (int)(cardLayoutRect.Width * 0.62f);
+
+                if (cardW < EmptyOverlayCardMinWidth)
+                    cardW = EmptyOverlayCardMinWidth;
+
+                if (cardW > EmptyOverlayCardMaxWidth)
+                    cardW = EmptyOverlayCardMaxWidth;
+
+
+                // IMPORTANT:
+                // On narrow TreeViews the normal minimum width may be larger than our
+                // safe drawing area. Never allow the card to extend back into the
+                // scrollbar transition gutter.
+                if (cardW > cardLayoutRect.Width)
+                    cardW = cardLayoutRect.Width;
+
+
+                int cardX =
+                    cardLayoutRect.Left +
+                    (cardLayoutRect.Width - cardW) / 2;
 
                 int cardY;
                 int availableH = overlayRect.Height;
@@ -441,6 +493,46 @@ namespace datinate.app
             path.CloseFigure();
 
             return path;
+        }
+        private static Size GetStableOverlayClientSize(
+            Control source)
+        {
+            int width =
+                source.ClientSize.Width;
+
+            int height =
+                source.ClientSize.Height;
+
+            if (source is DatGrouperTreeView &&
+                source.Parent is Control parent)
+            {
+                /*
+                 * The TreeView is deliberately positioned partly outside its parent
+                 * and is widened/shrunk to expose or clip the native scrollbar.
+                 *
+                 * None of that should affect overlay layout.
+                 *
+                 * Use the parent's visible right edge, expressed in TreeView
+                 * coordinates, as the permanent overlay width.
+                 *
+                 * Example:
+                 *
+                 *     TreeView.Left = -30
+                 *     Parent.Width   = 500
+                 *
+                 *     Stable source width = 530
+                 *
+                 * The existing offsetX = 30 then gives an overlay area exactly
+                 * 500px wide and centred within the visible parent.
+                 */
+                width =
+                    parent.ClientSize.Width -
+                    source.Left;
+            }
+
+            return new Size(
+                Math.Max(0, width),
+                Math.Max(0, height));
         }
     }
 }
