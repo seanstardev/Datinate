@@ -626,8 +626,11 @@ namespace datinate.app
 
             base.WndProc(ref m);
 
-            if (!IsDesignTime() && IsHandleCreated && (ncSensitive || scrollSensitive || mouseSensitive))
+            if (!IsDesignTime() && IsHandleCreated &&
+                (ncSensitive || scrollSensitive || mouseSensitive)) // NOTE: Changing anything here may break custom scroller interaction.
+            {
                 PollAndApplyVScroll(force: true);
+            }
         }
 
         private bool IsEmptyTreeOverlayLikelyActive()

@@ -34,7 +34,7 @@ namespace datinate.app
 
             tt.SetToolTip(
                 filterTxt,
-                "Double-click to clear Search text and toggle sorting (alphabetical / best match).");
+                "Double-click to clear Search text");
         }
 
         internal void ResetUI()
@@ -125,7 +125,7 @@ namespace datinate.app
         private void filterTxt_DoubleClick(object sender, EventArgs e)
         {
             filterTxt.Text = string.Empty;
-            ToggleSortEvt?.Invoke();
+            //ToggleSortEvt?.Invoke();
         }
 
 

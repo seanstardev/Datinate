@@ -56,6 +56,8 @@ namespace datinate.app
 
             ClearView();
 
+            descriptorContainer.Controls.Clear(); // remove placeholder controls.
+
             descriptorContainer.CenterVertically = true;
             descriptorContainer.StragglerAlignment = HorizontalAlignment.Left;
 

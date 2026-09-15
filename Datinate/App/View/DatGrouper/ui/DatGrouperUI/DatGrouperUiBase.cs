@@ -1605,7 +1605,6 @@ namespace datinate.app
             if (!isAutoUI && isDraggedOver)
                 TreeViewAdornerUtil.Draw(treeView, e);
 
-
             // 1 root node with 0 or 1 spacer nodes = empty:
             if (isAutoUI == false &&
                 treeView.Nodes.Count == 1 &&
@@ -1618,7 +1617,9 @@ namespace datinate.app
                     treeView,
                     e.Bounds);
             }
-            else if (isAutoUI && treeView.AllNodesDisabled && isBeingDragged == false)
+            else if (isAutoUI &&
+                     treeView.AllNodesDisabled &&
+                     isBeingDragged == false)
             {
                 TreeRenderUtil.DrawOverlay(
                     "Drag an Entity here to Reset",

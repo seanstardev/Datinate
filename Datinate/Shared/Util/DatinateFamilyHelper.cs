@@ -130,7 +130,7 @@ namespace Datinate.Shared.Util
                     DatinateHelper.GetFlaglessName(part.GetName());
 
                 string[] nameParts = unbracketed.Split(
-                    new[] { ' ', '-' },
+                    new[] { ' ', '-', ':', ',',';', '!', '\'', '.' },
                     StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var namePart in nameParts)
