@@ -31,6 +31,8 @@ namespace datinate.app
             public Action<DatGrouperTreeView, DrawTreeNodeEventArgs>? DrawCore { get; set; }
             public Action<DatGrouperTreeView, DrawTreeNodeEventArgs>? DrawAdorner { get; set; }
 
+            public bool InitialInvalidateQueued { get; set; }
+
             public State(DatGrouperTreeView treeView)
             {
                 TreeRef = new WeakReference<DatGrouperTreeView>(treeView);
@@ -73,41 +75,6 @@ namespace datinate.app
             e.Graphics.Restore(saved);
         }
 
-        public static void DrawNode(DatGrouperTreeView treeView, DrawTreeNodeEventArgs e)
-        {
-            if (e.Node == null)
-                return;
-
-            if (!TryGetState(treeView, out var state) || state.DrawCore == null || state.DrawAdorner == null)
-            {
-                return;
-            }
-
-            if (!TryGetPulseParams(state, e.Node, out var intensity))
-            {
-                state.DrawCore(treeView, e);
-                state.DrawAdorner(treeView, e);
-                return;
-            }
-
-            state.DrawCore(treeView, e);
-
-            var pulseColor = GetPulseColorForNode(state, treeView, e.Node);
-
-            var saved = e.Graphics.Save();
-
-            var row = GetRowRect(treeView, e.Node);
-            if (!row.IsEmpty)
-                e.Graphics.SetClip(row);
-
-            DrawWideRowHalo(e, row, intensity, pulseColor);
-            DrawIconPulse(treeView, e, intensity, pulseColor);
-
-            e.Graphics.Restore(saved);
-
-            state.DrawAdorner(treeView, e);
-        }
-
         public static void StartNodePulseAmbiguous(DatGrouperTreeView treeView, TreeNode node) =>
             StartNodePulseCore(treeView, node, Color.LightBlue);
 
@@ -117,7 +84,10 @@ namespace datinate.app
         public static void StartNodePulse(DatGrouperTreeView treeView, TreeNode node, Color pulseColor) =>
             StartNodePulseCore(treeView, node, pulseColor);
 
-        private static void StartNodePulseCore(DatGrouperTreeView treeView, TreeNode node, Color? pulseColorOverride)
+        private static void StartNodePulseCore(
+            DatGrouperTreeView treeView,
+            TreeNode node,
+            Color? pulseColorOverride)
         {
             if (treeView.IsDisposed || !treeView.IsHandleCreated)
                 return;
@@ -128,26 +98,34 @@ namespace datinate.app
             var state = StateByTree.GetValue(treeView, static tv => new State(tv));
 
             var now = Stopwatch.GetTimestamp();
-            state.Pulses[node] = new NodePulse(now, now + MsToTicks(NodePulseDurationMs), pulseColorOverride);
+            state.Pulses[node] = new NodePulse(
+                now,
+                now + MsToTicks(NodePulseDurationMs),
+                pulseColorOverride);
 
             if (!state.Timer.Enabled)
                 state.Timer.Start();
 
-            InvalidateRow(treeView, node);
-
-            if (treeView.IsHandleCreated)
+            // Many nodes may be added to the pulse set in one UI operation.
+            // Queue only one repaint once that operation returns to the message pump.
+            if (!state.InitialInvalidateQueued)
             {
+                state.InitialInvalidateQueued = true;
+
                 treeView.BeginInvoke(new Action(() =>
                 {
+                    state.InitialInvalidateQueued = false;
+
                     if (!treeView.IsDisposed && treeView.IsHandleCreated)
-                        InvalidateRow(treeView, node);
+                        treeView.Invalidate(treeView.ClientRectangle, false);
                 }));
             }
         }
-
         private static void Tick(State state)
         {
-            if (!state.TreeRef.TryGetTarget(out var tv) || tv.IsDisposed || !tv.IsHandleCreated)
+            if (!state.TreeRef.TryGetTarget(out var tv) ||
+                tv.IsDisposed ||
+                !tv.IsHandleCreated)
             {
                 state.Pulses.Clear();
                 state.Timer.Stop();
@@ -155,8 +133,6 @@ namespace datinate.app
             }
 
             var now = Stopwatch.GetTimestamp();
-
-            List<TreeNode>? alive = null;
             List<TreeNode>? dead = null;
 
             foreach (var kv in state.Pulses)
@@ -164,39 +140,21 @@ namespace datinate.app
                 var node = kv.Key;
                 var pulse = kv.Value;
 
-                if (!ReferenceEquals(node.TreeView, tv))
+                if (!ReferenceEquals(node.TreeView, tv) || now >= pulse.EndTicks)
                 {
                     dead ??= new List<TreeNode>();
                     dead.Add(node);
-                    continue;
                 }
-
-                if (now >= pulse.EndTicks)
-                {
-                    dead ??= new List<TreeNode>();
-                    dead.Add(node);
-                    continue;
-                }
-
-                alive ??= new List<TreeNode>();
-                alive.Add(node);
-            }
-
-            if (alive != null)
-            {
-                for (int i = 0; i < alive.Count; i++)
-                    InvalidateRow(tv, alive[i]);
             }
 
             if (dead != null)
             {
                 for (int i = 0; i < dead.Count; i++)
-                {
-                    var n = dead[i];
-                    state.Pulses.Remove(n);
-                    InvalidateRow(tv, n);
-                }
+                    state.Pulses.Remove(dead[i]);
             }
+
+            // One paint request per animation frame, regardless of how many nodes pulse.
+            tv.Invalidate(tv.ClientRectangle, false);
 
             if (state.Pulses.Count == 0)
                 state.Timer.Stop();

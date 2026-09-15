@@ -103,7 +103,7 @@ namespace datinate.app
         private bool isDraggedOver = false;
         private bool isBeingDragged = false;
         private bool suppressDragCaptureChrome;
-
+        private bool disableNodeDrawing = false;
         private bool isSurrogate = false;
         private bool isAutoUI = true;
 
@@ -202,6 +202,7 @@ namespace datinate.app
                 // the order of these lines is vital:
                 this.isSurrogate = isSurrogate;
                 this.isAutoUI = isAutoUI;
+
                 ResetView();
 
                 this.partFingerprintReportDic = partFingerprintReportDic;
@@ -224,6 +225,7 @@ namespace datinate.app
                 }
 
                 treeView.BeginUpdate();
+                disableNodeDrawing = true;
 
                 try
                 {
@@ -245,7 +247,18 @@ namespace datinate.app
                 }
                 finally
                 {
-                    treeView.EndUpdate();
+                    try
+                    {
+                        treeView.EndUpdate();
+                    }
+                    finally
+                    {
+                        disableNodeDrawing = false;
+
+                        // EndUpdate may have requested a paint while drawing was suppressed.
+                        // Ensure a real paint is now queued with the completed tree state.
+                        treeView.Invalidate();
+                    }
                 }
 
                 hideExcludedLabel.Text = !isSurrogate ? "✓" : "";
@@ -573,7 +586,8 @@ namespace datinate.app
 
                 this.allCuratedAutoParts = allCuratedAutoParts;
 
-                treeView.BeginUpdate();
+                treeView.BeginUpdate(); 
+                disableNodeDrawing = true;
 
                 try
                 {
@@ -607,7 +621,15 @@ namespace datinate.app
                 }
                 finally
                 {
-                    treeView.EndUpdate();
+                    try
+                    {
+                        treeView.EndUpdate();
+                    }
+                    finally
+                    {
+                        disableNodeDrawing = false;
+                        treeView.Invalidate();
+                    }
                 }
 
                 List<TreeNode> nodesToPulse = [];
@@ -848,26 +870,36 @@ namespace datinate.app
             treeView.AppendContentNodeWithSpacer(newNode);
 
             TreeNode? insertBefore = null;
+            int familyInsertIndex = familyOrder.Count;
+            int familyOrdinal = 0;
             var newName = newNode.Text;
 
             for (int i = 0; i < Nodes.Count; i++)
             {
                 var n = Nodes[i];
-                if (ReferenceEquals(n, newNode)) continue;
-                if (n.Tag is not IGameFamily) continue;
+
+                if (ReferenceEquals(n, newNode))
+                    continue;
+
+                if (n.Tag is not IGameFamily)
+                    continue;
 
                 if (StringComparer.OrdinalIgnoreCase.Compare(n.Text, newName) > 0)
                 {
                     insertBefore = n;
+                    familyInsertIndex = familyOrdinal;
                     break;
                 }
+
+                familyOrdinal++;
             }
 
             if (insertBefore != null)
             {
                 var trailingSpacer = newNode.NextNode;
 
-                if (trailingSpacer != null) Nodes.Remove(trailingSpacer);
+                if (trailingSpacer != null)
+                    Nodes.Remove(trailingSpacer);
 
                 Nodes.Remove(newNode);
 
@@ -883,28 +915,13 @@ namespace datinate.app
             if (updateFamilyOrder)
             {
                 if (insertBefore == null)
+                {
                     familyOrder.Add(newFamily);
+                }
                 else
                 {
-                    int familyOrdinal = 0;
-                    int listInsert = familyOrder.Count;
-
-                    for (int i = 0; i < Nodes.Count; i++)
-                    {
-                        var n = Nodes[i];
-
-                        if (ReferenceEquals(n, newNode))
-                        {
-                            listInsert = familyOrdinal;
-                            break;
-                        }
-
-                        if (n.Tag is IGameFamily)
-                            familyOrdinal++;
-                    }
-
-                    listInsert = Math.Max(0, Math.Min(listInsert, familyOrder.Count));
-                    familyOrder.Insert(listInsert, newFamily);
+                    familyInsertIndex = Math.Max(0, Math.Min(familyInsertIndex, familyOrder.Count));
+                    familyOrder.Insert(familyInsertIndex, newFamily);
                 }
             }
 
@@ -1176,6 +1193,7 @@ namespace datinate.app
             
             isDraggedOver = false;
             isBeingDragged = false;
+            disableNodeDrawing = false;
 
             mediaCache = null;
             scoringExemptFamilies.Clear();
@@ -1588,6 +1606,11 @@ namespace datinate.app
 
         private void treeView_DrawNode(object? sender, DrawTreeNodeEventArgs e)
         {
+            if (disableNodeDrawing)
+            {
+                return;
+            }
+
             if (sender is not DatGrouperTreeView treeView || e.Node is null)
                 return;
 
