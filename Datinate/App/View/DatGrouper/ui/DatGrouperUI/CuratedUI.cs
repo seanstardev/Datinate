@@ -33,7 +33,7 @@ namespace datinate.app
                 types = [typeof(IGamePart), typeof(IGame), typeof(IGameEntityProxy)];
 
             treeView.SetDisabledNodes(types, enabledEntities, hiddenNodes);
-            treeView.Refresh();
+            //treeView.Refresh();
 
             var data = new DataObject();
             data.SetData(typeof(DatGrouperDragData), curatedPayload);

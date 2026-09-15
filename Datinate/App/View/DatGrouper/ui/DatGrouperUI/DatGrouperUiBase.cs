@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using static app.datinate.DatGrouperEditDelta;
-using static com.RADIO.Datinate.RMVC.Shared.DatGrouperEditRequestDTO;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 using static datinate.app.DatGrouperTreeView;
 
@@ -103,6 +102,7 @@ namespace datinate.app
         
         private bool isDraggedOver = false;
         private bool isBeingDragged = false;
+        private bool suppressDragCaptureChrome;
 
         private bool isSurrogate = false;
         private bool isAutoUI = true;
@@ -1636,20 +1636,20 @@ namespace datinate.app
             {
 #pragma warning disable CS0162 // Unreachable code detected
                 TreeRenderUtil.DrawTreeNode(
-                        treeView,
-                        node,
-                        bounds, // is this ever a different value to e.Node.Bounds?
-                        graphics,
-                        renderAliases,
-                        searchUI.HighlightText,
-                        searchUI.HighlightTextBackColour,
-                        IsExcludedAutoNode(node),
-                        treeView.DisabledTagTypes,
-                        treeView.EnabledEntities,
-                        treeView.FocusNode,
-                        treeView.HiddenNodes,
-                        GetNodeMediaCollection(node),
-                        false);
+                    treeView,
+                    node,
+                    bounds,
+                    graphics,
+                    renderAliases,
+                    searchUI.HighlightText,
+                    searchUI.HighlightTextBackColour,
+                    IsExcludedAutoNode(node),
+                    treeView.DisabledTagTypes,
+                    treeView.EnabledEntities,
+                    suppressDragCaptureChrome ? null : treeView.FocusNode,
+                    treeView.HiddenNodes,
+                    GetNodeMediaCollection(node),
+                    suppressDragCaptureChrome);
 #pragma warning restore CS0162 // Unreachable code detected
             }
         }
@@ -2191,16 +2191,7 @@ namespace datinate.app
         }
         protected void InitialiseDragDropPreviewWithoutTreeChrome(TreeNode node)
         {
-            var selectedNode = treeView.SelectedNode;
-            var hotNode = treeView.FocusNode;
-
-            treeView.SetHotNode(null);
-
-            if (treeView.SelectedNode != null)
-                treeView.SelectedNode = null;
-
-            treeView.Refresh();
-            treeView.Update();
+            suppressDragCaptureChrome = true;
 
             try
             {
@@ -2208,13 +2199,7 @@ namespace datinate.app
             }
             finally
             {
-                if (!ReferenceEquals(treeView.SelectedNode, selectedNode))
-                    treeView.SelectedNode = selectedNode;
-
-                treeView.SetHotNode(hotNode);
-
-                treeView.Refresh();
-                treeView.Update();
+                suppressDragCaptureChrome = false;
             }
         }
     }
