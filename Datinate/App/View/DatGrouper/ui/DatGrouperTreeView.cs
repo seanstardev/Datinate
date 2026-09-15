@@ -45,6 +45,9 @@ namespace datinate.app
 
         private const int TTDT_AUTOPOP = 2;
 
+        private readonly DatGrouperTreeViewScrollManager scrollManager = 
+            new DatGrouperTreeViewScrollManager(); 
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Predicate<object?>? IsNodeInteractableTag { get; set; }
 
@@ -566,8 +569,24 @@ namespace datinate.app
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
+
             SetHotNode(null);
-            ApplyVScrollVisible(false, force: true);
+
+            // Do not blindly hide here. The mouse may simply have moved from
+            // the client area onto this TreeView's native scrollbar.
+            PollAndApplyVScroll(force: false);
+
+            // Recheck once Windows has completed the mouse transition.
+            // This catches rapid movement into another TreeView where the
+            // synchronous check above may still see this TreeView's HWND.
+            if (IsHandleCreated && !IsDisposed)
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    if (!IsDisposed && IsHandleCreated)
+                        PollAndApplyVScroll(force: false);
+                }));
+            }
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -612,13 +631,15 @@ namespace datinate.app
                 m.Msg == WM_MOUSEWHEEL ||
                 m.Msg == WM_MOUSEHWHEEL;
 
-            bool mouseSensitive =
-                m.Msg == WM_MOUSEMOVE ||
-                m.Msg == WM_MOUSELEAVE ||
+            // Client mouse movement is already handled by OnMouseMove/OnMouseLeave.
+            // We specifically need non-client movement here so the native vertical
+            // scrollbar remains visible and interactive while the mouse is over it.
+            bool nonClientMouseSensitive =
                 m.Msg == WM_NCMOUSEMOVE ||
                 m.Msg == WM_NCMOUSELEAVE;
 
-            if (!IsDesignTime() && IsHandleCreated && (ncSensitive || scrollSensitive))
+            if (!IsDesignTime() && IsHandleCreated &&
+                (ncSensitive || scrollSensitive))
             {
                 if (!IsCursorActuallyOverThisTreeOrChild())
                     ApplyVScrollVisible(false, force: true);
@@ -626,10 +647,20 @@ namespace datinate.app
 
             base.WndProc(ref m);
 
-            if (!IsDesignTime() && IsHandleCreated &&
-                (ncSensitive || scrollSensitive || mouseSensitive)) // NOTE: Changing anything here may break custom scroller interaction.
+            if (!IsDesignTime() && IsHandleCreated)
             {
-                PollAndApplyVScroll(force: true);
+                if (ncSensitive || scrollSensitive)
+                {
+                    // Native layout/scroll operations can alter scrollbar state,
+                    // so deliberately reassert it here.
+                    PollAndApplyVScroll(force: true);
+                }
+                else if (nonClientMouseSensitive)
+                {
+                    // Required for scrollbar interaction, but do NOT redraw it
+                    // repeatedly when the desired visibility has not changed.
+                    PollAndApplyVScroll(force: false);
+                }
             }
         }
 
