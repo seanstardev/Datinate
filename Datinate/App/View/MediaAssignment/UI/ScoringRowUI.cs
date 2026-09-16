@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using System.Drawing.Drawing2D;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace datinate.app
@@ -8,6 +9,8 @@ namespace datinate.app
         public ScoringRowUI()
         {
             InitializeComponent();
+
+            UpdateRoundedRegion();
         }
 
         public void SetUI(DatGrouperScoringItem item)
@@ -82,7 +85,35 @@ namespace datinate.app
             int i = s.LastIndexOf(':');
             return i < 0 ? s.Trim() : s[(i + 1)..].Trim();
         }
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
 
+            UpdateRoundedRegion();
+        }
+
+        private void UpdateRoundedRegion()
+        {
+            if (Width <= 0 || Height <= 0)
+                return;
+
+            const int radius = 6;
+            int diameter = radius * 2;
+
+            var rect = new Rectangle(0, 0, Width, Height);
+
+            using var path = new GraphicsPath();
+
+            path.AddArc(rect.Left, rect.Top, diameter, diameter, 180, 90);
+            path.AddArc(rect.Right - diameter, rect.Top, diameter, diameter, 270, 90);
+            path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(rect.Left, rect.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+
+            var oldRegion = Region;
+            Region = new Region(path);
+            oldRegion?.Dispose();
+        }
         private void Ui(Action action)
         {
             if (InvokeRequired)

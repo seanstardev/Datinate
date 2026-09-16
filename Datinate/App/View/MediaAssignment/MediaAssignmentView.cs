@@ -534,14 +534,14 @@ namespace datinate.app
                 return;
 
             const int gap = 2;
-            const int top = 2;
-            const int height = 26;
+            const int top = 0;
+            const int height = 30;
 
             // This is the hard stop for the descriptor area's left edge.
             int minLeft = scoringLeftContainer.Right + gap;
 
             // Keep the descriptor area's right edge pinned to the parent.
-            int right = mediaItemOptionsPanel.ClientSize.Width - 2;
+            int right = mediaItemOptionsPanel.ClientSize.Width + 2;
 
             int desiredWidth =
                 scoringRightContainer.Padding.Left +

@@ -706,14 +706,13 @@ namespace datinate.app
             // scoringRightContainer
             // 
             scoringRightContainer.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            scoringRightContainer.BackColor = Color.White;
-            scoringRightContainer.BorderStyle = BorderStyle.FixedSingle;
-            scoringRightContainer.Location = new Point(568, 2);
+            scoringRightContainer.BackColor = Color.Black;
+            scoringRightContainer.Location = new Point(572, 0);
             scoringRightContainer.Margin = new Padding(0);
             scoringRightContainer.Name = "scoringRightContainer";
-            scoringRightContainer.Padding = new Padding(2, 0, 2, 0);
+            scoringRightContainer.Padding = new Padding(3, 3, 0, 0);
             scoringRightContainer.RightToLeft = RightToLeft.No;
-            scoringRightContainer.Size = new Size(6, 26);
+            scoringRightContainer.Size = new Size(6, 29);
             scoringRightContainer.TabIndex = 18;
             scoringRightContainer.WrapContents = false;
             // 
