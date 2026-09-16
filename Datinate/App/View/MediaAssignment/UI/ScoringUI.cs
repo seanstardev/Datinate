@@ -43,7 +43,29 @@ namespace datinate.app
 
                 try
                 {
-                    BackColor = scoring.IsScoringExempt ? Color.Orange : SystemColors.Control;
+                    int total = scoring.ResourceDictionary.Count + scoring.MediaDictionary.Count;
+                    int hits = 0;
+
+                    foreach (var item in scoring.ResourceDictionary.Values)
+                    {
+                        if (item.HasScore)
+                            hits++;
+                    }
+
+                    foreach (var item in scoring.MediaDictionary.Values)
+                    {
+                        if (item.HasScore)
+                            hits++;
+                    }
+
+                    bool isPerfect = total > 0 && hits == total;
+
+                    BackColor =
+                        scoring.IsScoringExempt
+                            ? Color.PeachPuff
+                            : isPerfect
+                                ? Color.Green
+                                : SystemColors.Control;
 
                     topLeftPB.BackColor =
                     topRightPB.BackColor =

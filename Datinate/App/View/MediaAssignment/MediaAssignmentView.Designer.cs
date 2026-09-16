@@ -1,4 +1,4 @@
-﻿namespace datinate.app
+namespace datinate.app
 {
     partial class MediaAssignmentView
     {
@@ -59,14 +59,19 @@
             mediaWebView = new MediaWebView();
             filler2 = new Panel();
             mediaItemOptionsPanel = new Panel();
+            scoringLeftContainer = new CenteredFlowLayoutPanel();
             scoringBtn = new CheckBoxButton();
-            scoringLeftContainer = new FlowLayoutPanel();
+            scoringCompletePanel = new Panel();
+            completePic = new PictureBox();
+            label2 = new Label();
             scoringExemptPanel = new Panel();
-            label1 = new Label();
             pictureBox3 = new PictureBox();
-            scoringLabel = new Label();
+            label1 = new Label();
+            scoringPercentPanel = new Panel();
             scoringPercentLabel = new Label();
-            scoringRightContainer = new FlowLayoutPanel();
+            scoringCountPanel = new Panel();
+            scoringLabel = new Label();
+            scoringRightContainer = new CenteredFlowLayoutPanel();
             filler3 = new Panel();
             filler4 = new Panel();
             NotesPanel = new Panel();
@@ -86,8 +91,12 @@
             tableLayoutPanel.SuspendLayout();
             mediaItemOptionsPanel.SuspendLayout();
             scoringLeftContainer.SuspendLayout();
+            scoringCompletePanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)completePic).BeginInit();
             scoringExemptPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
+            scoringPercentPanel.SuspendLayout();
+            scoringCountPanel.SuspendLayout();
             NotesPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -252,7 +261,7 @@
             desc_un.Font = new Font("Segoe UI", 8.25F);
             desc_un.ForeColor = SystemColors.ControlDarkDark;
             desc_un.Grayscale = true;
-            desc_un.Location = new Point(208, 2);
+            desc_un.Location = new Point(208, 14);
             desc_un.Margin = new Padding(2);
             desc_un.Name = "desc_un";
             desc_un.Size = new Size(160, 20);
@@ -268,7 +277,7 @@
             desc_pd.Font = new Font("Segoe UI", 8.25F);
             desc_pd.ForeColor = SystemColors.ControlDarkDark;
             desc_pd.Grayscale = true;
-            desc_pd.Location = new Point(44, 2);
+            desc_pd.Location = new Point(44, 14);
             desc_pd.Margin = new Padding(2);
             desc_pd.Name = "desc_pd";
             desc_pd.Size = new Size(160, 20);
@@ -284,7 +293,7 @@
             desc_ed.Font = new Font("Segoe UI", 8.25F);
             desc_ed.ForeColor = SystemColors.ControlDarkDark;
             desc_ed.Grayscale = true;
-            desc_ed.Location = new Point(208, 26);
+            desc_ed.Location = new Point(208, 38);
             desc_ed.Margin = new Padding(2);
             desc_ed.Name = "desc_ed";
             desc_ed.Size = new Size(160, 20);
@@ -300,7 +309,7 @@
             desc_ng.Font = new Font("Segoe UI", 8.25F);
             desc_ng.ForeColor = SystemColors.ControlDarkDark;
             desc_ng.Grayscale = true;
-            desc_ng.Location = new Point(44, 26);
+            desc_ng.Location = new Point(44, 38);
             desc_ng.Margin = new Padding(2);
             desc_ng.Name = "desc_ng";
             desc_ng.Size = new Size(160, 20);
@@ -316,7 +325,7 @@
             desc_af.Font = new Font("Segoe UI", 8.25F);
             desc_af.ForeColor = SystemColors.ControlDarkDark;
             desc_af.Grayscale = true;
-            desc_af.Location = new Point(208, 50);
+            desc_af.Location = new Point(208, 62);
             desc_af.Margin = new Padding(2);
             desc_af.Name = "desc_af";
             desc_af.Size = new Size(160, 20);
@@ -332,7 +341,7 @@
             desc_in.Font = new Font("Segoe UI", 8.25F);
             desc_in.ForeColor = SystemColors.ControlDarkDark;
             desc_in.Grayscale = true;
-            desc_in.Location = new Point(44, 50);
+            desc_in.Location = new Point(44, 62);
             desc_in.Margin = new Padding(2);
             desc_in.Name = "desc_in";
             desc_in.Size = new Size(160, 20);
@@ -348,7 +357,7 @@
             desc_co.Font = new Font("Segoe UI", 8.25F);
             desc_co.ForeColor = SystemColors.ControlDarkDark;
             desc_co.Grayscale = true;
-            desc_co.Location = new Point(372, 26);
+            desc_co.Location = new Point(372, 38);
             desc_co.Margin = new Padding(2);
             desc_co.Name = "desc_co";
             desc_co.Size = new Size(160, 20);
@@ -364,7 +373,7 @@
             desc_na.Font = new Font("Segoe UI", 8.25F);
             desc_na.ForeColor = SystemColors.ControlDarkDark;
             desc_na.Grayscale = true;
-            desc_na.Location = new Point(372, 2);
+            desc_na.Location = new Point(372, 14);
             desc_na.Margin = new Padding(2);
             desc_na.Name = "desc_na";
             desc_na.Size = new Size(160, 20);
@@ -380,7 +389,7 @@
             desc_ha.Font = new Font("Segoe UI", 8.25F);
             desc_ha.ForeColor = SystemColors.ControlDarkDark;
             desc_ha.Grayscale = true;
-            desc_ha.Location = new Point(44, 74);
+            desc_ha.Location = new Point(44, 86);
             desc_ha.Margin = new Padding(2);
             desc_ha.Name = "desc_ha";
             desc_ha.Size = new Size(160, 20);
@@ -396,7 +405,7 @@
             desc_cd.Font = new Font("Segoe UI", 8.25F);
             desc_cd.ForeColor = SystemColors.ControlDarkDark;
             desc_cd.Grayscale = true;
-            desc_cd.Location = new Point(372, 50);
+            desc_cd.Location = new Point(372, 62);
             desc_cd.Margin = new Padding(2);
             desc_cd.Name = "desc_cd";
             desc_cd.Size = new Size(160, 20);
@@ -407,6 +416,7 @@
             // descriptorContainer
             // 
             descriptorContainer.AutoScroll = true;
+            descriptorContainer.CenterVertically = true;
             descriptorContainer.Controls.Add(desc_pd);
             descriptorContainer.Controls.Add(desc_un);
             descriptorContainer.Controls.Add(desc_na);
@@ -435,7 +445,7 @@
             descriptorChipui1.Font = new Font("Segoe UI", 8.25F);
             descriptorChipui1.ForeColor = SystemColors.ControlDarkDark;
             descriptorChipui1.Grayscale = true;
-            descriptorChipui1.Location = new Point(208, 74);
+            descriptorChipui1.Location = new Point(208, 86);
             descriptorChipui1.Margin = new Padding(2);
             descriptorChipui1.Name = "descriptorChipui1";
             descriptorChipui1.Size = new Size(160, 20);
@@ -451,7 +461,7 @@
             descriptorChipui2.Font = new Font("Segoe UI", 8.25F);
             descriptorChipui2.ForeColor = SystemColors.ControlDarkDark;
             descriptorChipui2.Grayscale = true;
-            descriptorChipui2.Location = new Point(372, 74);
+            descriptorChipui2.Location = new Point(372, 86);
             descriptorChipui2.Margin = new Padding(2);
             descriptorChipui2.Name = "descriptorChipui2";
             descriptorChipui2.Size = new Size(160, 20);
@@ -520,105 +530,187 @@
             // 
             // mediaItemOptionsPanel
             // 
-            mediaItemOptionsPanel.Controls.Add(scoringBtn);
+            mediaItemOptionsPanel.BackColor = SystemColors.Control;
             mediaItemOptionsPanel.Controls.Add(scoringLeftContainer);
-            mediaItemOptionsPanel.Controls.Add(scoringRightContainer);
             mediaItemOptionsPanel.Dock = DockStyle.Fill;
             mediaItemOptionsPanel.Location = new Point(0, 466);
             mediaItemOptionsPanel.Margin = new Padding(0);
             mediaItemOptionsPanel.Name = "mediaItemOptionsPanel";
+            mediaItemOptionsPanel.Padding = new Padding(0, 1, 0, 0);
             mediaItemOptionsPanel.Size = new Size(576, 30);
             mediaItemOptionsPanel.TabIndex = 20;
-            // 
-            // scoringBtn
-            // 
-            scoringBtn.CheckedBackColor = SystemColors.GradientInactiveCaption;
-            scoringBtn.CheckedForeColor = SystemColors.ControlDarkDark;
-            scoringBtn.Cursor = Cursors.Hand;
-            scoringBtn.Location = new Point(3, 4);
-            scoringBtn.Name = "scoringBtn";
-            scoringBtn.Padding = new Padding(16, 8, 16, 8);
-            scoringBtn.Size = new Size(100, 23);
-            scoringBtn.TabIndex = 16;
-            scoringBtn.Text = "Show Scoring";
-            scoringBtn.Click += scoringBtn_Click;
             // 
             // scoringLeftContainer
             // 
             scoringLeftContainer.AutoSize = true;
+            scoringLeftContainer.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             scoringLeftContainer.BackColor = SystemColors.Control;
+            scoringLeftContainer.CenterVertically = true;
+            scoringLeftContainer.Controls.Add(scoringBtn);
+            scoringLeftContainer.Controls.Add(scoringCompletePanel);
             scoringLeftContainer.Controls.Add(scoringExemptPanel);
-            scoringLeftContainer.Controls.Add(scoringLabel);
-            scoringLeftContainer.Controls.Add(scoringPercentLabel);
-            scoringLeftContainer.Location = new Point(111, 0);
+            scoringLeftContainer.Controls.Add(scoringPercentPanel);
+            scoringLeftContainer.Controls.Add(scoringCountPanel);
+            scoringLeftContainer.Controls.Add(scoringRightContainer);
+            scoringLeftContainer.Location = new Point(0, 1);
             scoringLeftContainer.Margin = new Padding(0);
             scoringLeftContainer.Name = "scoringLeftContainer";
-            scoringLeftContainer.Size = new Size(253, 30);
+            scoringLeftContainer.Size = new Size(409, 29);
             scoringLeftContainer.TabIndex = 17;
+            scoringLeftContainer.WrapContents = false;
+            // 
+            // scoringBtn
+            // 
+            scoringBtn.CheckedBackColor = SystemColors.GradientInactiveCaption;
+            scoringBtn.CheckedForeColor = Color.Black;
+            scoringBtn.Cursor = Cursors.Hand;
+            scoringBtn.Location = new Point(3, 2);
+            scoringBtn.Margin = new Padding(3, 3, 2, 2);
+            scoringBtn.Name = "scoringBtn";
+            scoringBtn.Padding = new Padding(16, 8, 16, 6);
+            scoringBtn.Size = new Size(100, 24);
+            scoringBtn.TabIndex = 16;
+            scoringBtn.Text = "Show Scoring";
+            scoringBtn.UncheckedForeColor = SystemColors.ControlDarkDark;
+            scoringBtn.Click += scoringBtn_Click;
+            // 
+            // scoringCompletePanel
+            // 
+            scoringCompletePanel.BackColor = Color.White;
+            scoringCompletePanel.BorderStyle = BorderStyle.FixedSingle;
+            scoringCompletePanel.Controls.Add(completePic);
+            scoringCompletePanel.Controls.Add(label2);
+            scoringCompletePanel.Location = new Point(105, 1);
+            scoringCompletePanel.Margin = new Padding(0, 2, 0, 0);
+            scoringCompletePanel.Name = "scoringCompletePanel";
+            scoringCompletePanel.Padding = new Padding(0, 2, 0, 0);
+            scoringCompletePanel.Size = new Size(75, 26);
+            scoringCompletePanel.TabIndex = 2;
+            // 
+            // completePic
+            // 
+            completePic.BackColor = Color.White;
+            completePic.Image = Datinate.Properties.Resources.include_icon;
+            completePic.Location = new Point(0, -1);
+            completePic.Margin = new Padding(0);
+            completePic.Name = "completePic";
+            completePic.Size = new Size(26, 26);
+            completePic.SizeMode = PictureBoxSizeMode.Zoom;
+            completePic.TabIndex = 20;
+            completePic.TabStop = false;
+            // 
+            // label2
+            // 
+            label2.BackColor = Color.White;
+            label2.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.ForeColor = Color.Green;
+            label2.Location = new Point(26, -1);
+            label2.Margin = new Padding(0);
+            label2.Name = "label2";
+            label2.Size = new Size(46, 24);
+            label2.TabIndex = 21;
+            label2.Text = "100%";
+            label2.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // scoringExemptPanel
             // 
             scoringExemptPanel.BackColor = Color.White;
-            scoringExemptPanel.Controls.Add(label1);
+            scoringExemptPanel.BorderStyle = BorderStyle.FixedSingle;
             scoringExemptPanel.Controls.Add(pictureBox3);
-            scoringExemptPanel.Location = new Point(0, 0);
-            scoringExemptPanel.Margin = new Padding(0);
+            scoringExemptPanel.Controls.Add(label1);
+            scoringExemptPanel.Location = new Point(182, 1);
+            scoringExemptPanel.Margin = new Padding(2, 2, 0, 0);
             scoringExemptPanel.Name = "scoringExemptPanel";
-            scoringExemptPanel.Size = new Size(121, 30);
+            scoringExemptPanel.Size = new Size(117, 26);
             scoringExemptPanel.TabIndex = 1;
-            // 
-            // label1
-            // 
-            label1.BackColor = Color.White;
-            label1.Location = new Point(27, 0);
-            label1.Margin = new Padding(0);
-            label1.Name = "label1";
-            label1.Size = new Size(94, 30);
-            label1.TabIndex = 1;
-            label1.Text = "Scoring Exempt";
-            label1.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // pictureBox3
             // 
             pictureBox3.BackColor = Color.White;
             pictureBox3.Image = Datinate.Properties.Resources.amber_icon;
-            pictureBox3.Location = new Point(0, 0);
+            pictureBox3.Location = new Point(0, -1);
             pictureBox3.Margin = new Padding(0);
             pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(30, 30);
+            pictureBox3.Size = new Size(26, 26);
             pictureBox3.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox3.TabIndex = 0;
             pictureBox3.TabStop = false;
             // 
-            // scoringLabel
+            // label1
             // 
-            scoringLabel.Location = new Point(121, 0);
-            scoringLabel.Margin = new Padding(0);
-            scoringLabel.Name = "scoringLabel";
-            scoringLabel.Size = new Size(66, 30);
-            scoringLabel.TabIndex = 18;
-            scoringLabel.Text = "100 / 100";
-            scoringLabel.TextAlign = ContentAlignment.MiddleCenter;
+            label1.BackColor = Color.White;
+            label1.Font = new Font("Segoe UI", 8.25F);
+            label1.Location = new Point(27, 0);
+            label1.Margin = new Padding(0);
+            label1.Name = "label1";
+            label1.Size = new Size(87, 22);
+            label1.TabIndex = 1;
+            label1.Text = "Scoring Exempt";
+            label1.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // scoringPercentPanel
+            // 
+            scoringPercentPanel.BackColor = Color.White;
+            scoringPercentPanel.BorderStyle = BorderStyle.FixedSingle;
+            scoringPercentPanel.Controls.Add(scoringPercentLabel);
+            scoringPercentPanel.Location = new Point(301, 1);
+            scoringPercentPanel.Margin = new Padding(2, 2, 0, 0);
+            scoringPercentPanel.Name = "scoringPercentPanel";
+            scoringPercentPanel.Padding = new Padding(0, 2, 0, 0);
+            scoringPercentPanel.Size = new Size(49, 26);
+            scoringPercentPanel.TabIndex = 20;
             // 
             // scoringPercentLabel
             // 
-            scoringPercentLabel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            scoringPercentLabel.Location = new Point(187, 0);
+            scoringPercentLabel.BackColor = Color.White;
+            scoringPercentLabel.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            scoringPercentLabel.ForeColor = SystemColors.ControlText;
+            scoringPercentLabel.Location = new Point(3, 2);
             scoringPercentLabel.Margin = new Padding(0);
             scoringPercentLabel.Name = "scoringPercentLabel";
-            scoringPercentLabel.Padding = new Padding(0, 0, 0, 2);
-            scoringPercentLabel.Size = new Size(57, 30);
+            scoringPercentLabel.Padding = new Padding(0, 0, 0, 1);
+            scoringPercentLabel.Size = new Size(41, 19);
             scoringPercentLabel.TabIndex = 19;
-            scoringPercentLabel.Text = "100%";
+            scoringPercentLabel.Text = "86%";
             scoringPercentLabel.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // scoringCountPanel
+            // 
+            scoringCountPanel.BackColor = Color.White;
+            scoringCountPanel.BorderStyle = BorderStyle.FixedSingle;
+            scoringCountPanel.Controls.Add(scoringLabel);
+            scoringCountPanel.Location = new Point(352, 1);
+            scoringCountPanel.Margin = new Padding(2, 2, 0, 0);
+            scoringCountPanel.Name = "scoringCountPanel";
+            scoringCountPanel.Size = new Size(49, 26);
+            scoringCountPanel.TabIndex = 3;
+            // 
+            // scoringLabel
+            // 
+            scoringLabel.AutoSize = true;
+            scoringLabel.BackColor = Color.White;
+            scoringLabel.Font = new Font("Segoe UI", 8.25F);
+            scoringLabel.Location = new Point(3, 5);
+            scoringLabel.Margin = new Padding(0);
+            scoringLabel.Name = "scoringLabel";
+            scoringLabel.Padding = new Padding(0, 0, 0, 1);
+            scoringLabel.Size = new Size(41, 14);
+            scoringLabel.TabIndex = 18;
+            scoringLabel.Text = "13 / 13";
+            scoringLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // scoringRightContainer
             // 
-            scoringRightContainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            scoringRightContainer.Location = new Point(364, 3);
-            scoringRightContainer.Margin = new Padding(0);
+            scoringRightContainer.Anchor = AnchorStyles.None;
+            scoringRightContainer.AutoSize = true;
+            scoringRightContainer.BackColor = Color.White;
+            scoringRightContainer.BorderStyle = BorderStyle.FixedSingle;
+            scoringRightContainer.CenterVertically = true;
+            scoringRightContainer.Location = new Point(403, 13);
+            scoringRightContainer.Margin = new Padding(2, 2, 0, 0);
             scoringRightContainer.Name = "scoringRightContainer";
-            scoringRightContainer.Size = new Size(212, 27);
+            scoringRightContainer.Padding = new Padding(2, 0, 2, 0);
+            scoringRightContainer.Size = new Size(6, 2);
             scoringRightContainer.TabIndex = 18;
             // 
             // filler3
@@ -739,8 +831,14 @@
             mediaItemOptionsPanel.ResumeLayout(false);
             mediaItemOptionsPanel.PerformLayout();
             scoringLeftContainer.ResumeLayout(false);
+            scoringLeftContainer.PerformLayout();
+            scoringCompletePanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)completePic).EndInit();
             scoringExemptPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
+            scoringPercentPanel.ResumeLayout(false);
+            scoringCountPanel.ResumeLayout(false);
+            scoringCountPanel.PerformLayout();
             NotesPanel.ResumeLayout(false);
             NotesPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
@@ -789,14 +887,19 @@
         private DescriptorChipUI descriptorChipui2;
         private ScoringUI scoringUI;
         private CheckBoxButton scoringBtn;
-        private FlowLayoutPanel scoringLeftContainer;
+        private CenteredFlowLayoutPanel scoringLeftContainer;
         private PictureBox pictureBox3;
         private Panel scoringExemptPanel;
         private Label label1;
         private Label scoringLabel;
-        private Label scoringPercentLabel;
-        private FlowLayoutPanel scoringRightContainer;
+        private Panel scoringPercentPanel;
+        private Panel scoringCountPanel;
+        private CenteredFlowLayoutPanel scoringRightContainer;
         private Datinate.App.UI.LinkLabelHackUI linkLabelHackui1;
         private Panel REAL_browserBtn;
+        private PictureBox completePic;
+        private Label scoringPercentLabel;
+        private Label label2;
+        private Panel scoringCompletePanel = new Panel();
     }
 }

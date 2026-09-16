@@ -3,7 +3,6 @@ using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Datinate.Shared.Rb;
 using RadioLibCore.RadioDat;
-using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace datinate.app
@@ -27,7 +26,8 @@ namespace datinate.app
 
         private IMediaCollection? mediaCollection = null;
         private bool suppressMetaChangeEvents = false;
-
+        private bool suppressNotesSelectionUntilMouseUp = false;
+        
         private const string NotesExpandGlyph = "↗";
         private const string NotesCollapseGlyph = "×";
 
@@ -37,7 +37,7 @@ namespace datinate.app
         private Label? notesToggleHitArea;
         private const float DescriptorRowDefaultHeight = 120f;
         private const float NotesRowDefaultHeight = 26f;
-        private const float DescriptorRowExpandedHeight = 24f;
+        private const float DescriptorRowExpandedHeight = 0f;
 
         private const float NotesRowExpandedHeight =
             DescriptorRowDefaultHeight + NotesRowDefaultHeight - DescriptorRowExpandedHeight;
@@ -48,9 +48,13 @@ namespace datinate.app
         {
             InitializeComponent();
 
-            Facade.RegisterActor(this);
+            if (DatinateHelper.IsDesignTime)
+            {
+                Facade.RegisterActor(this);
+                return;
+            }
 
-            if (DatinateHelper.IsDesignTime) return;
+            InitialiseScoringCloseClickHandling();
 
             CacheReadOnlyLayout();
 
@@ -71,10 +75,33 @@ namespace datinate.app
             SetDescriptorGrayscale(true, true);
 
             InitialiseNotesResizeUi();
+
+            if (DatinateHelper.IsDesignTime == false)
+                Facade.RegisterActor(this);
         }
 
         public void SetDescriptorDefinitions(IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions)
         {
+            if (IsDisposed)
+                return;
+
+            // Descriptor definitions can arrive very early during project load.
+            // Do not lose the update if this view does not have a handle yet.
+            if (!IsHandleCreated)
+            {
+                EventHandler? h = null;
+                h = (_, __) =>
+                {
+                    HandleCreated -= h;
+
+                    if (!IsDisposed)
+                        SetDescriptorDefinitions(descriptorDefinitions);
+                };
+
+                HandleCreated += h;
+                return;
+            }
+
             Ui(() =>
             {
                 SuspendLayout();
@@ -153,6 +180,8 @@ namespace datinate.app
                         hits++;
                 }
 
+                bool isPerfect = total > 0 && hits == total;
+
                 int percent = total <= 0
                     ? 0
                     : (int)Math.Round((hits * 100d) / total, MidpointRounding.AwayFromZero);
@@ -162,25 +191,14 @@ namespace datinate.app
                 else if (percent > 100)
                     percent = 100;
 
+                // Do not visually claim 100% unless scoring is genuinely complete.
+                if (!isPerfect && percent == 100)
+                    percent = 99;
+
                 scoringLabel.Text = hits + " / " + total;
                 scoringPercentLabel.Text = percent + "%";
 
-                var panelBackColor = scoring.IsScoringExempt
-                    ? Color.Orange
-                    : SystemColors.Control;
-
-                mediaItemOptionsPanel.BackColor = panelBackColor;
-                scoringLeftContainer.BackColor = panelBackColor;
-
-                bool isPerfect = total > 0 && hits == total;
-
-                scoringPercentLabel.BackColor = isPerfect ? Color.LimeGreen : panelBackColor;
-                scoringPercentLabel.ForeColor = isPerfect ? Color.White : SystemColors.ControlText;
-
-                scoringLabel.BackColor = panelBackColor;
-                scoringLabel.ForeColor = SystemColors.ControlText;
-
-                scoringExemptPanel.Visible = scoring.IsScoringExempt;
+                ApplyScoringSummaryVisualState(isPerfect, scoring.IsScoringExempt);
 
                 scoringUI.SetUI(scoring);
 
@@ -268,18 +286,21 @@ namespace datinate.app
 
         public void ClearView()
         {
-
             Ui(() =>
             {
                 mediaCollection = null;
+
                 SetNotesAreaExpanded(false);
-                scoringPercentLabel.BackColor = BackColor;
-                scoringPercentLabel.ForeColor = ForeColor;
 
                 scoringPercentLabel.Text = string.Empty;
                 scoringLabel.Text = string.Empty;
 
+                ApplyScoringSummaryVisualState(
+                    isPerfect: false,
+                    isScoringExempt: false);
+
                 scoringRightContainer.Controls.Clear();
+
                 datChipUI.DatKey = string.Empty;
 
                 mediaNameTxt.Text = string.Empty;
@@ -287,27 +308,27 @@ namespace datinate.app
                 mediaIconUI.ImageKey = null;
                 entryNameTxt.Text = string.Empty;
 
-                mediaItemOptionsPanel.BackColor = SystemColors.Control;
-
-
                 suppressMetaChangeEvents = true;
 
                 familyNotesTxt.Text = string.Empty;
 
                 var uis = DescriptorChipUIs;
+
                 foreach (var chip in uis)
-                {
                     chip.Checked = false;
-                }
+
                 suppressMetaChangeEvents = false;
 
                 SetScoringActive(false);
                 scoringUI.ClearUI();
 
                 datChipUI.Visible = false;
+
                 mediaSelectedContainer.BackColor = Color.Black;
                 cornerTopLeft.BackColor = cornerTopRight.BackColor = Color.Black;
                 cornerBottomLeft.BackColor = cornerBottomRight.BackColor = Color.Black;
+
+                scoringRightContainer.Visible = false;
 
                 UpdateDescriptorGrayscaleFromMouse();
             });
@@ -338,6 +359,44 @@ namespace datinate.app
 
                 ApplyScoringActive(restore);
             });
+        }
+        private void ApplyScoringSummaryVisualState(bool isPerfect, bool isScoringExempt)
+        {
+
+            var rowBackColor = isScoringExempt
+                ? Color.PeachPuff
+                    : isPerfect
+                        ? Color.LightGreen
+                            : SystemColors.Control;
+
+            scoringLeftContainer.SuspendLayout();
+
+            try
+            {
+                mediaItemOptionsPanel.BackColor = rowBackColor;
+                scoringLeftContainer.BackColor = rowBackColor;
+
+                scoringExemptPanel.Visible = isScoringExempt;
+
+                if (isPerfect)
+                {
+                    scoringPercentPanel.Visible = false;
+                    scoringCompletePanel.Visible = true;
+                }
+                else
+                {
+                    scoringPercentPanel.Visible = true;
+                    scoringCompletePanel.Visible = false;
+                }
+            }
+            finally
+            {
+                scoringLeftContainer.ResumeLayout(true);
+            }
+
+            scoringExemptPanel.Invalidate();
+            scoringPercentPanel.Invalidate();
+            scoringCountPanel.Invalidate();
         }
         private void CacheReadOnlyLayout()
         {
@@ -527,9 +586,41 @@ namespace datinate.app
                 descriptorsChanged);
         }
 
-        private void scoringUI_Click(object sender, EventArgs e)
+        private void scoringUI_Click(object? sender, EventArgs e)
         {
+            ClearFamilyNotesSelection();
+
             SetScoringActive(false);
+
+            if (scoringBtn.CanFocus)
+                scoringBtn.Focus();
+
+            // NOTE: Deliberate second call. There is some strange family notes text selection that can happen here.
+            ClearFamilyNotesSelection();
+        }
+        private void InitialiseScoringCloseClickHandling()
+        {
+            WireScoringCloseClicks(scoringUI, false);
+        }
+
+        private void WireScoringCloseClicks(Control control, bool wireClick = true)
+        {
+            if (wireClick)
+            {
+                control.Click -= scoringUI_Click;
+                control.Click += scoringUI_Click;
+            }
+
+            control.ControlAdded -= ScoringControl_ControlAdded;
+            control.ControlAdded += ScoringControl_ControlAdded;
+
+            foreach (Control child in control.Controls)
+                WireScoringCloseClicks(child);
+        }
+
+        private void ScoringControl_ControlAdded(object? sender, ControlEventArgs e)
+        {
+            WireScoringCloseClicks(e.Control);
         }
 
         private void scoringBtn_Click(object sender, EventArgs e)
@@ -537,7 +628,7 @@ namespace datinate.app
             SetScoringActive(scoringBtn.Checked);
         }
 
-        
+
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -612,7 +703,33 @@ namespace datinate.app
             if (e.Button != MouseButtons.Left)
                 return;
 
+            suppressNotesSelectionUntilMouseUp = true;
+
             SetNotesAreaExpanded(true, true);
+            ClearFamilyNotesSelection();
+        }
+
+        private void FamilyNotesTxt_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (!suppressNotesSelectionUntilMouseUp)
+                return;
+
+            ClearFamilyNotesSelection();
+        }
+
+        private void FamilyNotesTxt_MouseUp(object? sender, MouseEventArgs e)
+        {
+            if (!suppressNotesSelectionUntilMouseUp)
+                return;
+
+            suppressNotesSelectionUntilMouseUp = false;
+            ClearFamilyNotesSelection();
+        }
+
+        private void ClearFamilyNotesSelection()
+        {
+            familyNotesTxt.SelectionStart = familyNotesTxt.TextLength;
+            familyNotesTxt.SelectionLength = 0;
         }
 
         private void FamilyNotesTxt_Enter(object? sender, EventArgs e)
@@ -652,7 +769,8 @@ namespace datinate.app
 
             NotesPanel.MouseDown += NotesPanelMouseDown;
             familyNotesTxt.MouseDown += FamilyNotesTxt_MouseDown;
-            familyNotesTxt.Enter += FamilyNotesTxt_Enter;
+            familyNotesTxt.MouseMove += FamilyNotesTxt_MouseMove;
+            familyNotesTxt.MouseUp += FamilyNotesTxt_MouseUp;
 
             UpdateNotesAreaUi();
         }
@@ -673,9 +791,15 @@ namespace datinate.app
                 return;
 
             notesAreaExpanded = expand;
+            pictureBox1.Visible = !expand;
 
             float descriptorHeight = expand ? DescriptorRowExpandedHeight : DescriptorRowDefaultHeight;
             float notesHeight = expand ? NotesRowExpandedHeight : NotesRowDefaultHeight;
+
+            // Do not let AutoScroll calculate a virtual extent while this
+            // container is being collapsed to zero height.
+            descriptorContainer.AutoScroll = false;
+            descriptorContainer.AutoScrollPosition = Point.Empty;
 
             SuspendLayout();
             tableLayoutPanel.SuspendLayout();
@@ -708,6 +832,15 @@ namespace datinate.app
             tableLayoutPanel.PerformLayout();
             PerformLayout();
 
+            // Only restore scrolling once the descriptor panel has its normal
+            // height again. This prevents stale zero-height AutoScroll state.
+            if (!expand)
+            {
+                descriptorContainer.AutoScrollPosition = Point.Empty;
+                descriptorContainer.AutoScroll = true;
+                descriptorContainer.PerformLayout();
+            }
+
             UpdateNotesAreaUi();
             SyncNotesTextBoxLayout();
 
@@ -717,9 +850,11 @@ namespace datinate.app
             {
                 familyNotesTxt.Focus();
                 familyNotesTxt.SelectionStart = familyNotesTxt.TextLength;
-                familyNotesTxt.SelectionLength = 0;
             }
+
+            familyNotesTxt.SelectionLength = 0;
         }
+
         private void UpdateNotesAreaUi()
         {
             browserBtn.Text = notesAreaExpanded ? NotesCollapseGlyph : NotesExpandGlyph;
@@ -744,7 +879,10 @@ namespace datinate.app
                 width = 0;
 
             familyNotesTxt.Multiline = true;
-            familyNotesTxt.ScrollBars = ScrollBars.Vertical;
+            familyNotesTxt.ScrollBars =
+                notesAreaExpanded
+                    ? ScrollBars.Vertical
+                    : ScrollBars.None;
 
             if (notesAreaExpanded)
             {
@@ -769,6 +907,7 @@ namespace datinate.app
             foreach (var ui in DescriptorChipUIs)
                 ui.Checked = mediaCollection.CheckedDescriptorCodes.Contains(ui.Code);
         }
+        
         private void SyncScoringDescriptorChips()
         {
             scoringRightContainer.SuspendLayout();
@@ -800,6 +939,11 @@ namespace datinate.app
             }
             finally
             {
+                scoringRightContainer.Visible =
+                    scoringRightContainer.Controls.Count > 0
+                        ? true
+                        : false; 
+
                 scoringRightContainer.ResumeLayout(true);
             }
         }
