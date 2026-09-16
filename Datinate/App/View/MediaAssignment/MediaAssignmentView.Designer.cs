@@ -71,7 +71,7 @@ namespace datinate.app
             scoringPercentLabel = new Label();
             scoringCountPanel = new Panel();
             scoringLabel = new Label();
-            scoringRightContainer = new CenteredFlowLayoutPanel();
+            scoringRightContainer = new FlowLayoutPanel();
             filler3 = new Panel();
             filler4 = new Panel();
             NotesPanel = new Panel();
@@ -79,6 +79,11 @@ namespace datinate.app
             pictureBox2 = new PictureBox();
             pictureBox1 = new PictureBox();
             familyNotesTxt = new TextBox();
+            panel1 = new Panel();
+            panel2 = new Panel();
+            panel3 = new Panel();
+            panel4 = new Panel();
+            panel5 = new Panel();
             scoringUI = new ScoringUI();
             mediaSelectedContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)cornerBottomRight).BeginInit();
@@ -532,6 +537,7 @@ namespace datinate.app
             // 
             mediaItemOptionsPanel.BackColor = SystemColors.Control;
             mediaItemOptionsPanel.Controls.Add(scoringLeftContainer);
+            mediaItemOptionsPanel.Controls.Add(scoringRightContainer);
             mediaItemOptionsPanel.Dock = DockStyle.Fill;
             mediaItemOptionsPanel.Location = new Point(0, 466);
             mediaItemOptionsPanel.Margin = new Padding(0);
@@ -551,11 +557,10 @@ namespace datinate.app
             scoringLeftContainer.Controls.Add(scoringExemptPanel);
             scoringLeftContainer.Controls.Add(scoringPercentPanel);
             scoringLeftContainer.Controls.Add(scoringCountPanel);
-            scoringLeftContainer.Controls.Add(scoringRightContainer);
             scoringLeftContainer.Location = new Point(0, 1);
             scoringLeftContainer.Margin = new Padding(0);
             scoringLeftContainer.Name = "scoringLeftContainer";
-            scoringLeftContainer.Size = new Size(409, 29);
+            scoringLeftContainer.Size = new Size(401, 29);
             scoringLeftContainer.TabIndex = 17;
             scoringLeftContainer.WrapContents = false;
             // 
@@ -687,7 +692,6 @@ namespace datinate.app
             // 
             // scoringLabel
             // 
-            scoringLabel.AutoSize = true;
             scoringLabel.BackColor = Color.White;
             scoringLabel.Font = new Font("Segoe UI", 8.25F);
             scoringLabel.Location = new Point(3, 5);
@@ -701,17 +705,17 @@ namespace datinate.app
             // 
             // scoringRightContainer
             // 
-            scoringRightContainer.Anchor = AnchorStyles.None;
-            scoringRightContainer.AutoSize = true;
+            scoringRightContainer.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             scoringRightContainer.BackColor = Color.White;
             scoringRightContainer.BorderStyle = BorderStyle.FixedSingle;
-            scoringRightContainer.CenterVertically = true;
-            scoringRightContainer.Location = new Point(403, 13);
-            scoringRightContainer.Margin = new Padding(2, 2, 0, 0);
+            scoringRightContainer.Location = new Point(568, 2);
+            scoringRightContainer.Margin = new Padding(0);
             scoringRightContainer.Name = "scoringRightContainer";
             scoringRightContainer.Padding = new Padding(2, 0, 2, 0);
-            scoringRightContainer.Size = new Size(6, 2);
+            scoringRightContainer.RightToLeft = RightToLeft.No;
+            scoringRightContainer.Size = new Size(6, 26);
             scoringRightContainer.TabIndex = 18;
+            scoringRightContainer.WrapContents = false;
             // 
             // filler3
             // 
@@ -800,6 +804,46 @@ namespace datinate.app
             familyNotesTxt.TabIndex = 0;
             familyNotesTxt.TextChanged += familyNotesTxt_TextChanged;
             // 
+            // panel1
+            // 
+            panel1.BackColor = Color.Silver;
+            panel1.Location = new Point(131, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(30, 26);
+            panel1.TabIndex = 0;
+            // 
+            // panel2
+            // 
+            panel2.BackColor = Color.Silver;
+            panel2.Location = new Point(95, 3);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(30, 26);
+            panel2.TabIndex = 1;
+            // 
+            // panel3
+            // 
+            panel3.BackColor = Color.Silver;
+            panel3.Location = new Point(59, 3);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(30, 26);
+            panel3.TabIndex = 2;
+            // 
+            // panel4
+            // 
+            panel4.BackColor = Color.Silver;
+            panel4.Location = new Point(23, 3);
+            panel4.Name = "panel4";
+            panel4.Size = new Size(30, 26);
+            panel4.TabIndex = 3;
+            // 
+            // panel5
+            // 
+            panel5.BackColor = Color.Silver;
+            panel5.Location = new Point(-13, 3);
+            panel5.Name = "panel5";
+            panel5.Size = new Size(30, 26);
+            panel5.TabIndex = 4;
+            // 
             // scoringUI
             // 
             scoringUI.Location = new Point(0, 124);
@@ -831,14 +875,12 @@ namespace datinate.app
             mediaItemOptionsPanel.ResumeLayout(false);
             mediaItemOptionsPanel.PerformLayout();
             scoringLeftContainer.ResumeLayout(false);
-            scoringLeftContainer.PerformLayout();
             scoringCompletePanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)completePic).EndInit();
             scoringExemptPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
             scoringPercentPanel.ResumeLayout(false);
             scoringCountPanel.ResumeLayout(false);
-            scoringCountPanel.PerformLayout();
             NotesPanel.ResumeLayout(false);
             NotesPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
@@ -894,12 +936,17 @@ namespace datinate.app
         private Label scoringLabel;
         private Panel scoringPercentPanel;
         private Panel scoringCountPanel;
-        private CenteredFlowLayoutPanel scoringRightContainer;
+        private FlowLayoutPanel scoringRightContainer;
         private Datinate.App.UI.LinkLabelHackUI linkLabelHackui1;
         private Panel REAL_browserBtn;
         private PictureBox completePic;
         private Label scoringPercentLabel;
         private Label label2;
         private Panel scoringCompletePanel = new Panel();
+        private Panel panel1;
+        private Panel panel2;
+        private Panel panel3;
+        private Panel panel4;
+        private Panel panel5;
     }
 }

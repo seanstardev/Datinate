@@ -76,8 +76,15 @@ namespace datinate.app
 
             InitialiseNotesResizeUi();
 
+            scoringLeftContainer.SizeChanged += (_, _) =>
+                LayoutScoringDescriptorContainer();
+
+            mediaItemOptionsPanel.SizeChanged += (_, _) =>
+                LayoutScoringDescriptorContainer();
+
             if (DatinateHelper.IsDesignTime == false)
                 Facade.RegisterActor(this);
+
         }
 
         public void SetDescriptorDefinitions(IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions)
@@ -364,7 +371,7 @@ namespace datinate.app
         {
 
             var rowBackColor = isScoringExempt
-                ? Color.PeachPuff
+                ? Color.Orange
                     : isPerfect
                         ? Color.LightGreen
                             : SystemColors.Control;
@@ -397,6 +404,8 @@ namespace datinate.app
             scoringExemptPanel.Invalidate();
             scoringPercentPanel.Invalidate();
             scoringCountPanel.Invalidate();
+
+            LayoutScoringDescriptorContainer();
         }
         private void CacheReadOnlyLayout()
         {
@@ -506,12 +515,67 @@ namespace datinate.app
 
                 for (int i = 0; i < descriptorContainer.Controls.Count; i++)
                     if (descriptorContainer.Controls[i] is DescriptorChipUI ui)
-                        list.Add(ui);
+                        list.Insert(0, ui);
 
                 return list;
             }
         }
+        private void LayoutScoringDescriptorContainer()
+        {
+            if (scoringRightContainer == null ||
+                scoringRightContainer.IsDisposed ||
+                scoringLeftContainer == null ||
+                mediaItemOptionsPanel == null)
+            {
+                return;
+            }
 
+            if (!scoringRightContainer.Visible)
+                return;
+
+            const int gap = 2;
+            const int top = 2;
+            const int height = 26;
+
+            // This is the hard stop for the descriptor area's left edge.
+            int minLeft = scoringLeftContainer.Right + gap;
+
+            // Keep the descriptor area's right edge pinned to the parent.
+            int right = mediaItemOptionsPanel.ClientSize.Width - 2;
+
+            int desiredWidth =
+                scoringRightContainer.Padding.Left +
+                scoringRightContainer.Padding.Right +
+                2; // FixedSingle border: 1px each side.
+
+            foreach (Control control in scoringRightContainer.Controls)
+            {
+                if (!control.Visible)
+                    continue;
+
+                desiredWidth +=
+                    control.Margin.Left +
+                    control.Width +
+                    control.Margin.Right;
+            }
+
+            int maxWidth = right - minLeft;
+
+            if (maxWidth < 0)
+                maxWidth = 0;
+
+            int width = Math.Min(desiredWidth, maxWidth);
+
+            // Normally this moves left as descriptors are added.
+            // Once it hits minLeft, it stays there.
+            int left = right - width;
+
+            scoringRightContainer.SetBounds(
+                left,
+                top,
+                width,
+                height);
+        }
         private void Ui(Action action)
         {
             if (InvokeRequired)
@@ -907,7 +971,7 @@ namespace datinate.app
             foreach (var ui in DescriptorChipUIs)
                 ui.Checked = mediaCollection.CheckedDescriptorCodes.Contains(ui.Code);
         }
-        
+
         private void SyncScoringDescriptorChips()
         {
             scoringRightContainer.SuspendLayout();
@@ -940,12 +1004,12 @@ namespace datinate.app
             finally
             {
                 scoringRightContainer.Visible =
-                    scoringRightContainer.Controls.Count > 0
-                        ? true
-                        : false; 
+                    scoringRightContainer.Controls.Count > 0;
 
                 scoringRightContainer.ResumeLayout(true);
             }
+
+            LayoutScoringDescriptorContainer();
         }
     }
 }

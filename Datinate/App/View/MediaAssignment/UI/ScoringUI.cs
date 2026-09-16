@@ -62,9 +62,9 @@ namespace datinate.app
 
                     BackColor =
                         scoring.IsScoringExempt
-                            ? Color.PeachPuff
+                            ? Color.FromArgb(180, 85, 0)
                             : isPerfect
-                                ? Color.Green
+                                ? Color.DarkGreen
                                 : SystemColors.Control;
 
                     topLeftPB.BackColor =

@@ -234,7 +234,6 @@
             // 
             notFoundPic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             notFoundPic.BackColor = Color.White;
-            notFoundPic.BorderStyle = BorderStyle.FixedSingle;
             notFoundPic.Image = Datinate.Properties.Resources.media_assign_not_found;
             notFoundPic.Location = new Point(-2, 202);
             notFoundPic.Margin = new Padding(0);
@@ -248,7 +247,6 @@
             // 
             okPic.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             okPic.BackColor = Color.White;
-            okPic.BorderStyle = BorderStyle.FixedSingle;
             okPic.Image = Datinate.Properties.Resources.media_assign_ok;
             okPic.Location = new Point(-2, 202);
             okPic.Margin = new Padding(0);
