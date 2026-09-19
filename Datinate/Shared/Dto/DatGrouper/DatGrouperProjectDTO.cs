@@ -62,7 +62,7 @@ namespace com.RADIO.Datinate.RMVC.Shared
 
             return true;
         }
-        public static bool GetAllExpressionFilesExist(DatGrouperProjectDTO project)
+        public static bool GetAllExpressionFilesExistOrAreEmpty(DatGrouperProjectDTO project)
         {
             var allEntries = GetAllProjectEntries(project);
 
@@ -73,15 +73,12 @@ namespace com.RADIO.Datinate.RMVC.Shared
                     continue;
 
                 if (File.Exists(entry.ExpressionsXmlFullpath) == false)
-                {
-                    Debug.WriteLine("???: " + entry.ExpressionsXmlFullpath);
                     return false;
-                }
             }
             return true;
         }
 
-        public static bool GetAllDatPathFilesExist(DatGrouperProjectDTO project)
+        public static bool GetAllDatFilesExist(DatGrouperProjectDTO project)
         {
             var paths = GetAllProjectEntries(project);
             foreach(var path in paths)
@@ -93,7 +90,7 @@ namespace com.RADIO.Datinate.RMVC.Shared
             }
             return true;
         }
-        public bool GetAllPathsAreValidOrEmpty()
+        public bool GetAllDatContentPathsAreValidOrEmpty()
         {
             var paths = GetAllProjectEntries(this);
             foreach (var path in paths)

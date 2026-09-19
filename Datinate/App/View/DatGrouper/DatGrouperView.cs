@@ -6,6 +6,7 @@ using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using static app.datinate.DatGrouperEditDelta;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using System.ComponentModel;
 
 namespace datinate.app
 {
@@ -30,9 +31,7 @@ namespace datinate.app
         public event Action? CurateEvt;
         public event Action? ExportEvt;
         public event Action? ConfigureEvt;
-
         public event Action? ExitMediaEvt;
-
         public event Action<IGameEntity?, bool>? GameEntitySelectedEvt;
 
         private bool _mainControlsVisible = true;
@@ -368,12 +367,15 @@ namespace datinate.app
                 bool proceed = false;
 
                 if (CurrentLayoutIsAuto)
+                {
                     proceed = true;
+                }
                 else
                 {
                     proceed = UIHelper.ShowDialogYesNo(
                         "Any unsaved changes will be lost if you return to the Projects View. Do you wish to proceed?");
                 }
+
                 if (proceed)
                 {
                     // NOTE: Do not remove: stops curated UI appearing when auto grouper layout is set again later.

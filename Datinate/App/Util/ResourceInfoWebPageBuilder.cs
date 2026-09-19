@@ -411,7 +411,7 @@ namespace datinate.app
             if (!string.IsNullOrWhiteSpace(model.DescriptionHtml))
                 sb.AppendLine($"        <div class=\"hero-description\">{model.DescriptionHtml}</div>");
             else
-                sb.AppendLine("        <p class=\"hero-description empty-note\">No description was available in the info data.</p>");
+                sb.AppendLine("        <p class=\"hero-description empty-note\">No description is available.</p>");
 
             sb.AppendLine("      </div>");
             sb.AppendLine("    </div>");

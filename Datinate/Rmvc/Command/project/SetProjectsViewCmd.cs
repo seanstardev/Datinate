@@ -10,8 +10,19 @@ namespace com.RADIO.Datinate.RMVC
 
             Facade.Instance?.Shell?.ShowRbProjectsView();
             Facade.Instance?.Shell?.SetProjectsFormTitle("DAT Grouper");
-            Facade.Instance?.ProjectLoaderMediator?.ReloadCurrentProject();
 
+            var sessionModel = Facade.Instance?.DatGrouperSessionModel;
+            
+            // NOTE: When in DatGrouper-only mode we won't have a project to reload.
+            if (sessionModel is { } && sessionModel.DatGrouperStartupProject is { } startupProject)
+            {
+                // TODO: Load sessionModel.DatGrouperStartupProject in Projects view.
+                sessionModel.DatGrouperStartupProject = null;
+            }
+            else
+            {
+                Facade.Instance?.ProjectLoaderMediator?.ReloadCurrentProject();
+            }
             base.ExecuteCommand(new ClearProgressCmd());
         }
     }

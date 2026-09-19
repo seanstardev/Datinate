@@ -36,7 +36,7 @@ namespace datinate.app
         private List<Form>? progressDisabledForms;
 
         private readonly int uiThreadId;
-        private readonly System.Threading.SynchronizationContext? uiContext;
+        private readonly SynchronizationContext? uiContext;
         private static readonly IntPtr HWND_TOP = IntPtr.Zero;
 
         private const uint SWP_NOSIZE = 0x0001;
@@ -62,6 +62,12 @@ namespace datinate.app
         {
             uiThreadId = Environment.CurrentManagedThreadId;
             uiContext = System.Threading.SynchronizationContext.Current;
+
+            // TODO: parse args:
+            if (DatinateHelper.IsDebugBuild)
+            {
+                DatGrouperModeStartupProjectName = "Nintendo - SNES";
+            }
 
             Facade.Create(typeof(Facade), this);
 
@@ -100,6 +106,15 @@ namespace datinate.app
 
             UpdateStyles();
             CenterToScreen();
+        }
+
+        public void ExitApplication()
+        {
+            StartAppExit();
+            Ui(() =>
+            {
+                Application.Exit();
+            });
         }
 
         public void StartResizeMonitor()
@@ -286,8 +301,21 @@ namespace datinate.app
         }
         public bool CurrentProjectsPageIsProjectLoaderPage
             => ProjectsForm.ProjectsView.CurrentProjectsPageIsProjectLoaderPage;
+
+        public string? DatGrouperModeStartupProjectName { get; } = null;
+
         public void SetAppEnabled(bool doEnable)
         {
+        }
+        public void SetMainFormVisible(bool visible)
+        {
+            Ui(() =>
+            {
+                if (visible == false)
+                    Hide();
+                else
+                    Show();
+            });
         }
 
         public Task<bool> ShowMessageBox(string title, string message, bool isYesNo = false)
@@ -316,13 +344,18 @@ namespace datinate.app
 
         public void HandleCompareFormClose()
         {
-            Facade.Instance?.HandleCompareFormClose();
             BringToFront();
         }
 
         public void HandleProjectsFormClose()
         {
-            Facade.Instance?.HandleProjectsFormClose();
+            if (string.IsNullOrWhiteSpace(DatGrouperModeStartupProjectName) == false)
+            {
+                
+                StartAppExit();
+                Application.Exit();
+            }
+                
             BringToFront();
         }
 

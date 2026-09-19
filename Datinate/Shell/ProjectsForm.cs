@@ -16,6 +16,11 @@ namespace datinate.app
         }
         public void ShowProjectsFormAndBringToFront()
         {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => ShowProjectsFormAndBringToFront()));
+                return;
+            }
             if (!Visible)
                 Show();
 
@@ -52,5 +57,15 @@ namespace datinate.app
         {
 
         }
+        //protected override CreateParams CreateParams
+        //{
+        //    get
+        //    {
+        //        const int CS_NOCLOSE = 0x200;
+        //        var cp = base.CreateParams;
+        //        cp.ClassStyle |= CS_NOCLOSE;
+        //        return cp;
+        //    }
+        //}
     }
 }

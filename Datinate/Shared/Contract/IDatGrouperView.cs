@@ -26,9 +26,7 @@ namespace Datinate.Shared
         event Action? CurateEvt;
         event Action? ExportEvt;
         event Action? ConfigureEvt;
-
         event Action? ExitMediaEvt;
-
         event Action<DatGrouperEditRequestDTO>? EditRequestEvt;
 
         void SetLocalProgress(int parts, int total, string message);

@@ -136,6 +136,7 @@ namespace com.RADIO.Datinate.RMVC
             view.DatGrouperActionEvt += OnDatGrouperAction;
         }
 
+
         private void OnDatGrouperAction(DatinateEnums.DAT_GROUPER_ACTION_ENUM actionEnum, IGameEntity? entity)
         {
             switch(actionEnum)

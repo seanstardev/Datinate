@@ -111,18 +111,7 @@ namespace com.RADIO.Datinate
                 new ExportDatGrouperProjectProxy()
             };
         }
-        
-        // Shell
-        public void HandleCompareFormClose() 
-        {
-            //base.ExecuteCommand(new ClearCompareDatsModelAndViewCmd());    
-        }
-        public void HandleProjectsFormClose() 
-        {
-            // TODO: What is this?
-            HighlightProjectDatsCmd.Execute();
-        }
-
+       
         protected override RCommandBase RegisterStartupCommand()
         {
             return new StartupCmd();

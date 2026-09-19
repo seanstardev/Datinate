@@ -11,6 +11,8 @@ namespace com.RADIO.Datinate
 {
     public interface IShell: IRAppShell 
     {
+        string? DatGrouperModeStartupProjectName { get; }
+
         // Views:
         CompareView CompareView { get; }
         CreateDatView CreateDatView { get; }
@@ -24,6 +26,7 @@ namespace com.RADIO.Datinate
         ExportView ExportView { get; }
 
         // Methods:
+        void SetMainFormVisible(bool visible);
         void SetCompareFormVisible(bool doShow);
         void SetCustomFormVisible(bool doShow);
         void SetProblemListFormVisible(bool doShow);
@@ -42,6 +45,8 @@ namespace com.RADIO.Datinate
         void SetProjectsFormTitle(string title);
         void StartResizeMonitor();
         void SetMainFormsSizeBarBackColor(Color color);
+        void ExitApplication();
+
         bool CurrentProjectsPageIsProjectLoaderPage { get; }
     }
 }

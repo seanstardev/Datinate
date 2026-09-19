@@ -49,7 +49,7 @@ namespace com.RADIO.Datinate.RMVC
 
                 await base.ExecuteCommandAsync(new ShowProgressCmd("Checking Content Paths", 1, 4));
 
-                AutoLoadSuccessful = project.GetAllPathsAreValidOrEmpty();
+                AutoLoadSuccessful = project.GetAllDatContentPathsAreValidOrEmpty();
 
                 if (jumpToViewAfterLoad && (!AutoLoadSuccessful || forceJumpToCfgView))
                 {

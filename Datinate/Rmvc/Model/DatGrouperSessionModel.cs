@@ -1,10 +1,12 @@
-﻿using RMVC;
+﻿using com.RADIO.Datinate.RMVC.Shared;
+using RMVC;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
     public class DatGrouperSessionModel : RModel
     {
+        public DatGrouperProjectDTO? DatGrouperStartupProject { get; set; } = null;
         public bool ContentPathsResolved { get; set; }
         public bool MediaInitialisd { get; set; } = false;
 

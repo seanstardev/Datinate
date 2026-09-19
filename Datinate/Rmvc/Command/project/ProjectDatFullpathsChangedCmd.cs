@@ -15,7 +15,7 @@ namespace com.RADIO.Datinate.RMVC
         protected override void Run() 
         {
             Facade.Instance?.DatPathsUpdateMediator?.SetView(projectVO);
-            Facade.Instance?.Shell?.SetDatPathsUpdateFormVisible(!DatGrouperProjectDTO.GetAllDatPathFilesExist(projectVO));
+            Facade.Instance?.Shell?.SetDatPathsUpdateFormVisible(!DatGrouperProjectDTO.GetAllDatFilesExist(projectVO));
         }
     }
 }

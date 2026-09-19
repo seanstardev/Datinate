@@ -104,7 +104,7 @@ namespace datinate.app
 
             UpdateProjectBrowserState();
 
-            if (!string.IsNullOrWhiteSpace(projectToLoad) && SelectProjectInList(projectToLoad))
+            if (string.IsNullOrWhiteSpace(projectToLoad) == false && SelectProjectInList(projectToLoad))
                 return;
 
             if (projectListBox.Items.Count == 0)
@@ -442,7 +442,7 @@ namespace datinate.app
                 return;
             }
 
-            var allExpressionFilesExist = DatGrouperProjectDTO.GetAllExpressionFilesExist(project);
+            var allExpressionFilesExist = DatGrouperProjectDTO.GetAllExpressionFilesExistOrAreEmpty(project);
             if (allExpressionFilesExist == false)
             {
                 ShowError("Dat Grouper cannot be run as one or more DAT Filter files do not exist.");

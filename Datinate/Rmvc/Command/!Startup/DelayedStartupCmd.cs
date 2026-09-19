@@ -12,42 +12,82 @@ namespace Datinate.Rmvc.Command
         {
             base.ExecuteCommand(new UpdateUnitDisplayCmd(UnitFormatHelper.Unit.GB, true));
 
-            var datDbProxy = Facade.Instance?.DatDbProxy;
+            DatGrouperProjectDTO? datGrouperStartupProject = null;
 
-            if (datDbProxy is not null && datDbProxy.GetDbExists() == false)
+            bool datGrouperStartupProjectNeedsEditing = false;
+
+            if (string.IsNullOrWhiteSpace(Facade.Instance?.Shell?.DatGrouperModeStartupProjectName) == false)
             {
-                Facade.Instance?.Shell?.ShowMessageBox(
-                    "Attention",
-                    "Please note that Datinate will perform an initial scan of DATs once directories are set. This is a one-time process to create the Database that may take several minutes.");
+                datGrouperStartupProject = Facade.Instance?.ProjectProxy?.LoadProject(
+                    Facade.Instance?.Shell?.DatGrouperModeStartupProjectName!);
+
+                if (datGrouperStartupProject != null)
+                {
+                    var cmd = new CheckDatGrouperProjectValidCmd(datGrouperStartupProject);
+                    base.ExecuteCommand(cmd);
+
+                    if (cmd.DatAndExpressionFilesExist)
+                    {
+                        if (Facade.Instance?.DatGrouperSessionModel is { } datGrouperSessionModel)
+                            datGrouperSessionModel.DatGrouperStartupProject = datGrouperStartupProject;
+                    }
+                    else
+                    {
+                        datGrouperStartupProject = null;
+                        datGrouperStartupProjectNeedsEditing = true;
+                    }
+                }
             }
-
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Loading DAT Grouper Project Summaries", 1, 4));
             
-            base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(null, true));
+            if (datGrouperStartupProject == null && datGrouperStartupProjectNeedsEditing == false)
+            {
+                var datDbProxy = Facade.Instance?.DatDbProxy;
 
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Initialising Database.", 2, 4));
+                if (datDbProxy is not null && datDbProxy.GetDbExists() == false)
+                {
+                    Facade.Instance?.Shell?.ShowMessageBox(
+                        "Attention",
+                        "Please note that Datinate will perform an initial scan of DATs once directories are set. This is a one-time process to create the Database that may take several minutes.");
+                }
 
-            var ctx = SynchronizationContext.Current;
+                await base.ExecuteCommandAsync(new ShowProgressCmd("Loading DAT Grouper Project Summaries", 1, 4));
 
-            Task SendProgressAsync(string text, int part, int total)
-                => base.ExecuteCommandAsync(new ShowProgressCmd(text, part, total));
+                base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(null, true));
 
-            var report = ProgressReportThrottle.CreateReporter(
-                send: SendProgressAsync,
-                ctx: ctx,
-                prefix: "Checking Database. ",
-                outputTotal: 100,
-                minPercentDelta: 1,
-                minIntervalMs: 120,
-                reportOnMessageChange: true);
+                await base.ExecuteCommandAsync(new ShowProgressCmd("Initialising Database.", 2, 4));
 
-            await Task.Run(() => Facade.Instance?.DatDbProxy?.EnsureDbExists(report));
+                var ctx = SynchronizationContext.Current;
 
-            Facade.Instance?.LandingMediator?.ActivateView();
+                Task SendProgressAsync(string text, int part, int total)
+                    => base.ExecuteCommandAsync(new ShowProgressCmd(text, part, total));
 
-            base.ExecuteCommand(new LoadDatRootPathsCmd());
+                var report = ProgressReportThrottle.CreateReporter(
+                    send: SendProgressAsync,
+                    ctx: ctx,
+                    prefix: "Checking Database. ",
+                    outputTotal: 100,
+                    minPercentDelta: 1,
+                    minIntervalMs: 120,
+                    reportOnMessageChange: true);
 
-            base.ExecuteCommand(new ClearProgressCmd());
+                await Task.Run(() => Facade.Instance?.DatDbProxy?.EnsureDbExists(report));
+
+                Facade.Instance?.LandingMediator?.ActivateView();
+
+                base.ExecuteCommand(new LoadDatRootPathsCmd());
+                base.ExecuteCommand(new ClearProgressCmd());
+
+            }
+            else
+            {
+                Facade.Instance?.LandingMediator?.ActivateView();
+                base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
+                base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(null, true));
+                Facade.Instance?.Shell?.SetMainFormVisible(false);
+
+                if ((datGrouperStartupProjectNeedsEditing == false))
+                    await base.ExecuteCommandAsync(new StartDatGrouperCmd(datGrouperStartupProject!));
+            }
 
             Facade.Instance?.Shell?.StartResizeMonitor();
         }

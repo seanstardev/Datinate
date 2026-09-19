@@ -70,9 +70,9 @@ namespace com.RADIO.Datinate.RMVC
 
         private void OnHighlight(DatGrouperProjectDTO project)
         {
-            base.ExecuteCommand(new HighlightProjectDatsCmd(
-                project.SoftwareEntries.ToArray()
-                , project.SoftwareIgnoreEntries.ToArray()));            
+            //base.ExecuteCommand(new HighlightProjectDatsCmd(
+            //    project.SoftwareEntries.ToArray()
+            //    , project.SoftwareIgnoreEntries.ToArray()));            
         }
 
         private void OnEditExpressions(DatGrouperProjectEntry headline) 

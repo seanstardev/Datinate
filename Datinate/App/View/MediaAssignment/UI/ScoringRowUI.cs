@@ -97,7 +97,7 @@ namespace datinate.app
             if (Width <= 0 || Height <= 0)
                 return;
 
-            const int radius = 6;
+            const int radius = 7;
             int diameter = radius * 2;
 
             var rect = new Rectangle(0, 0, Width, Height);
