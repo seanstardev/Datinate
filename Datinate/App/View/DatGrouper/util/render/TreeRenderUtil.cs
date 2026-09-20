@@ -8,32 +8,19 @@ namespace datinate.app
 {
     public static class TreeRenderUtil
     {
-        private const int ALIAS_CONNECTOR_GRAY_20260218 = 160;
+        private const int ALIAS_CONNECTOR_GRAY = 160;
 
-        private const bool FocusNodeDarkMode = true;
+        private const bool FOCUS_NODE_DARK_MODE = true;
 
-        private const bool FOCUS_NEIGHBOUR_SOLID_BLACK_BEFORE_ROW = true;
-
-
-        // Hover row styling (very subtle; designed for dense UI)
-        private const bool HOVER_ROW_Enable = true;              // master toggle
+        // NOTE: Hover row styling (very subtle; designed for dense UI)
         private const bool HOVER_ROW_SkipSelected = true;        // selection already has a strong cue
         private const bool HOVER_ROW_SkipDisabled = true;        // disabled should feel inert
 
         private const int HOVER_ROW_FillAlpha = 38;              // 0..255 (keep low)
-        private const bool HOVER_ROW_DrawBorder = true;
         private const int HOVER_ROW_BorderAlpha = 55;            // 0..255
         private const int HOVER_ROW_BorderInsetPx = 0;
 
-        private const bool HOVER_ROW_DrawLeftAccentBar = false;  // optional experiment
-        private const int HOVER_ROW_LeftBarWidthPx = 3;
-        private const int HOVER_ROW_LeftBarAlpha = 140;
-
-        private const bool FOCUS_ROW_Enable = true;
-
         private const int DisabledRowFadeOpacityPercent = 70;
-
-        private const float SpacerMessageFontScale = 1.5f;          
 
         private const int ChipGap = 8;
 
@@ -45,10 +32,6 @@ namespace datinate.app
         private const int AliasStartX = 300;
         private const int AliasMinGapAfterChips = 100;
         private const string AliasSeparator = "     ";
-
-        private const string EmptySpacerMessage = "";
-
-        private const bool DATINATE_CHIP_VTOP_VTopSecondaryChips = true;
 
         private const int NEIGHBOUR_FADE_PEAK_ALPHA = 80;
 
@@ -69,14 +52,10 @@ namespace datinate.app
             After
         }
         private static readonly Color AlphaChipTextColor = Color.SlateGray;
-
-        private static Font? cachedSpacerMessageFont;
-        private static string? cachedSpacerMessageFontSig;
         
         private static readonly ConditionalWeakTable<TreeNode, NodeRenderCache> RenderCache = [];
         private static readonly Color HOVER_ROW_FillRgb = Color.FromArgb(215, 228, 242);  // matches your selection family
         private static readonly Color HOVER_ROW_BorderRgb = Color.FromArgb(120, 145, 170); // neutral-ish
-        private static readonly Color HOVER_ROW_LeftBarRgb = Color.FromArgb(0, 120, 215);  // “Windows accent”-ish
 
         private static readonly Color ExcludedNodeHatchColor = Color.FromArgb(255, 60, 60, 60);
 
@@ -129,7 +108,6 @@ namespace datinate.app
 #pragma warning restore CS0162
             }
 
-            //var g = e.Graphics;
             var nodeBounds = node.Bounds;
             int rowWidth = rowWidthOverride ?? tv.ClientSize.Width;
 
@@ -314,10 +292,9 @@ namespace datinate.app
                 g.SetClip(fullRowRect);
 
                 var focusRel = GetFocusRelation(node, focusNode);
-                bool focusDark = FocusNodeDarkMode && focusRel == FocusRelation.Focus;
+                bool focusDark = FOCUS_NODE_DARK_MODE && focusRel == FocusRelation.Focus;
 
                 var alphaPrimaryChipSetEffective = alphaPrimaryChipSet;
-
 
                 int y = GetAlignedTop(bounds, nodeFont.Height, align);
 
@@ -530,12 +507,13 @@ namespace datinate.app
                 var fullRow = new Rectangle(0, bounds.Top, tv.ClientSize.Width, bounds.Height);
 
                 var state = g.Save();
+
                 try
                 {
                     g.SetClip(fullRow);
 
                     var focusRel = GetFocusRelation(node, focusNode);
-                    bool focusDark = FocusNodeDarkMode && focusRel == FocusRelation.Focus;
+                    bool focusDark = FOCUS_NODE_DARK_MODE && focusRel == FocusRelation.Focus;
 
                     using (var bg = new SolidBrush(focusDark ? Color.Black : tv.BackColor))
                         g.FillRectangle(bg, fullRow);
@@ -564,8 +542,8 @@ namespace datinate.app
             TreeView tv,
             Rectangle bounds)
         {
-            // DrawNode is called once per visible row.
-            // Only allow the final visible row to perform the full overlay render.
+            // NOTE: DrawNode is called once per visible row.
+            // ... Only allow the final visible row to perform the full overlay render.
             var currentNode = tv.GetNodeAt(
                 Math.Max(1, bounds.Left + 1),
                 bounds.Top + Math.Max(1, bounds.Height / 2));
@@ -772,7 +750,7 @@ namespace datinate.app
 
             int topY = y - headH;
 
-            int gray = ALIAS_CONNECTOR_GRAY_20260218;
+            int gray = ALIAS_CONNECTOR_GRAY;
             if (gray < 0) gray = 0;
             if (gray > 255) gray = 255;
 
@@ -1013,9 +991,6 @@ namespace datinate.app
 
         private static FocusRelation GetFocusRelation(TreeNode node, TreeNode? focusNode)
         {
-            if (!FOCUS_ROW_Enable)
-                return FocusRelation.None;
-
             if (focusNode == null)
                 return FocusRelation.None;
 
@@ -1046,14 +1021,14 @@ namespace datinate.app
             if (yMid <= yTop) yMid = yTop + 1;
             if (yMid > yBot) yMid = yBot;
 
-            var solidColor = FocusNodeDarkMode ? Color.Black : tv.BackColor;
+            var solidColor = FOCUS_NODE_DARK_MODE ? Color.Black : tv.BackColor;
 
             var hairlineColor = SystemColors.ControlDarkDark;
 
             using var solid = new SolidBrush(solidColor);
             using var hair = new SolidBrush(hairlineColor);
 
-            bool forceSolidBeforeRow = FocusNodeDarkMode && FOCUS_NEIGHBOUR_SOLID_BLACK_BEFORE_ROW;
+            bool forceSolidBeforeRow = FOCUS_NODE_DARK_MODE;
 
             if (rel == FocusRelation.Above)
             {
@@ -1204,7 +1179,7 @@ namespace datinate.app
         }
 
 
-        // Gradient: dark gray at top -> fully transparent at bottom, spanning the whole row width.
+        // NOTE: Gradient: dark gray at top -> fully transparent at bottom, spanning the whole row width.
         private static void DrawSpacerGradient(Graphics g, Rectangle rowRect)
         {
             if (rowRect.Width <= 0 || rowRect.Height <= 0)
@@ -1218,14 +1193,14 @@ namespace datinate.app
             g.FillRectangle(brush, rowRect);
         }
 
-        // "First node is a spacer" in both rootless and rooted trees.
+        // NOTE: "First node is a spacer" in both rootless and rooted trees.
         private static bool IsFirstSpacerNodeInTree(TreeView tv, TreeNode spacerNode)
         {
-            // Rootless: first top-level node.
+            // NOTE: Rootless: first top-level node.
             if (spacerNode.Parent == null)
                 return tv.Nodes.Count > 0 && ReferenceEquals(tv.Nodes[0], spacerNode);
 
-            // Rooted: single root, first child is the spacer.
+            // NOTE: Rooted: single root, first child is the spacer.
             if (tv.Nodes.Count == 1 && ReferenceEquals(tv.Nodes[0], spacerNode.Parent))
                 return spacerNode.Parent.Nodes.Count > 0 && ReferenceEquals(spacerNode.Parent.Nodes[0], spacerNode);
 
@@ -1283,11 +1258,9 @@ namespace datinate.app
        
         private static int Clamp0To100(int v) => v < 0 ? 0 : (v > 100 ? 100 : v);
 
-        private static int MeasureTextWidth(Graphics g, string text, Font font)
-        {
-            return TextRenderer.MeasureText(g, text, font, Size.Empty, NodeTextFlags).Width;
-        }
-
+        private static int MeasureTextWidth(Graphics g, string text, Font font) =>
+            TextRenderer.MeasureText(g, text, font, Size.Empty, NodeTextFlags).Width;
+        
         private static IReadOnlyList<(string LabelKey, string Text)>? BuildAliasItems(
             IGamePart part)
         {
@@ -1334,16 +1307,16 @@ namespace datinate.app
                 bool small = IsSecondaryChip(alphaPrimaryChipSet, i, chips.Count, forceSecondaryStyle);
 
                 NodeVAlign chipAlign =
-                    (DATINATE_CHIP_VTOP_VTopSecondaryChips && small)
+                    small
                         ? NodeVAlign.Top
                         : align;
 
-                // We still grab the bitmap purely for height/measurement.
+                // NOTE: We still grab the bitmap purely for height/measurement.
                 var bmp = GetChipBitmap(chips[i], small);
 
                 int y = GetAlignedTop(nodeBounds, bmp.Height, chipAlign);
 
-                // IMPORTANT: draw using DatChipUtil.Draw/DrawSmall so the text is rendered on the final Graphics surface.
+                // NOTE: Important: draw using DatChipUtil.Draw/DrawSmall so the text is rendered on the final Graphics surface.
                 int w = DrawChip(g, chips[i], small, x, y);
 
                 x += w + ChipGap;
@@ -1459,19 +1432,12 @@ namespace datinate.app
             return alphaPrimaryChipSet && chipCount > 1 && chipIndex > 0;
         }
 
-        private static bool IsHotRow(TreeView tv, TreeNode node)
-        {
-            if (!HOVER_ROW_Enable)
-                return false;
-
-            return tv is DatGrouperTreeView dgtv && ReferenceEquals(dgtv.HotNode, node);
-        }
-
-        private static bool IsTagDisabledOnTv(TreeView tv, TreeNode? node)
-        {
-            return tv is DatGrouperTreeView dgtv && dgtv.IsNodeDisabled(node);
-        }
-
+        private static bool IsHotRow(TreeView tv, TreeNode node) =>
+            tv is DatGrouperTreeView dgtv && ReferenceEquals(dgtv.HotNode, node);
+        
+        private static bool IsTagDisabledOnTv(TreeView tv, TreeNode? node) =>
+            tv is DatGrouperTreeView dgtv && dgtv.IsNodeDisabled(node);
+        
         private static void ApplyHotRowOverlay(
             Graphics g,
             TreeView tv,
@@ -1479,7 +1445,7 @@ namespace datinate.app
             int rightMost,
             int rowWidth)
         {
-            // Keep the overlay within the visible client width.
+            // NOTE: Keep the overlay within the visible client width.
             int maxW = rowWidth - bounds.Left;
             if (maxW <= 0)
                 return;
@@ -1495,36 +1461,20 @@ namespace datinate.app
             using (var fill = new SolidBrush(Color.FromArgb(HOVER_ROW_FillAlpha, HOVER_ROW_FillRgb)))
                 g.FillRectangle(fill, r);
 
-            if (HOVER_ROW_DrawBorder)
+
+            var rr = r;
+            rr.Width -= 1;
+            rr.Height -= 1;
+
+            if (HOVER_ROW_BorderInsetPx != 0)
+                rr.Inflate(-HOVER_ROW_BorderInsetPx, -HOVER_ROW_BorderInsetPx);
+
+            if (rr.Width > 0 && rr.Height > 0)
             {
-                var rr = r;
-                rr.Width -= 1;
-                rr.Height -= 1;
-
-                if (HOVER_ROW_BorderInsetPx != 0)
-                    rr.Inflate(-HOVER_ROW_BorderInsetPx, -HOVER_ROW_BorderInsetPx);
-
-                if (rr.Width > 0 && rr.Height > 0)
-                {
-                    using var pen = new Pen(Color.FromArgb(HOVER_ROW_BorderAlpha, HOVER_ROW_BorderRgb), 1f);
-                    g.DrawRectangle(pen, rr);
-                }
+                using var pen = new Pen(Color.FromArgb(HOVER_ROW_BorderAlpha, HOVER_ROW_BorderRgb), 1f);
+                g.DrawRectangle(pen, rr);
             }
-
-            if (HOVER_ROW_DrawLeftAccentBar)
-            {
-                var bar = new Rectangle(
-                    r.Left,
-                    r.Top + 1,
-                    HOVER_ROW_LeftBarWidthPx,
-                    Math.Max(0, r.Height - 2));
-
-                if (bar.Width > 0 && bar.Height > 0)
-                {
-                    using var b = new SolidBrush(Color.FromArgb(HOVER_ROW_LeftBarAlpha, HOVER_ROW_LeftBarRgb));
-                    g.FillRectangle(b, bar);
-                }
-            }
+            
         }
         private static int GetAliasSeparatorWidth(Graphics g, Font font)
         {

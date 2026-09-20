@@ -276,27 +276,34 @@ namespace datinate.app
                 contextMenu.Reset();
             }
         }
-        public void SetMediaCache(IReadOnlyDictionary<IGameFamily, IMediaCollection> mediaCache)
+        public void SetMediaCache(
+            IReadOnlyDictionary<IGameFamily, IMediaCollection> mediaCache)
         {
-            var newScoringExemptFamilies = new HashSet<IGameFamily>();
-
-            foreach (var family in familyOrder)
-            {
-                if (mediaCache.TryGetValue(family, out var collection) &&
-                    collection.IsScoringExempt)
-                {
-                    _ = newScoringExemptFamilies.Add(family);
-                }
-            }
-
-            var changedFamilies = new HashSet<IGameFamily>(scoringExemptFamilies);
-            changedFamilies.SymmetricExceptWith(newScoringExemptFamilies);
-
-            this.mediaCache = mediaCache;
-            scoringExemptFamilies = newScoringExemptFamilies;
-
+            // Keep this entire update on the UI thread so it cannot be reordered against
+            // SetView()/ResetView(), which may otherwise clear the media cache after it is assigned.
             Ui(() =>
             {
+                var newScoringExemptFamilies =
+                    new HashSet<IGameFamily>();
+
+                foreach (var family in familyOrder)
+                {
+                    if (mediaCache.TryGetValue(family, out var collection) &&
+                        collection.IsScoringExempt)
+                    {
+                        _ = newScoringExemptFamilies.Add(family);
+                    }
+                }
+
+                var changedFamilies =
+                    new HashSet<IGameFamily>(scoringExemptFamilies);
+
+                changedFamilies.SymmetricExceptWith(
+                    newScoringExemptFamilies);
+
+                this.mediaCache = mediaCache;
+                scoringExemptFamilies = newScoringExemptFamilies;
+
                 if (isSurrogate && changedFamilies.Count > 0)
                     ReconcileScoringExemptFamilies(changedFamilies);
 
@@ -568,6 +575,7 @@ namespace datinate.app
             int redoCount, 
             IReadOnlySet<IGameEntity> affectedEntities)
         {
+            Debug.WriteLine("_____________________DELTA: "+mediaCache);
             Ui(() =>
             {
                 contextMenu.SetUndoRedoEnabled(undoCount > 0, redoCount > 0);
@@ -1822,10 +1830,12 @@ namespace datinate.app
             TreeNode node,
             object? nodeTag)
         {
+            var mediaCollection = GetNodeMediaCollection(node);
+
             node.ToolTipText = nodeTag switch
             {
                 IGameFamily family =>
-                    TreeNodeNameUtil.CreateTooltip(family),
+                    TreeNodeNameUtil.CreateTooltip(family, mediaCollection),
 
                 IGame game =>
                     TreeNodeNameUtil.CreateTooltip(game),

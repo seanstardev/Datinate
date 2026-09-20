@@ -67,6 +67,7 @@ namespace datinate.app
             if (DatinateHelper.IsDebugBuild)
             {
                 DatGrouperModeStartupProjectName = "Nintendo - SNES";
+                //DatGrouperModeStartupProjectName = "Atari - Lynx";
             }
 
             Facade.Create(typeof(Facade), this);
