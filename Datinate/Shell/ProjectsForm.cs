@@ -57,15 +57,5 @@ namespace datinate.app
         {
 
         }
-        //protected override CreateParams CreateParams
-        //{
-        //    get
-        //    {
-        //        const int CS_NOCLOSE = 0x200;
-        //        var cp = base.CreateParams;
-        //        cp.ClassStyle |= CS_NOCLOSE;
-        //        return cp;
-        //    }
-        //}
     }
 }

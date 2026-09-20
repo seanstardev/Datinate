@@ -247,8 +247,9 @@ namespace datinate.app
         private static IReadOnlyCollection<string> GetFamilySources(
             IGameFamily family)
         {
-            var sources =
-                new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+            var sources = new List<string>();
+            var seenSources =
+                new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var game in family.GetAllGames())
             {
@@ -265,20 +266,15 @@ namespace datinate.app
 
             void AddSource(IGamePart part)
             {
-                string? directoryId = part.GetDirectoryId();
+                string source =
+                    DatinatePointerHelper.GetDatGroupAndFriendlyName(
+                        part.GetDirectoryId());
 
-                if (string.IsNullOrWhiteSpace(directoryId))
+                if (string.IsNullOrWhiteSpace(source))
                     return;
 
-                var datGroup =
-                    DatinatePointerHelper.GetDatGroup(directoryId);
-
-                string name = datGroup
-                    .ToString()
-                    .Replace('_', ' ');
-
-                if (!string.IsNullOrWhiteSpace(name))
-                    sources.Add(name);
+                if (seenSources.Add(source))
+                    sources.Add(source);
             }
         }
 

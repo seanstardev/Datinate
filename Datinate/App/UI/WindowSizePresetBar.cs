@@ -570,7 +570,7 @@ namespace datinate.app
                 attachedForm.HandleCreated -= AttachedForm_HandleCreated;
                 attachedForm.HandleDestroyed -= AttachedForm_HandleDestroyed;
 
-                HideResizeOverlay();
+                HideResizeOverlay(false);
             }
 
             attachedForm = null;
@@ -729,7 +729,7 @@ namespace datinate.app
 
         private void AttachedForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
-            HideResizeOverlay();
+            HideResizeOverlay(false);
         }
 
         private void AttachedForm_FormClosed(object? sender, FormClosedEventArgs e)
@@ -1168,14 +1168,6 @@ namespace datinate.app
 
                 try
                 {
-                    Application.DoEvents();
-                }
-                catch
-                {
-                }
-
-                try
-                {
                     NativeMethods.DwmFlush();
                 }
                 catch
@@ -1203,13 +1195,19 @@ namespace datinate.app
                 NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_SHOWWINDOW);
         }
 
-        private void HideResizeOverlay()
+        private void HideResizeOverlay(bool repaintAttachedForm = true)
         {
             if (overlayHideTimer != null)
                 overlayHideTimer.Stop();
 
-            if (overlayForm != null && !overlayForm.IsDisposed && overlayForm.IsHandleCreated)
-                NativeMethods.ShowWindow(overlayForm.Handle, NativeMethods.SW_HIDE);
+            if (overlayForm != null &&
+                !overlayForm.IsDisposed &&
+                overlayForm.IsHandleCreated)
+            {
+                NativeMethods.ShowWindow(
+                    overlayForm.Handle,
+                    NativeMethods.SW_HIDE);
+            }
 
             overlayPreviewBounds = null;
             transitionOverlayActive = false;
@@ -1217,13 +1215,14 @@ namespace datinate.app
             resizeOverlayActive = false;
             overlayRenderPrimitiveValue = 0;
 
-            if (attachedForm != null && !attachedForm.IsDisposed)
+            if (repaintAttachedForm &&
+                attachedForm != null &&
+                !attachedForm.IsDisposed)
             {
                 attachedForm.Invalidate(true);
                 attachedForm.Update();
             }
         }
-
         private int HitTest(Point point)
         {
             Rectangle[] segments = GetSegmentRects();

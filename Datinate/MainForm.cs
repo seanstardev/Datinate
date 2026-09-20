@@ -654,8 +654,15 @@ namespace datinate.app
             StartAppExit();
         }
 
+        private bool appExitStarted;
+
         private void StartAppExit()
         {
+            if (appExitStarted)
+                return;
+
+            appExitStarted = true;
+
             AddToProjectForm.AppClosing = true;
             CompareForm.AppClosing = true;
             CreateDatForm.AppClosing = true;
