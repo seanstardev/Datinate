@@ -22,7 +22,8 @@ namespace datinate.app
 
     public sealed class DatGrouperTreeView : TreeView, IDatGrouperTree
     {        
-        public event Action? SelectionCleared;
+        public event Action? SelectionClearedEvt;
+        public event Action<TreeNode, object?>? NodeTooltopActivatingEvt;
         
 
         private const bool HotTrackingEnabled = true;
@@ -187,8 +188,7 @@ namespace datinate.app
                 (IntPtr)TVS_EX_DOUBLEBUFFER);
 
             // NOTE: Keep node tooltips visible longer while the cursor remains
-            // over the node image. They can still be popped immediately when
-            // the mouse leaves the image.
+            // over the node image.
             SetNodeToolTipAutoPopDelay(15000);
 
             scrollManager.HandleHostHandleCreated();
@@ -339,7 +339,7 @@ namespace datinate.app
                 SetFocusNode(null);
             }
 
-            SelectionCleared?.Invoke();
+            SelectionClearedEvt?.Invoke();
         }
 
         public void ClearHiddenNodes()
@@ -501,18 +501,26 @@ namespace datinate.app
                     m.LParam,
                     IntPtr.Size * 2) == TTN_GETDISPINFOW)
             {
-                var mousePoint =
-                    PointToClient(Cursor.Position);
+                var mousePoint = PointToClient(Cursor.Position);
+                var hit = HitTest(mousePoint);
 
-                if (!IsPointOverNodeImage(mousePoint))
+                if (hit.Node == null ||
+                    (hit.Location & TreeViewHitTestLocations.Image) == 0)
                 {
                     m.Result = IntPtr.Zero;
                     return;
                 }
+
+                // NOTE: Allow the owner to refresh the tooltip from the node's
+                // current backing data immediately before it is displayed.
+                NodeTooltopActivatingEvt?.Invoke(
+                    hit.Node,
+                    hit.Node.Tag);
             }
 
             base.WndProc(ref m);
         }
+
         private bool IsEmptyTreeOverlayLikelyActive()
         {
             if (Nodes.Count == 1 &&

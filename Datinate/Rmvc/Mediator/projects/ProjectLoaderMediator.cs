@@ -19,9 +19,9 @@ namespace com.RADIO.Datinate.RMVC
             view?.ReloadCurrentProject();
         }
 
-        public void SetView(DatGrouperProjectDTO[] projectVOs, string? projectToLoad = null) 
+        public void SetView(DatGrouperProjectDTO[] projectVOs, string? projectNameToLoad = null) 
         {
-            view?.SetView(projectVOs, projectToLoad);
+            view?.SetView(projectVOs, projectNameToLoad);
         }
 
         public void ClearView()

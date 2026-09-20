@@ -5,7 +5,6 @@ using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text;
 using static app.datinate.DatGrouperEditDelta;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 using static datinate.app.DatGrouperTreeView;
@@ -15,17 +14,14 @@ namespace datinate.app
     public partial class DatGrouperUiBase : UserControl
     {
         public static IDatGrouperNodePreview? NodePreview;
+        
         public event Action? InitialisedEvt;
-
         public event Action<IGameEntity?>? SelectedNodeChangedEvt;
-
         public event Action<string>? SearchGameNameEvt;
         public event Action<DatGrouperEntryDTO>? ShowGameMediaEvt;
         public event Action<IGameEntity>? ShowGroupingReportEvt;
-
         public event Action<DatGrouperEntryDTO>? GameEntityDragStartEvt;
         public event Action? GameEntityDragStopEvt;
-
         public event Action<DatGrouperUiBase, string?>? SurrogateToggleEvt;
         public event Action<bool>? ToggleRenderAliasesEvt;
         public Action? ClearDragTargetDisabledNodesEvt;
@@ -130,7 +126,9 @@ namespace datinate.app
             treeView.IsSelectableTag = tag => tag is IGameEntity;
             treeView.ClearSelectionOnEmptySpaceClick = true;
             treeView.ClearSelectionOnNonSelectableClick = true;
-            treeView.SelectionCleared += treeView_SelectionCleared;
+
+            treeView.SelectionClearedEvt += treeView_SelectionCleared;
+            treeView.NodeTooltopActivatingEvt += treeView_NodeTooltopActivating;
 
             contextMenu = new DatGrouperContextMenu(this as CuratedUI is { });
             contextMenu.UndoEvt += OnUndo;
@@ -1007,8 +1005,7 @@ namespace datinate.app
             var gameFamilyNode = new TreeNode(gameFamily.GetFamilyDisplayName())
             {
                 Tag = gameFamily,
-                NodeFont = familyNodeFont,
-                ToolTipText = TreeNodeNameUtil.CreateTooltip(gameFamily)
+                NodeFont = familyNodeFont
             };
 
             hasGreenCandidate = false;
@@ -1029,7 +1026,6 @@ namespace datinate.app
 
                 var gameNode = gameFamilyNode.Nodes.Add(string.Empty);
                 gameNode.Tag = game;
-                gameNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(game);
                 gameNode.ForeColor = Color.DarkSlateGray;
 
                 var partsForCounts = new List<IGamePart>(parts.Length);
@@ -1055,7 +1051,6 @@ namespace datinate.app
 
                     var partNode = gameNode.Nodes.Add(TreeNodeNameUtil.GetGamePartNameRender(gamePart));
                     partNode.Tag = gamePart;
-                    partNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(gamePart);
                     
                     ApplyPartNodeVisual(partNode, gamePart);
                 }
@@ -1092,8 +1087,7 @@ namespace datinate.app
             var gameFamilyNode = new TreeNode(gameFamily.GetFamilyDisplayName())
             {
                 Tag = gameFamily,
-                NodeFont = familyNodeFont,
-                ToolTipText = TreeNodeNameUtil.CreateTooltip(gameFamily)
+                NodeFont = familyNodeFont
             };
 
             hasGreenCandidate = false;
@@ -1109,7 +1103,6 @@ namespace datinate.app
                     TreeNodeNameUtil.GetGameNameRender(game.GetGameParts(false), game.GetNameWithoutExt()));
                 
                 gameNode.Tag = game;
-                gameNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(game);
                 gameNode.ForeColor = Color.DarkSlateGray;
 
                 var parts = game.GetGameParts(false);
@@ -1120,7 +1113,6 @@ namespace datinate.app
 
                     var partNode = gameNode.Nodes.Add(TreeNodeNameUtil.GetGamePartNameRender(gamePart));
                     partNode.Tag = gamePart;
-                    partNode.ToolTipText = TreeNodeNameUtil.CreateTooltip(gamePart);
 
                     ApplyPartNodeVisual(partNode, gamePart);
                 }
@@ -1229,7 +1221,8 @@ namespace datinate.app
             treeView.DrawNode -= treeView_DrawNode;
             treeView.NodeMouseClick -= treeView_NodeMouseClick;
             treeView.MouseUp -= treeView_MouseUp;
-            treeView.SelectionCleared -= treeView_SelectionCleared;
+            treeView.SelectionClearedEvt -= treeView_SelectionCleared;
+            treeView.NodeTooltopActivatingEvt -= treeView_NodeTooltopActivating;
 
             ResetView();
 
@@ -1245,7 +1238,8 @@ namespace datinate.app
 
             treeView.DrawNode -= treeView_DrawNode;
 
-            treeView.SelectionCleared -= treeView_SelectionCleared;
+            treeView.SelectionClearedEvt -= treeView_SelectionCleared;
+            treeView.NodeTooltopActivatingEvt -= treeView_NodeTooltopActivating;
             treeView.AfterSelect -= treeView_AfterSelect;
             treeView.NodeMouseClick -= treeView_NodeMouseClick;
             treeView.MouseUp -= treeView_MouseUp;
@@ -1288,7 +1282,8 @@ namespace datinate.app
             treeView.ClearSelectionOnEmptySpaceClick = true;
             treeView.ClearSelectionOnNonSelectableClick = true;
 
-            treeView.SelectionCleared += treeView_SelectionCleared;
+            treeView.SelectionClearedEvt += treeView_SelectionCleared;
+            treeView.NodeTooltopActivatingEvt += treeView_NodeTooltopActivating;
             treeView.AfterSelect += treeView_AfterSelect;
             treeView.NodeMouseClick += treeView_NodeMouseClick;
             treeView.MouseUp += treeView_MouseUp;
@@ -1821,6 +1816,25 @@ namespace datinate.app
                 }
                 return target;
             } 
+        }
+
+        private void treeView_NodeTooltopActivating(
+            TreeNode node,
+            object? nodeTag)
+        {
+            node.ToolTipText = nodeTag switch
+            {
+                IGameFamily family =>
+                    TreeNodeNameUtil.CreateTooltip(family),
+
+                IGame game =>
+                    TreeNodeNameUtil.CreateTooltip(game),
+
+                IGamePart part =>
+                    TreeNodeNameUtil.CreateTooltip(part),
+
+                _ => string.Empty
+            };
         }
 
         private void treeView_SelectionCleared()

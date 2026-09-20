@@ -43,7 +43,12 @@ namespace datinate.app
 
         private DatGrouperProjectDTO? currentProject = null;
 
-        
+        private readonly object pendingSetViewLock = new();
+        private DatGrouperProjectDTO[]? pendingSetViewProjects;
+        private string? pendingSetViewProjectToLoad;
+        private volatile bool viewLoaded;
+
+
         // FlowLayoutPanel drag-reorder support per container (same-panel only).
         private readonly Dictionary<FlowLayoutPanel, FlowReorderDragManager> dragManagers = new();
 
@@ -71,53 +76,19 @@ namespace datinate.app
             UpdateProjectBrowserState();
         }
 
-        public void SetView(DatGrouperProjectDTO[] projects, string? projectToLoad = null)
+        public void SetView(
+            DatGrouperProjectDTO[] projects,
+            string? projectToLoad = null)
         {
-            // NOTE: Do NOT run in UI thread as projects get set before the UI gets rendered.
-
-            if (isCreatingNewProject)
+            lock (pendingSetViewLock)
             {
-                isCreatingNewProject = false;
-                projectNameBeforeNewMode = null;
+                pendingSetViewProjects = projects;
+                pendingSetViewProjectToLoad = projectToLoad;
             }
 
-            ClearView();
-
-            ignoreProjectSelectionChange = true;
-            try
-            {
-                projectListBox.Items.Clear();
-                projectModel = new SortedDictionary<string, DatGrouperProjectDTO>();
-
-                for (int i = 0; i < projects.Length; i++)
-                {
-                    projectListBox.Items.Add(projects[i].ProjectName);
-                    projectModel.Add(projects[i].ProjectName, projects[i]);
-                }
-
-                projectListBox.ClearSelected();
-            }
-            finally
-            {
-                ignoreProjectSelectionChange = false;
-            }
-
-            UpdateProjectBrowserState();
-
-            if (string.IsNullOrWhiteSpace(projectToLoad) == false && SelectProjectInList(projectToLoad))
-                return;
-
-            if (projectListBox.Items.Count == 0)
-            {
-                BeginNewProjectMode();
-                return;
-            }
-
-            currentProject = null;
-            projectNameText.Text = string.Empty;
-            projectNameText.Enabled = false;
+            TryApplyPendingSetView();
         }
-
+        
         public DatGrouperProjectEntry[] GetAllDatHeadlines()
         {
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
@@ -161,7 +132,97 @@ namespace datinate.app
         {
             Facade.UnregisterActor(this);
         }
+        private void TryApplyPendingSetView()
+        {
+            if (IsDisposed || Disposing)
+                return;
 
+            // This is fine. We DON'T throw the request away.
+            // OnLoad will try again once the view is actually ready.
+            if (!viewLoaded || !IsHandleCreated)
+                return;
+
+            if (InvokeRequired)
+            {
+                BeginInvoke((Action)TryApplyPendingSetView);
+                return;
+            }
+
+            DatGrouperProjectDTO[]? projects;
+            string? projectToLoad;
+
+            lock (pendingSetViewLock)
+            {
+                projects = pendingSetViewProjects;
+                projectToLoad = pendingSetViewProjectToLoad;
+
+                pendingSetViewProjects = null;
+                pendingSetViewProjectToLoad = null;
+            }
+
+            if (projects == null)
+                return;
+
+            SetViewCore(projects, projectToLoad);
+        }
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            viewLoaded = true;
+
+            // Defer once more so the initial WinForms layout/load cycle can finish.
+            BeginInvoke((Action)TryApplyPendingSetView);
+        }
+        private void SetViewCore(
+    DatGrouperProjectDTO[] projects,
+    string? projectToLoad)
+        {
+            if (isCreatingNewProject)
+            {
+                isCreatingNewProject = false;
+                projectNameBeforeNewMode = null;
+            }
+
+            ClearView();
+
+            ignoreProjectSelectionChange = true;
+            try
+            {
+                projectListBox.Items.Clear();
+                projectModel = new SortedDictionary<string, DatGrouperProjectDTO>();
+
+                for (int i = 0; i < projects.Length; i++)
+                {
+                    projectListBox.Items.Add(projects[i].ProjectName);
+                    projectModel.Add(projects[i].ProjectName, projects[i]);
+                }
+
+                projectListBox.ClearSelected();
+            }
+            finally
+            {
+                ignoreProjectSelectionChange = false;
+            }
+
+            UpdateProjectBrowserState();
+
+            if (!string.IsNullOrWhiteSpace(projectToLoad) &&
+                SelectProjectInList(projectToLoad))
+            {
+                return;
+            }
+
+            if (projectListBox.Items.Count == 0)
+            {
+                BeginNewProjectMode();
+                return;
+            }
+
+            currentProject = null;
+            projectNameText.Text = string.Empty;
+            projectNameText.Enabled = false;
+        }
         private DatGrouperProjectDTO? GetProject()
         {
             var projectName = projectNameText.Text.Trim();
@@ -191,10 +252,10 @@ namespace datinate.app
                 return;
 
             p.SuspendLayout();
+
             try
             {
-                p.Controls.Remove(datUI);
-                DisposeDatUI(datUI);
+                RemoveAndDisposeDatUI(p, datUI);
                 CheckParentSetup(p);
             }
             finally
@@ -243,7 +304,15 @@ namespace datinate.app
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
             return list.ToArray();
         }
+        private void RemoveAndDisposeDatUI(FlowLayoutPanel p, ProjectDatUI datUI)
+        {
+            if (dragManagers.TryGetValue(p, out var mgr))
+                mgr.Unregister(datUI);
 
+            p.Controls.Remove(datUI);
+
+            DisposeDatUI(datUI);
+        }
 
         public void ClearView()
         {
@@ -265,9 +334,11 @@ namespace datinate.app
 
         void EmptyContainer(FlowLayoutPanel p)
         {
-            List<ProjectDatUI> list = new List<ProjectDatUI>(p.Controls.Count);
+            List<ProjectDatUI> list =
+                new List<ProjectDatUI>(p.Controls.Count);
 
             p.SuspendLayout();
+
             try
             {
                 for (int i = p.Controls.Count - 1; i >= 0; i--)
@@ -277,10 +348,7 @@ namespace datinate.app
                 }
 
                 for (int i = 0; i < list.Count; i++)
-                    p.Controls.Remove(list[i]);
-
-                for (int i = 0; i < list.Count; i++)
-                    DisposeDatUI(list[i]);
+                    RemoveAndDisposeDatUI(p, list[i]);
             }
             finally
             {
@@ -654,7 +722,7 @@ namespace datinate.app
             if (!projectModel.TryGetValue(clickedProjectName, out var project))
                 return;
 
-            LoadingProjectEvt?.Invoke();
+            //LoadingProjectEvt?.Invoke();
             LoadProject(project);
         }
         private void projectListBox_Resize(object? sender, EventArgs e)
@@ -752,7 +820,7 @@ namespace datinate.app
             if (string.Equals(currentProject?.ProjectName, projectName, StringComparison.Ordinal))
                 return;
 
-            LoadingProjectEvt?.Invoke();
+            //LoadingProjectEvt?.Invoke();
             LoadProject(project);
         }
 
@@ -886,12 +954,6 @@ namespace datinate.app
 
                 AddDatRange(projectVO.SoftwareEntries, DAT_GROUP_TARGET_ENUM.GAMES_INCLUDE_GROUP);
                 AddDatRange(projectVO.AuxEntries, DAT_GROUP_TARGET_ENUM.MEDIA_INCLUDE_GROUP);
-
-                DatGrouperProjectEntry[] allVOs = DatGrouperProjectDTO.GetAllProjectEntries(projectVO);
-
-                for (int i = 0; i < allVOs.Length; i++)
-                    if (!File.Exists(allVOs[i].DatFullpath))
-                        break;
 
                 projectComment = commentText.Text =
                     string.IsNullOrWhiteSpace(projectVO.Comment)
@@ -1100,9 +1162,6 @@ namespace datinate.app
             datUI.LoadExpressionsEvt -= OnLoadExpressions;
 
             datUIs.Remove(datUI);
-
-            if (datUI.Parent is FlowLayoutPanel p && dragManagers.TryGetValue(p, out var mgr))
-                mgr.Unregister(datUI);
 
             datUI.Dispose();
         }

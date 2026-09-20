@@ -5,7 +5,7 @@ namespace com.RADIO.Datinate.RMVC
 {
     public class CheckDatGrouperProjectValidCmd : RCommand
     {
-        public bool DatAndExpressionFilesExist { get; private set; }
+        public bool AllDatAndExpressionFilesExist { get; private set; }
         private readonly DatGrouperProjectDTO dto;
 
         public CheckDatGrouperProjectValidCmd(DatGrouperProjectDTO dto)
@@ -15,7 +15,7 @@ namespace com.RADIO.Datinate.RMVC
 
         protected override void Run()
         {
-            DatAndExpressionFilesExist =
+            AllDatAndExpressionFilesExist =
                 DatGrouperProjectDTO.GetAllDatFilesExist(dto) &&
                 DatGrouperProjectDTO.GetAllExpressionFilesExistOrAreEmpty(dto);
         }

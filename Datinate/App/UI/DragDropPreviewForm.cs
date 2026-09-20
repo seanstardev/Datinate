@@ -58,7 +58,6 @@ namespace datinate.app
         private readonly Font captionFont2;
         private readonly object captionSync = new object();
         private volatile int captionDirty;
-        private const int CaptionDebounceMs = 200;
 
         private const int CaptionChangeAnimDurationMs = 360;
         private const int CaptionChangeAnimMaxAlpha = 120;
@@ -200,23 +199,81 @@ namespace datinate.app
             return Math.Max(0, Math.Min(255, (int)Math.Round(CaptionChangeAnimMaxAlpha * eased)));
         }
 
-        private void EnsureClearCaptionTimer()
-        {
-            if (clearCaptionTimer != null)
-                return;
-
-            clearCaptionTimer = new System.Windows.Forms.Timer
-            {
-                Interval = CaptionDebounceMs
-            };
-
-            clearCaptionTimer.Tick += ClearCaptionTimer_Tick;
-        }
-
         private static Bitmap CaptureTreeRectBitmap(TreeView tv, Rectangle rect)
         {
-            var safe = Rectangle.Intersect(new Rectangle(Point.Empty, tv.ClientSize), rect);
+            var safe = Rectangle.Intersect(
+                new Rectangle(Point.Empty, tv.ClientSize),
+                rect);
 
+            var bmp = new Bitmap(
+                Math.Max(1, safe.Width),
+                Math.Max(1, safe.Height),
+                PixelFormat.Format32bppPArgb);
+
+
+            /*
+             * Fast path.
+             *
+             * The original implementation renders the entire TreeView and then crops
+             * the small area we actually need.
+             *
+             * Instead, render directly into a bitmap the size of the required area.
+             * Shift the target DC so that the requested TreeView rectangle maps onto
+             * the top-left of this bitmap.
+             *
+             * If anything about this fails, fall through to the original implementation
+             * below unchanged.
+             */
+            if (safe.Width > 0 &&
+                safe.Height > 0 &&
+                tv.IsHandleCreated)
+            {
+                using var g = Graphics.FromImage(bmp);
+
+                var hdc = g.GetHdc();
+
+                try
+                {
+                    int savedDc = SaveDC(hdc);
+
+                    if (savedDc != 0)
+                    {
+                        try
+                        {
+                            if (SetViewportOrgEx(
+                                    hdc,
+                                    -safe.X,
+                                    -safe.Y,
+                                    IntPtr.Zero))
+                            {
+                                if (PrintWindow(
+                                        tv.Handle,
+                                        hdc,
+                                        0x00000001))
+                                {
+                                    return bmp;
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            RestoreDC(hdc, savedDc);
+                        }
+                    }
+                }
+                finally
+                {
+                    g.ReleaseHdc(hdc);
+                }
+            }
+
+
+            /*
+             * Original implementation.
+             *
+             * Deliberately retained as the fallback because this capture path is
+             * already proven to work correctly.
+             */
             using var full = new Bitmap(
                 Math.Max(1, tv.ClientSize.Width),
                 Math.Max(1, tv.ClientSize.Height),
@@ -227,10 +284,14 @@ namespace datinate.app
             using (var g = Graphics.FromImage(full))
             {
                 var hdc = g.GetHdc();
+
                 try
                 {
-                    if (tv.IsHandleCreated && PrintWindow(tv.Handle, hdc, 0x00000001))
+                    if (tv.IsHandleCreated &&
+                        PrintWindow(tv.Handle, hdc, 0x00000001))
+                    {
                         captured = true;
+                    }
                 }
                 finally
                 {
@@ -241,19 +302,23 @@ namespace datinate.app
             if (!captured)
             {
                 using var g = Graphics.FromImage(full);
-                tv.DrawToBitmap(full, new Rectangle(Point.Empty, full.Size));
-            }
 
-            var bmp = new Bitmap(
-                Math.Max(1, safe.Width),
-                Math.Max(1, safe.Height),
-                PixelFormat.Format32bppPArgb);
+                tv.DrawToBitmap(
+                    full,
+                    new Rectangle(
+                        Point.Empty,
+                        full.Size));
+            }
 
             using (var g = Graphics.FromImage(bmp))
             {
                 g.DrawImage(
                     full,
-                    new Rectangle(0, 0, bmp.Width, bmp.Height),
+                    new Rectangle(
+                        0,
+                        0,
+                        bmp.Width,
+                        bmp.Height),
                     safe,
                     GraphicsUnit.Pixel);
             }
@@ -1161,6 +1226,18 @@ namespace datinate.app
 
         [DllImport("user32.dll", EntryPoint = "PrintWindow", SetLastError = true)]
         private static extern bool PrintWindowNative(IntPtr hwnd, IntPtr hdcBlt, uint nFlags);
+        [DllImport("gdi32.dll")]
+        private static extern int SaveDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool RestoreDC(IntPtr hdc, int nSavedDC);
+
+        [DllImport("gdi32.dll", SetLastError = true)]
+        private static extern bool SetViewportOrgEx(
+            IntPtr hdc,
+            int x,
+            int y,
+            IntPtr lpPoint);
 
         private static bool IsDescendantOf(TreeNode ancestor, TreeNode node)
         {

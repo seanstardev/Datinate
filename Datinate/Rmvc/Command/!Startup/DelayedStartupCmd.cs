@@ -26,20 +26,19 @@ namespace Datinate.Rmvc.Command
                     var cmd = new CheckDatGrouperProjectValidCmd(datGrouperStartupProject);
                     base.ExecuteCommand(cmd);
 
-                    if (cmd.DatAndExpressionFilesExist)
+                    if (cmd.AllDatAndExpressionFilesExist)
                     {
                         if (Facade.Instance?.DatGrouperSessionModel is { } datGrouperSessionModel)
                             datGrouperSessionModel.DatGrouperStartupProject = datGrouperStartupProject;
                     }
                     else
                     {
-                        datGrouperStartupProject = null;
                         datGrouperStartupProjectNeedsEditing = true;
                     }
                 }
             }
             
-            if (datGrouperStartupProject == null && datGrouperStartupProjectNeedsEditing == false)
+            if (datGrouperStartupProject == null)
             {
                 var datDbProxy = Facade.Instance?.DatDbProxy;
 
@@ -82,10 +81,10 @@ namespace Datinate.Rmvc.Command
             {
                 Facade.Instance?.LandingMediator?.ActivateView();
                 base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
-                base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(null, true));
+                base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(datGrouperStartupProject!.ProjectName, true));
                 Facade.Instance?.Shell?.SetMainFormVisible(false);
 
-                if ((datGrouperStartupProjectNeedsEditing == false))
+                if (datGrouperStartupProjectNeedsEditing == false)
                     await base.ExecuteCommandAsync(new StartDatGrouperCmd(datGrouperStartupProject!));
             }
 
