@@ -27,7 +27,7 @@ namespace com.RADIO.Datinate.RMVC
 
             var ctx = SynchronizationContext.Current;
 
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Loading Dats...", 0, 100));
+            base.ExecuteCommand(new ShowProgressCmd("Loading Dats...", 0, 100));
 
             Facade.Instance?.Shell?.SetProgressFormVisible(true);
 

@@ -40,7 +40,7 @@ namespace com.RADIO.Datinate.RMVC
             List<string> unrecognisedDATs = new List<string>();
 
             // Note: We have to send something to force Progress view update:
-            await base.ExecuteCommandAsync(
+            base.ExecuteCommand(
                 new ShowProgressCmd("Fetching DAT Summary Information", 0, datPaths.Length));
 
             List<DatSummaryVO> datsSummaries = new List<DatSummaryVO>();
@@ -77,7 +77,7 @@ namespace com.RADIO.Datinate.RMVC
                 }
                 else
                 {
-                    await base.ExecuteCommandAsync(new ShowProgressCmd(
+                    base.ExecuteCommand(new ShowProgressCmd(
                         "Fetching DAT Summary Information (" + Path.GetDirectoryName(summary.DatFullpath) + " > " + Path.GetFileNameWithoutExtension(summary.DatFullpath) + ")", i + 1, datPaths.Length));
 
                     datsSummaries.Add(summary);

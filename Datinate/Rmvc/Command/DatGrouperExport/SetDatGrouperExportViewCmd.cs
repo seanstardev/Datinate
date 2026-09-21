@@ -43,7 +43,7 @@ namespace com.RADIO.Datinate.RMVC
                                 ": " +
                                 lookupName;
 
-                            base.ExecuteCommandAsync(new ShowProgressCmd(message, current, total));
+                            base.ExecuteCommand(new ShowProgressCmd(message, current, total));
                         });
 
                 var reconciled = ReconcileMediaExportPriorities(

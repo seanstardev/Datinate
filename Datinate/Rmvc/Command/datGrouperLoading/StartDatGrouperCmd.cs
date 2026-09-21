@@ -30,7 +30,7 @@ namespace com.RADIO.Datinate.RMVC
             if (autoGroupModel == null || appDataProxy == null) 
                 return;
 
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Loading Project DATs.", 1, 4));
+            base.ExecuteCommand(new ShowProgressCmd("Loading Project DATs.", 1, 4));
 
             var cmd = new BuildSmartSoftwareDatsCmd(projectVO);
             await base.ExecuteCommandAsync(cmd);
@@ -41,7 +41,7 @@ namespace com.RADIO.Datinate.RMVC
 
             var keys = new HashSet<string>(StringComparer.Ordinal);
 
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Running DAT Grouper.", 2, 4));
+            base.ExecuteCommand(new ShowProgressCmd("Running DAT Grouper.", 2, 4));
 
             var families = autoGroupModel.Build(
                 new AutoGrouperOptions(),
@@ -57,7 +57,7 @@ namespace com.RADIO.Datinate.RMVC
                     controlsMediator.SetCompletionStats(0, sessionModel.PartsTotal);
             }
         
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Rendering Results.", 3, 4));
+            base.ExecuteCommand(new ShowProgressCmd("Rendering Results.", 3, 4));
 
             base.ExecuteCommand(
                 new InitialiseRadioDatModelCmd(

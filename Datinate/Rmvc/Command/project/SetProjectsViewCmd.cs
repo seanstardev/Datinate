@@ -6,7 +6,7 @@ namespace com.RADIO.Datinate.RMVC
     {
         protected async override Task RunAsync()
         {
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Reloading Projects View.", 1, 2));
+            base.ExecuteCommand(new ShowProgressCmd("Reloading Projects View.", 1, 2));
 
             Facade.Instance?.Shell?.ShowRbProjectsView();
             Facade.Instance?.Shell?.SetProjectsFormTitle("DAT Grouper");

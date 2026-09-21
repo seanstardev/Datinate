@@ -29,7 +29,7 @@ namespace com.RADIO.Datinate.RMVC
             if (cmd.AutoLoadSuccessful && Facade.Instance?.DatGrouperSessionModel != null)
                 Facade.Instance.DatGrouperSessionModel.ContentPathsResolved = true;
 
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Rendering Results", 4, 5));
+            base.ExecuteCommand(new ShowProgressCmd("Rendering Results", 4, 5));
 
             Dictionary<string, CurationPartReport> partReportsDictionary; 
 

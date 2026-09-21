@@ -13,7 +13,7 @@ namespace com.RADIO.Datinate.RMVC
 
         protected override async Task RunAsync()
         {
-            await base.ExecuteCommandAsync(new ShowProgressCmd("Loading View", 1, 1));
+            base.ExecuteCommand(new ShowProgressCmd("Loading View", 1, 1));
 
             Facade.Instance?.Shell?.SetProgressFormVisible(false);
             base.ExecuteCommand(new ClearProgressCmd());
