@@ -306,7 +306,7 @@
             label2.Name = "label2";
             label2.Size = new Size(277, 15);
             label2.TabIndex = 3;
-            label2.Text = "Skip Games where all Parts are marked as Excluded.";
+            label2.Text = "Skip Games where all Parts are marked as Bad.";
             // 
             // export1g1rCB
             // 
@@ -325,7 +325,7 @@
             skipExcludedGamesCB.Name = "skipExcludedGamesCB";
             skipExcludedGamesCB.Size = new Size(236, 19);
             skipExcludedGamesCB.TabIndex = 2;
-            skipExcludedGamesCB.Text = "Skip Games where all Parts are Excluded";
+            skipExcludedGamesCB.Text = "Skip Games where all Parts are Bad";
             skipExcludedGamesCB.UseVisualStyleBackColor = true;
             // 
             // label1

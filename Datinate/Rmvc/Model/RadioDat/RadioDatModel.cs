@@ -1,6 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app;
-using Datinate.Properties;
 using Datinate.Shared.Rb;
 using RadioLibCore.RadioDat;
 using RadioLibCore.RadioResource;

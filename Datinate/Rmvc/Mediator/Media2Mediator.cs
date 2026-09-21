@@ -28,14 +28,14 @@ namespace com.RADIO.Datinate.RMVC
         {
             view?.EmptyView();
         }
-        public void ShowViewPreview(string searchName)
+        public void ShowViewPreview(IReadOnlySet<string> searchNames)
         {
-            view?.ShowViewPreview(searchName);
+            view?.ShowViewPreview(searchNames);
         }
 
-        public void ShowViewAssign(string searchName, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
+        public void ShowViewAssign(IReadOnlySet<string> searchNames, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
         {
-            view?.ShowViewAssign(searchName, mediaCollection, prompts);
+            view?.ShowViewAssign(searchNames, mediaCollection, prompts);
         }
         public void SetMediaCardContent(
             ILookupSet lookupSet, 

@@ -184,7 +184,7 @@ namespace datinate.app
             }
         }
         public void SetUI(
-            string filterText, 
+            IReadOnlySet<string> filterTexts, 
             bool readOnlyMode, 
             IMediaCollection? mediaCollection,
             IReadOnlyList<string>? searchPrompts)
@@ -205,7 +205,7 @@ namespace datinate.app
                 SetAssignmentBannersVisible(false, false);
 
                 var bestScorePercentage = entryListUI.SetEntryToScoreAgainst(
-                    filterText,
+                    filterTexts,
                     excludeAlreadyAssigned: !readOnlyMode);
 
                 assignControls.SetBestScore(bestScorePercentage);

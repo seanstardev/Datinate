@@ -11,7 +11,7 @@ namespace datinate.app
 
         private string[] entriesFlaglessUpper = Array.Empty<string>();
 
-        private string lastReferenceFlaglessUpper = string.Empty;
+        private string[] lastReferenceFlaglessUppers = Array.Empty<string>();
 
         private static readonly string[] PctTextCache = BuildPctTextCache();
         private readonly Dictionary<string, int> backingIndexByFull = new(StringComparer.Ordinal);
@@ -256,7 +256,7 @@ namespace datinate.app
             EnsureScratchCapacity(entriesFull.Length);
 
             lastReferenceFlagless = string.Empty;
-            lastReferenceFlaglessUpper = string.Empty;
+            lastReferenceFlaglessUppers = Array.Empty<string>();
 
             lastFilterFull = string.Empty;
             lastFilterFlagless = string.Empty;
@@ -356,7 +356,7 @@ namespace datinate.app
             Invalidate();
         }
         public int SetEntryToScoreAgainst(
-            string textToMatch,
+            IReadOnlySet<string> textsToMatch,
             bool excludeAlreadyAssigned)
         {
             alphaSort = false;
@@ -366,17 +366,33 @@ namespace datinate.app
             if (IsHandleCreated)
                 SelectedIndices.Clear();
 
-            textToMatch ??= string.Empty;
+            var references = new List<string>(textsToMatch.Count);
+            var seenReferences = new HashSet<string>(StringComparer.Ordinal);
 
-            string refFull = textToMatch.Trim();
-            string refFlagless = DatinateHelper.GetFlaglessName(refFull) ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(refFlagless))
-                refFlagless = refFull;
-
-            if (string.IsNullOrWhiteSpace(refFlagless))
+            foreach (string textToMatch in textsToMatch)
             {
-                SetReferenceFlagless(string.Empty, forceReset: true);
+                if (string.IsNullOrWhiteSpace(textToMatch))
+                    continue;
+
+                string refFull = textToMatch.Trim();
+                string refFlagless = DatinateHelper.GetFlaglessName(refFull) ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(refFlagless))
+                    refFlagless = refFull;
+
+                if (string.IsNullOrWhiteSpace(refFlagless))
+                    continue;
+
+                string refFlaglessUpper = refFlagless.ToUpperInvariant();
+
+                // NOTE: Different full names can reduce to the same flagless name.
+                if (seenReferences.Add(refFlaglessUpper))
+                    references.Add(refFlaglessUpper);
+            }
+
+            if (references.Count == 0)
+            {
+                SetReferenceFlagless(Array.Empty<string>(), forceReset: true);
                 singleHighConfidenceMatch = null; // NOTE: clear stale.
                 highConfidenceMatches = Array.Empty<EntryInfo>();
                 RefreshVirtualView();
@@ -384,7 +400,11 @@ namespace datinate.app
                 return 0;
             }
 
-            SetReferenceFlagless(refFlagless, forceReset: false);
+            // NOTE: Keep comparison deterministic so an unchanged reference set
+            // does not invalidate the score cache merely because enumeration order changed.
+            references.Sort(StringComparer.Ordinal);
+
+            SetReferenceFlagless(references.ToArray(), forceReset: false);
 
             int bestScore = 0;
 
@@ -405,7 +425,6 @@ namespace datinate.app
 
             return bestScore;
         }
-
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
@@ -1034,15 +1053,39 @@ namespace datinate.app
                     SetWindowLong32(hWnd, GWL_STYLE, style);
             }
         }
-        private void SetReferenceFlagless(string newReferenceFlagless, bool forceReset)
+        private void SetReferenceFlagless(string[] newReferenceFlaglessUppers, bool forceReset)
         {
-            newReferenceFlagless ??= string.Empty;
+            newReferenceFlaglessUppers ??= Array.Empty<string>();
 
-            if (!forceReset && string.Equals(lastReferenceFlagless, newReferenceFlagless, StringComparison.Ordinal))
-                return;
+            if (!forceReset &&
+                lastReferenceFlaglessUppers.Length == newReferenceFlaglessUppers.Length)
+            {
+                bool same = true;
 
-            lastReferenceFlagless = newReferenceFlagless;
-            lastReferenceFlaglessUpper = newReferenceFlagless.Length == 0 ? string.Empty : newReferenceFlagless.ToUpperInvariant();
+                for (int i = 0; i < newReferenceFlaglessUppers.Length; i++)
+                {
+                    if (!string.Equals(
+                        lastReferenceFlaglessUppers[i],
+                        newReferenceFlaglessUppers[i],
+                        StringComparison.Ordinal))
+                    {
+                        same = false;
+                        break;
+                    }
+                }
+
+                if (same)
+                    return;
+            }
+
+            lastReferenceFlaglessUppers = newReferenceFlaglessUppers;
+
+            // NOTE: This existing field is used as a simple "has scoring reference"
+            // indicator elsewhere in the control.
+            lastReferenceFlagless =
+                newReferenceFlaglessUppers.Length == 0
+                    ? string.Empty
+                    : newReferenceFlaglessUppers[0];
 
             scoreGeneration++;
             if (scoreGeneration == int.MaxValue)
@@ -1061,12 +1104,40 @@ namespace datinate.app
         }
         private int GetScorePct(int backingIndex)
         {
-            if (string.IsNullOrWhiteSpace(lastReferenceFlaglessUpper))
+            if (lastReferenceFlaglessUppers.Length == 0)
                 return -1;
 
             if (scoreGen[backingIndex] != scoreGeneration)
             {
-                scorePct[backingIndex] = ComputePercentUpper(lastReferenceFlaglessUpper, entriesFlaglessUpper[backingIndex]);
+                string entryUpper = entriesFlaglessUpper[backingIndex];
+
+                int bestScore = 0;
+
+                for (int i = 0; i < lastReferenceFlaglessUppers.Length; i++)
+                {
+                    string referenceUpper = lastReferenceFlaglessUppers[i];
+
+                    int score;
+
+                    // NOTE: Avoid Levenshtein entirely for an exact match.
+                    if (string.Equals(referenceUpper, entryUpper, StringComparison.Ordinal))
+                    {
+                        score = 100;
+                    }
+                    else
+                    {
+                        score = ComputePercentUpper(referenceUpper, entryUpper);
+                    }
+
+                    if (score > bestScore)
+                        bestScore = score;
+
+                    // NOTE: Cannot improve upon a perfect match.
+                    if (bestScore == 100)
+                        break;
+                }
+
+                scorePct[backingIndex] = bestScore;
                 scoreGen[backingIndex] = scoreGeneration;
             }
 
@@ -1074,13 +1145,12 @@ namespace datinate.app
         }
         private void EnsureScoresForViewOrder()
         {
-            if (string.IsNullOrWhiteSpace(lastReferenceFlaglessUpper))
+            if (lastReferenceFlaglessUppers.Length == 0)
                 return;
 
             for (int i = 0; i < viewOrder.Length; i++)
                 _ = GetScorePct(viewOrder[i]);
         }
-
         private void RefreshVirtualView()
         {
             ClearCache();

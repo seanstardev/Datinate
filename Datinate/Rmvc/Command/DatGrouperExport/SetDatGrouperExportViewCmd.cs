@@ -43,7 +43,7 @@ namespace com.RADIO.Datinate.RMVC
                                 ": " +
                                 lookupName;
 
-                            await base.ExecuteCommandAsync(new ShowProgressCmd(message, current, total));
+                            base.ExecuteCommandAsync(new ShowProgressCmd(message, current, total));
                         });
 
                 var reconciled = ReconcileMediaExportPriorities(
@@ -60,8 +60,6 @@ namespace com.RADIO.Datinate.RMVC
                 base.ExecuteCommand(new ClearProgressCmd());
 
             }
-
-            //return Task.CompletedTask;
         }
 
         private static IReadOnlyDictionary<MEDIA_TYPE_ENUM, IReadOnlyList<MediaExportPriorityItemDTO>> ReconcileMediaExportPriorities(

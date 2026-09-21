@@ -27,14 +27,14 @@ namespace com.RADIO.Datinate.RMVC
 
             Facade.Instance?.MediaWebMediator?.ClearView();
 
-            var filter = DatinateFamilyHelper.GetGameEntityName(datGrouperEntryDTO.Entity);
+            var filters = DatinateFamilyHelper.GetAllNames(datGrouperEntryDTO.Entity);
 
-            if (string.IsNullOrWhiteSpace(filter))
+            if (filters.Any() == false || string.IsNullOrWhiteSpace(filters.First()))
                 return;
 
             if (sessionModel.IsInMediaReadOnlyMode)
             {
-                Facade.Instance?.MediaMediator?.ShowViewPreview(filter!);
+                Facade.Instance?.MediaMediator?.ShowViewPreview(filters!);
 
                 // TODO: ?:
                 Facade.Instance?.DatGrouperMediator?.SetMediaMode(sessionModel.CurrentLayout);
@@ -50,13 +50,14 @@ namespace com.RADIO.Datinate.RMVC
                     {
                         var prompts = DatinateFamilyHelper.CreateSearchPrompts(family);
 
-                        Facade.Instance?.MediaMediator?.ShowViewAssign(filter!, collection, prompts);
+                        Facade.Instance?.MediaMediator?.ShowViewAssign(filters, collection, prompts);
                         Facade.Instance?.MediaAssignmentMediator?.SetView(collection);
 
                         var scoring = radioDatModel.GetScoring(family);
                         if (scoring != null)
                             Facade.Instance?.MediaAssignmentMediator?.SetScoring(scoring);
 
+                        // TODO: ?:
                         Facade.Instance?.DatGrouperMediator?.SetMediaMode(sessionModel.CurrentLayout);
                     }
                 }

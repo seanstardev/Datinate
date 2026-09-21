@@ -69,6 +69,47 @@ namespace Datinate.Shared.Util
             }
             return parts;
         }
+        public static IReadOnlySet<string> GetAllNames(IGameEntity? entity)
+        {
+            // Do not include whitespace-only names.
+            // Do not include duplicate names that differ only by casing.
+            HashSet<string> names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void AddName(IGameEntity? item)
+            {
+                string? name = GetGameEntityName(item);
+
+                if (string.IsNullOrWhiteSpace(name))
+                    return;
+
+                _ = names.Add(name.Trim());
+            }
+
+            AddName(entity);
+
+            if (entity is IGameFamily family)
+            {
+                foreach (var game in family.GetAllGames())
+                {
+                    AddName(game);
+
+                    foreach (var part in game.GetGameParts(true))
+                        AddName(part);
+                }
+            }
+            else if (entity is IGame game)
+            {
+                foreach (var part in game.GetGameParts(true))
+                    AddName(part);
+            }
+            else if (entity is IGamePart gamePart)
+            {
+                foreach (var alias in gamePart.GetSoftwareAliases())
+                    AddName(alias);
+            }
+
+            return names;
+        }
 
         public static string? GetGameEntityName(IGameEntity? entity)
         {
