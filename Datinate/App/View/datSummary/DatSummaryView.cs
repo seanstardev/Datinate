@@ -52,7 +52,8 @@ namespace datinate.app
          * Populate table with correct unit info.
          * We also CLEAR current item list
          */
-        public void PopulateTable(DatSummaryVO[] summaries, UnitFormatHelper.Unit unit, bool showUnitInCell) {
+        public void PopulateTable(DatSummaryVO[] summaries, UnitFormatHelper.Unit unit, bool showUnitInCell) 
+        {
             Ui(() => 
             { 
                 PopulateTable(summaries, unit, showUnitInCell, null);
@@ -87,7 +88,8 @@ namespace datinate.app
                 var summary = summaries[i];
                 var header = summary.DatHeader;
 
-                if (filter != null) {
+                if (filter != null) 
+                {
                     if (!header.Name.ToLower().Contains(filter))
                         continue;
                 }
@@ -278,7 +280,7 @@ namespace datinate.app
 
         private void OnFilterEvt(object? sender, EventArgs e) 
         {
-            PopulateTable(summaries, unit, showUnitInCells, filterUI.GetFilterValue());
+            PopulateTable(summaries, unit, showUnitInCells, filterUI.GetFilterValue().Trim().ToLower());
         }
 
         public void ClearView() 

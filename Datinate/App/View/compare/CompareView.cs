@@ -42,7 +42,6 @@ namespace com.RADIO.Datinate.App.View.compare
             leftUI.ClearUI();
             rightUI.ClearUI();
             middleUI.ClearUI();
-            filterUI1.Empty();
         }
 
         public void SetLeft(DatVO datVO) 

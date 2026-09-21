@@ -86,7 +86,7 @@ namespace datinate.app
 
         private void OnFilter(object? sender, EventArgs e)
         {
-            SetView(datVO, unit, showUnitInCells, filterUI.GetFilterValue());
+            SetView(datVO, unit, showUnitInCells, filterUI.GetFilterValue()?.Trim().ToLower());
         }
         private void OnClearFilter(object? sender, EventArgs e)
         {
@@ -103,6 +103,7 @@ namespace datinate.app
             , string? filter)
         {
             if (datVO == null) return;
+
             Ui(() =>
             {
                 // NOTE: DO NOT remove this line or we get index out of range error:

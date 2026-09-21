@@ -33,7 +33,6 @@
             rightUI = new datinate.app.CompareUI();
             panel7 = new Panel();
             clearBtn = new Button();
-            filterUI1 = new datinate.app.FilterUI();
             compareBtn = new Button();
             tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -138,7 +137,6 @@
             // panel7
             // 
             panel7.Controls.Add(clearBtn);
-            panel7.Controls.Add(filterUI1);
             panel7.Controls.Add(compareBtn);
             panel7.Dock = DockStyle.Fill;
             panel7.Location = new Point(4, 467);
@@ -149,8 +147,8 @@
             // 
             // clearBtn
             // 
-            clearBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            clearBtn.Location = new Point(4, -1);
+            clearBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            clearBtn.Location = new Point(850, -1);
             clearBtn.Margin = new Padding(4, 3, 4, 3);
             clearBtn.Name = "clearBtn";
             clearBtn.Size = new Size(88, 27);
@@ -159,19 +157,10 @@
             clearBtn.UseVisualStyleBackColor = true;
             clearBtn.Click += ClearBtn_Click;
             // 
-            // filterUI1
-            // 
-            filterUI1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            filterUI1.Location = new Point(100, 0);
-            filterUI1.Margin = new Padding(5, 3, 5, 3);
-            filterUI1.Name = "filterUI1";
-            filterUI1.Size = new Size(261, 24);
-            filterUI1.TabIndex = 1;
-            // 
             // compareBtn
             // 
-            compareBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            compareBtn.Location = new Point(366, -1);
+            compareBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            compareBtn.Location = new Point(946, -1);
             compareBtn.Margin = new Padding(4, 3, 4, 3);
             compareBtn.Name = "compareBtn";
             compareBtn.Size = new Size(88, 27);
@@ -210,7 +199,6 @@
         private datinate.app.CompareUI rightUI;
         private System.Windows.Forms.Panel panel7;
         private System.Windows.Forms.Button clearBtn;
-        private datinate.app.FilterUI filterUI1;
         private System.Windows.Forms.Button compareBtn;
     }
 }
