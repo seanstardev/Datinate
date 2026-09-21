@@ -701,19 +701,42 @@ namespace datinate.app
             assignControls.ShowNamePage();
             pageCurl.Visible = false;
 
-            // NOTE: Must momentarily enable component visibility to create drag preview.
-            HidingOverlay.Visible = false;
-            DragDropPreviewForm.Initialise(this);
-
-            HidingOverlay.BringToFront();
-            HidingOverlay.Visible = true;
+            bool okPicWasVisible = okPic.Visible;
+            bool notFoundPicWasVisible = notFoundPic.Visible;
+            bool notFoundBgWasVisible = notFoundPic_bg.Visible;
 
             try
             {
-                effect = DoDragDrop(data, DragDropEffects.Copy | DragDropEffects.Move);
+                // NOTE: Don't include assignment banners in the drag preview.
+                // WebView2 content is patched into the captured bitmap afterwards
+                // and would otherwise render over them.
+                okPic.Visible = false;
+                notFoundPic.Visible = false;
+                notFoundPic_bg.Visible = false;
+
+                // NOTE: Must momentarily enable component visibility to create drag preview.
+                HidingOverlay.Visible = false;
+                DragDropPreviewForm.Initialise(this);
+
+                HidingOverlay.BringToFront();
+                HidingOverlay.Visible = true;
+
+                // The real card is now hidden, so restore its normal banner state.
+                okPic.Visible = okPicWasVisible;
+                notFoundPic.Visible = notFoundPicWasVisible;
+                notFoundPic_bg.Visible = notFoundBgWasVisible;
+
+                effect = DoDragDrop(
+                    data,
+                    DragDropEffects.Copy | DragDropEffects.Move);
             }
             finally
             {
+                // Also restore here in case preview creation failed part-way through.
+                okPic.Visible = okPicWasVisible;
+                notFoundPic.Visible = notFoundPicWasVisible;
+                notFoundPic_bg.Visible = notFoundBgWasVisible;
+
                 HidingOverlay.Visible = false;
                 DragDropPreviewForm.Teardown();
 

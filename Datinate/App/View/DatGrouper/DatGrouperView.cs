@@ -413,20 +413,11 @@ namespace datinate.app
 
             exportBtn.Click += (_, __) =>
             {
-                bool proceed = false;
-
                 if (CurrentLayoutIsAuto)
                     return;
-                else
-                {
-                    proceed = UIHelper.ShowDialogYesNo(
-                        "Any unsaved changes will be lost if you visit the Export View. Do you wish to proceed?");
-                }
-                if (proceed)
-                {
-                    SetScreenLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.AutoGrouper);
-                    ExportEvt?.Invoke();
-                }
+                
+                ExportEvt?.Invoke();
+                
             };
 
         saveBtn.Click += (_, __) =>

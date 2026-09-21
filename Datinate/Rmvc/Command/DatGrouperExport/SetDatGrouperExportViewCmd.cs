@@ -1,14 +1,15 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared.Util;
 using RMVC;
+using System.Diagnostics;
 using System.Text;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
-    public class SetDatGrouperExportViewCmd : RCommand
+    public class SetDatGrouperExportViewCmd : RCommandAsync
     {
-        protected override void Run()
+        protected async override Task RunAsync()
         {
             Facade.Instance?.Shell?.ShowExportView();
 
@@ -28,9 +29,22 @@ namespace com.RADIO.Datinate.RMVC
                         mediaType != MEDIA_TYPE_ENUM.Unspecified)
                     .ToArray();
 
-                var mediaPriorityDictionary = radioDatModel.CreateMediaExportPriorityDictionary(
-                    families,
-                    mediaTypes);
+                var mediaPriorityDictionary =
+                    radioDatModel.CreateMediaExportPriorityDictionary(
+                        families,
+                        mediaTypes,
+                        async (current, total, lookupName) =>
+                        {
+                            string message =
+                                "Loading Resource: " +
+                                DatinateHelper.GetReadableNumber(current) +
+                                " / " +
+                                DatinateHelper.GetReadableNumber(total) +
+                                ": " +
+                                lookupName;
+
+                            await base.ExecuteCommandAsync(new ShowProgressCmd(message, current, total));
+                        });
 
                 var reconciled = ReconcileMediaExportPriorities(
                     mediaPriorityDictionary,
@@ -42,7 +56,12 @@ namespace com.RADIO.Datinate.RMVC
                     activeProject.ExportSoftwareOptionsDTO,
                     reconciled,
                     mediaExportSettingsMessage ?? string.Empty);
+
+                base.ExecuteCommand(new ClearProgressCmd());
+
             }
+
+            //return Task.CompletedTask;
         }
 
         private static IReadOnlyDictionary<MEDIA_TYPE_ENUM, IReadOnlyList<MediaExportPriorityItemDTO>> ReconcileMediaExportPriorities(

@@ -26,7 +26,7 @@ namespace com.RADIO.Datinate.RMVC
 
         private void OnBack()
         {
-            base.ExecuteCommand(new SetProjectsViewCmd());
+            base.ExecuteCommand(new SetDatGrouperFormActiveCmd());
         }
         private void OnExportProject(
             IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaOptions,

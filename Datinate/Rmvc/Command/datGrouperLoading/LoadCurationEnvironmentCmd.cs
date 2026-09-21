@@ -72,7 +72,7 @@ namespace com.RADIO.Datinate.RMVC
                     }
                     catch (Exception e)
                     {
-                        Debug.WriteLine(">> MOVE: " + e);
+                        //
                     }
                 }
             }

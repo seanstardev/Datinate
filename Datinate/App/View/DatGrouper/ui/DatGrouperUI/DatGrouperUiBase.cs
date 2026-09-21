@@ -575,7 +575,6 @@ namespace datinate.app
             int redoCount, 
             IReadOnlySet<IGameEntity> affectedEntities)
         {
-            Debug.WriteLine("_____________________DELTA: "+mediaCache);
             Ui(() =>
             {
                 contextMenu.SetUndoRedoEnabled(undoCount > 0, redoCount > 0);

@@ -122,19 +122,41 @@ namespace com.RADIO.Datinate.RMVC
         }
         public IReadOnlyDictionary<MEDIA_TYPE_ENUM, IReadOnlyList<MediaExportPriorityItemDTO>> CreateMediaExportPriorityDictionary(
             IReadOnlyList<IGameFamily> curatedFamilies,
-            IReadOnlyCollection<MEDIA_TYPE_ENUM> mediaTypes)
+            IReadOnlyCollection<MEDIA_TYPE_ENUM> mediaTypes,
+            Action<int, int, string>? progressCallback = null)
         {
+            DatGrouperProjectDTO? activeProject;
+            Dictionary<IGameFamily, RbMediaCollection> mediaCollections;
+            Dictionary<string, ILookupSet> lookupSets;
+            Dictionary<string, DatVO> sourceDats;
+
             lock (gate)
             {
-                return DatGrouperMediaExportDelegate.CreateMediaExportPriorityDictionary(
-                    curatedFamilies,
-                    mediaTypes,
-                    ActiveProject,
-                    mediaCollectionsDictionary,
-                    sourceIdLookupSetDictionary,
-                    sourceIdDatDictionary,
-                    GetResourceDetails);
+                activeProject = ActiveProject;
+
+                mediaCollections =
+                    new Dictionary<IGameFamily, RbMediaCollection>(
+                        mediaCollectionsDictionary,
+                        ReferenceEqualityComparer.Instance);
+
+                lookupSets =
+                    new Dictionary<string, ILookupSet>(
+                        sourceIdLookupSetDictionary);
+
+                sourceDats =
+                    new Dictionary<string, DatVO>(
+                        sourceIdDatDictionary);
             }
+
+            return DatGrouperMediaExportDelegate.CreateMediaExportPriorityDictionary(
+                curatedFamilies,
+                mediaTypes,
+                activeProject,
+                mediaCollections,
+                lookupSets,
+                sourceDats,
+                GetResourceDetails,
+                progressCallback);
         }
         public void Reset()
         {
@@ -419,46 +441,92 @@ namespace com.RADIO.Datinate.RMVC
             }
         }
 
-        public ResourceDetailsDTO? GetResourceDetails(string sourceId, string lookupName)
+        public ResourceDetailsDTO? GetResourceDetails(
+    string sourceId,
+    string lookupName)
         {
+            DatVO dat;
+            string contentPath;
+            string path;
+
             lock (gate)
             {
                 if (!sourceIdContentDictionary.TryGetValue(sourceId, out var dto))
                     return null;
 
-                string path = Path.Combine(dto.ContentPath, lookupName);
+                contentPath = dto.ContentPath;
+                path = Path.Combine(contentPath, lookupName);
 
-                if (sourceIdResourceDictionary.TryGetValue(path, out var resourceDetails))
-                    return resourceDetails;
+                if (sourceIdResourceDictionary.TryGetValue(
+                    path,
+                    out var cached))
+                {
+                    return cached;
+                }
 
-                if (!sourceIdDatDictionary.TryGetValue(sourceId, out var dat))
+                if (!sourceIdDatDictionary.TryGetValue(sourceId, out dat!))
                     return null;
+            }
 
-                string fullPath = Path.Combine(path, "Info.xml");
-                InfoVO? info = null;
+            string fullPath = Path.Combine(path, "Info.xml");
 
-                try
-                {
-                    if (File.Exists(fullPath))
-                        info = InfoHelper.LoadInfoVO(fullPath);
-                }
-                catch
-                {
-                }
+            InfoVO? info = null;
 
-                var created = DatGrouperScoringDelegate.CreateResourceDetails(
+            try
+            {
+                if (File.Exists(fullPath))
+                    info = InfoHelper.LoadInfoVO(fullPath);
+            }
+            catch
+            {
+            }
+
+            var created =
+                DatGrouperScoringDelegate.CreateResourceDetails(
                     lookupName,
                     sourceId,
                     dat,
                     info);
 
-                if (created != null)
+            if (created == null)
+                return null;
+
+            lock (gate)
+            {
+                // Another thread may have loaded this while we were outside the lock.
+                if (sourceIdResourceDictionary.TryGetValue(
+                    path,
+                    out var cached))
                 {
-                    _ = sourceIdResourceDictionary.TryAdd(path, created);
-                    return created;
+                    return cached;
                 }
 
-                return null;
+                // Don't cache data against a source which has changed while loading.
+                if (!sourceIdContentDictionary.TryGetValue(
+                        sourceId,
+                        out var currentDto) ||
+                    !string.Equals(
+                        currentDto.ContentPath,
+                        contentPath,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+
+                // Likewise, don't cache against a DAT which has been replaced.
+                if (!sourceIdDatDictionary.TryGetValue(
+                        sourceId,
+                        out var currentDat) ||
+                    !ReferenceEquals(currentDat, dat))
+                {
+                    return null;
+                }
+
+                _ = sourceIdResourceDictionary.TryAdd(
+                    path,
+                    created);
+
+                return created;
             }
         }
         public DatGrouperScoring? GetScoring(IGameFamily family)

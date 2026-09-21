@@ -16,11 +16,19 @@ namespace com.RADIO.Datinate.RMVC
             IReadOnlyDictionary<IGameFamily, RbMediaCollection> mediaCollectionsDictionary,
             IReadOnlyDictionary<string, ILookupSet> sourceIdLookupSetDictionary,
             IReadOnlyDictionary<string, DatVO> sourceIdDatDictionary,
-            Func<string, string, ResourceDetailsDTO?> getResourceDetails)
+            Func<string, string, ResourceDetailsDTO?> getResourceDetails,
+            Action<int, int, string>? progressCallback = null)
         {
             var expandedMediaTypes = ExpandMediaExportTypes(mediaTypes);
             var scoringMediaTypes = CreateExpandedScoringMediaTypeSet(activeProject);
             var assignedLookupsByKey = new Dictionary<MediaExportPriorityKey, HashSet<string>>();
+
+            int resourceLoadTotal = GetResourceLoadCount(
+                curatedFamilies,
+                mediaCollectionsDictionary,
+                sourceIdLookupSetDictionary);
+
+            int resourceLoadCurrent = 0;
 
             foreach (var family in curatedFamilies)
             {
@@ -44,7 +52,8 @@ namespace com.RADIO.Datinate.RMVC
 
                             if (lookupSet.RadioSource.Source == mediaTypeEnum.ToString())
                             {
-                                var assignedLookupName = assignment.LookupName ?? assignment.EntryName;
+                                var assignedLookupName =
+                                    assignment.LookupName ?? assignment.EntryName;
 
                                 if (string.IsNullOrWhiteSpace(assignedLookupName))
                                     continue;
@@ -53,7 +62,8 @@ namespace com.RADIO.Datinate.RMVC
                                     mediaTypeEnum,
                                     lookupSet.RadioSource.DatGroupEnum,
                                     assignment.SourceId,
-                                    DatinatePointerHelper.GetDatFriendlyName(lookupSet.RadioSource.Id));
+                                    DatinatePointerHelper.GetDatFriendlyName(
+                                        lookupSet.RadioSource.Id));
 
                                 AddAssignedLookup(
                                     assignedLookupsByKey,
@@ -71,7 +81,17 @@ namespace com.RADIO.Datinate.RMVC
                     if (string.IsNullOrWhiteSpace(assignment.LookupName))
                         continue;
 
-                    var resourceDetails = getResourceDetails(assignment.SourceId, assignment.LookupName);
+                    resourceLoadCurrent++;
+
+                    progressCallback?.Invoke(
+                        resourceLoadCurrent,
+                        resourceLoadTotal,
+                        assignment.LookupName);
+
+                    var resourceDetails =
+                        getResourceDetails(
+                            assignment.SourceId,
+                            assignment.LookupName);
 
                     if (resourceDetails == null)
                         continue;
@@ -123,6 +143,45 @@ namespace com.RADIO.Datinate.RMVC
                             scoringMediaTypes.Contains(item.Key.MediaTypeEnum),
                             item.EntryCount))
                         .ToArray());
+        }
+        private static int GetResourceLoadCount(
+    IReadOnlyList<IGameFamily> curatedFamilies,
+    IReadOnlyDictionary<IGameFamily, RbMediaCollection> mediaCollectionsDictionary,
+    IReadOnlyDictionary<string, ILookupSet> sourceIdLookupSetDictionary)
+        {
+            int count = 0;
+
+            foreach (var family in curatedFamilies)
+            {
+                if (!mediaCollectionsDictionary.TryGetValue(family, out var collection))
+                    continue;
+
+                foreach (var assignment in collection.SourceIdAssignmentDictionary.Values)
+                {
+                    if (assignment.AssignmentEnum != MEDIA_ASSIGNMENT_ENUM.Assigned)
+                        continue;
+
+                    if (!sourceIdLookupSetDictionary.TryGetValue(
+                        assignment.SourceId,
+                        out var lookupSet))
+                    {
+                        continue;
+                    }
+
+                    if (lookupSet.IsMedia)
+                        continue;
+
+                    if (!lookupSet.IsRadioResource)
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(assignment.LookupName))
+                        continue;
+
+                    count++;
+                }
+            }
+
+            return count;
         }
         private static void AddAssignedLookup(
             Dictionary<MediaExportPriorityKey, HashSet<string>> assignedLookupsByKey,
