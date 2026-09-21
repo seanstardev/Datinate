@@ -24,6 +24,8 @@ namespace Datinate.Rmvc.Command
 
             Facade.Instance?.ProjectLoaderMediator?.ClearView();
             Facade.Instance?.ContentPathsMediator?.ClearView();
+            
+            Facade.Instance?.ExportMediator?.ClearView();
 
 
             var appSession = Facade.Instance?.DatGrouperSessionModel;

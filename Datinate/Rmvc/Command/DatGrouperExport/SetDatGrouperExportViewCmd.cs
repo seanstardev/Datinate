@@ -12,6 +12,7 @@ namespace com.RADIO.Datinate.RMVC
         protected async override Task RunAsync()
         {
             Facade.Instance?.Shell?.ShowExportView();
+            Facade.Instance?.ExportMediator?.ClearView();
 
             if (Facade.Instance?.DatGrouperModel is { } datGrouperModel &&
                 Facade.Instance?.RadioDatModel is { } radioDatModel &&

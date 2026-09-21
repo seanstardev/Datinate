@@ -15,9 +15,28 @@ namespace com.RADIO.Datinate.RMVC
             IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaPriorities,
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> familyMediaDictionary,
             IReadOnlyDictionary<IGameFamily, IReadOnlyDictionary<string, ResourceDetailsDTO>> familyResourceDetailsDictionary,
-            string mediaProjectPath)
+            string mediaProjectPath,
+            Action<int, int, string>? progressCallback = null)
         {
             var infoSpecDictionary = new Dictionary<IGameFamily, InfoSpec>();
+
+            IReadOnlyList<string> infoAboutSourceIds =
+                CreateIncludedSourceIdList(
+                    mediaPriorities,
+                    MEDIA_TYPE_ENUM.Info_About);
+
+            IReadOnlyList<string> infoCreditsSourceIds =
+                CreateIncludedSourceIdList(
+                    mediaPriorities,
+                    MEDIA_TYPE_ENUM.Info_Credits);
+
+            IReadOnlyList<string> infoReleasesSourceIds =
+                CreateIncludedSourceIdList(
+                    mediaPriorities,
+                    MEDIA_TYPE_ENUM.Info_Releases);
+
+            int count = 1;
+            int total = curatedFamilies.Count;
 
             foreach (var family in curatedFamilies)
             {
@@ -44,22 +63,19 @@ namespace com.RADIO.Datinate.RMVC
 
                 var infoAboutCandidates = CreateInfoCandidates(
                     resourceDetailsDictionary,
-                    mediaPriorities,
-                    MEDIA_TYPE_ENUM.Info_About);
+                    infoAboutSourceIds);
 
                 bool hasAbout = SetInfoAbout(info, infoAboutCandidates);
 
                 var infoCreditsCandidates = CreateInfoCandidates(
                     resourceDetailsDictionary,
-                    mediaPriorities,
-                    MEDIA_TYPE_ENUM.Info_Credits);
+                    infoCreditsSourceIds);
 
                 bool hasCredits = SetInfoCredits(info, infoCreditsCandidates);
 
                 var infoReleasesCandidates = CreateInfoCandidates(
                     resourceDetailsDictionary,
-                    mediaPriorities,
-                    MEDIA_TYPE_ENUM.Info_Releases);
+                    infoReleasesSourceIds);
 
                 bool hasReleases = SetInfoReleases(
                     info,
@@ -74,6 +90,9 @@ namespace com.RADIO.Datinate.RMVC
                 string infoXmlPath = Path.Combine(familyMediaPath, "Info.xml");
 
                 Directory.CreateDirectory(familyMediaPath);
+
+                progressCallback?.Invoke(count, total, familyName);
+                count++;
 
                 InfoHelper.SaveInfoVO(
                     info,
@@ -298,12 +317,11 @@ namespace com.RADIO.Datinate.RMVC
 
         private IReadOnlyList<InfoCandidate> CreateInfoCandidates(
             IReadOnlyDictionary<string, ResourceDetailsDTO> resourceDetailsDictionary,
-            IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaOptions,
-            MEDIA_TYPE_ENUM mediaTypeEnum)
+            IReadOnlyList<string> sourceIds)
         {
             var list = new List<InfoCandidate>();
 
-            foreach (var sourceId in CreateIncludedSourceIdList(mediaOptions, mediaTypeEnum))
+            foreach (var sourceId in sourceIds)
             {
                 if (!resourceDetailsDictionary.TryGetValue(sourceId, out var resourceDetails))
                     continue;

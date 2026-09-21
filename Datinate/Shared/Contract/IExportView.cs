@@ -12,6 +12,7 @@ namespace Datinate.Shared
         
         event Action<IReadOnlyList<DatGrouperMediaExportEntryDTO>, ExportSoftwareOptionsDTO>? SaveSettingsEvt;
 
+        void ClearView();
         void SetView(
             bool everyGameHasExactlyOnePart,
             ExportSoftwareOptionsDTO exportSoftwareOptions,

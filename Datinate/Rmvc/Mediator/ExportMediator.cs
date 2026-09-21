@@ -11,6 +11,10 @@ namespace com.RADIO.Datinate.RMVC
         public ExportMediator(Type view) : base(view)
         {
         }
+
+        public void ClearView() => 
+            view?.ClearView();
+        
         public void SetView(
             bool everyGameHasExactlyOnePart,
             ExportSoftwareOptionsDTO exportSoftwareOptions,

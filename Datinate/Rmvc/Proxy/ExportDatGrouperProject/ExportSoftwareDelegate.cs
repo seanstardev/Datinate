@@ -18,7 +18,8 @@ namespace com.RADIO.Datinate.RMVC
             IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSetByGroup,
             IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary,
             string softwareProjectPath,
-            string m3uExportFolder)
+            string m3uExportFolder,
+            Action<int, int, string>? progressCallback = null)
         {
             string projectName = project.ProjectName;
             IReadOnlySet<string> excludedDescriptors = project.ExcludedDescriptorCodes;
@@ -106,6 +107,7 @@ namespace com.RADIO.Datinate.RMVC
                     throw new InvalidOperationException("Software export could not resolve export family name for: " + family.GetFamilyDisplayName());
                 }
 
+                string originalFamilyName = family.GetFamilyDisplayName();
                 string familyPath = familyName;
 
                 foreach (var game in GetExportGames(family, skipExcludedGames, exportAs1G1R))
@@ -132,6 +134,7 @@ namespace com.RADIO.Datinate.RMVC
 
                     string uniqueM3uFilename = GetUniqueM3uFilename(
                         m3uResult.m3FilenameWithExt,
+                        originalFamilyName,
                         familyName,
                         allocatedM3uFilenames);
 
@@ -164,7 +167,11 @@ namespace com.RADIO.Datinate.RMVC
                 }
 
                 ExportDatGrouperHelper.ExportDat(playlistDoc!, softwareProjectPath, playlistProjectName);
-                ExportM3us(m3uFilenameContentDictionary, softwareProjectPath, m3uExportFolder);
+                ExportM3us(
+                    m3uFilenameContentDictionary, 
+                    softwareProjectPath, 
+                    m3uExportFolder,
+                    progressCallback);
             }
         }
         private XmlElement CreatePlaylistMachineEntry(
@@ -366,6 +373,7 @@ namespace com.RADIO.Datinate.RMVC
 
         private string GetUniqueM3uFilename(
             string m3uFilenameWithExt,
+            string originalFamilyName,
             string familyName,
             IReadOnlySet<string> allocatedFilenames)
         {
@@ -375,7 +383,32 @@ namespace com.RADIO.Datinate.RMVC
             string extension = Path.GetExtension(m3uFilenameWithExt);
             string baseName = Path.GetFileNameWithoutExtension(m3uFilenameWithExt);
 
+            // If this game's name is the same as the family's original name,
+            // and the family itself has already been renamed to make it unique,
+            // use that already-unique family name for the playlist too.
+            //
+            // Example:
+            //   Family: Casper     -> Casper.m3u
+            //   Family: Casper [1] -> Casper [1].m3u
+            //   Family: Casper [2] -> Casper [2].m3u
+            if (string.Equals(
+                    baseName,
+                    originalFamilyName,
+                    StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(
+                    originalFamilyName,
+                    familyName,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                string familyNameCandidate = familyName + extension;
+
+                if (allocatedFilenames.Contains(familyNameCandidate) == false)
+                    return familyNameCandidate;
+            }
+
+            // Existing behaviour for genuine cross-family game-name collisions.
             string familyQualifiedName = $"{baseName} [{familyName}]{extension}";
+
             if (allocatedFilenames.Contains(familyQualifiedName) == false)
                 return familyQualifiedName;
 
@@ -656,16 +689,22 @@ namespace com.RADIO.Datinate.RMVC
         private void ExportM3us(
             Dictionary<string, string> m3uNameContentDictionary,
             string projectPath,
-            string m3uExportFolder)
+            string m3uExportFolder,
+            Action<int, int, string>? progressCallback = null)
         {
             var m3uExportPath = Path.Combine(projectPath, m3uExportFolder);
             Directory.CreateDirectory(m3uExportPath);
 
+            int count = 1;
             foreach (var kvp in m3uNameContentDictionary)
             {
                 var m3uFilenameWithExt = kvp.Key;
                 var content = kvp.Value.Trim();
                 var fullpath = Path.Combine(m3uExportPath, m3uFilenameWithExt);
+
+                progressCallback?.Invoke(count, m3uNameContentDictionary.Count, m3uFilenameWithExt);
+                count++;
+
                 File.WriteAllText(fullpath, content);
             }
         }

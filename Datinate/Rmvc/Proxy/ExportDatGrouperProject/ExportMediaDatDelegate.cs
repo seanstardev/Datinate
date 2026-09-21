@@ -288,7 +288,7 @@ namespace com.RADIO.Datinate.RMVC
 
             string? releaseAssetKey = CreateReleaseAssetKeyFromFilename(
                 filename,
-                inputFlag);
+                inputFlag ?? string.Empty);
 
             if (string.IsNullOrWhiteSpace(releaseAssetKey))
                 return null;
@@ -338,7 +338,7 @@ namespace com.RADIO.Datinate.RMVC
             IReadOnlyDictionary<string, DatVO> sourceIdDatDictionary,
             IReadOnlyDictionary<string, ISourceDefinition> sourceIdContentDictionary)
         {
-            if (!TryGetMediaOutputFlag(mediaType, out string? mediaFlag))
+            if (TryGetMediaOutputFlag(mediaType, out string? mediaFlag) == false)
                 return null;
 
             var assignedItems = mediaCollection.SourceIdAssignedItemDictionary;
@@ -399,13 +399,13 @@ namespace com.RADIO.Datinate.RMVC
                     {
                         return CreateResourceScreenCandidate(
                             familyName,
-                            mediaFlag,
+                            mediaFlag!,
                             resourceRoms);
                     }
 
                     return CreateCandidateFromSelectedRom(
                         familyName,
-                        mediaFlag,
+                        mediaFlag!,
                         resourceRoms[0]);
                 }
 
@@ -422,7 +422,7 @@ namespace com.RADIO.Datinate.RMVC
 
                 return CreateCandidateFromSelectedRom(
                     familyName,
-                    mediaFlag,
+                    mediaFlag!,
                     selectedRom);
             }
 

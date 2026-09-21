@@ -66,7 +66,8 @@ namespace datinate.app
             // TODO: parse args:
             if (DatinateHelper.IsDebugBuild)
             {
-                //DatGrouperModeStartupProjectName = "Nintendo - SNES";
+                DatGrouperModeStartupProjectName = "Nintendo - SNES";
+                //DatGrouperModeStartupProjectName = "Nintendo - Virtual Boy";
                 //DatGrouperModeStartupProjectName = "Atari - Lynx";
             }
 
@@ -319,21 +320,77 @@ namespace datinate.app
             });
         }
 
-        public Task<bool> ShowMessageBox(string title, string message, bool isYesNo = false)
+        public Task<bool> ShowMessageBox(
+            string title,
+            string message,
+            bool isYesNo = false)
         {
-            MessageBoxButtons messageBoxButtons = isYesNo ? MessageBoxButtons.OKCancel : MessageBoxButtons.OK;
-            MessageBoxIcon messageBoxIcon = MessageBoxIcon.Information;
+            if (Environment.CurrentManagedThreadId == uiThreadId)
+            {
+                return Task.FromResult(
+                    ShowMessageBoxInternal(
+                        title,
+                        message,
+                        isYesNo));
+            }
+
+            var tcs = new TaskCompletionSource<bool>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            Ui(() =>
+            {
+                try
+                {
+                    bool result =
+                        ShowMessageBoxInternal(
+                            title,
+                            message,
+                            isYesNo);
+
+                    tcs.TrySetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+            });
+
+            return tcs.Task;
+        }
+
+        private bool ShowMessageBoxInternal(
+            string title,
+            string message,
+            bool isYesNo)
+        {
+            MessageBoxButtons messageBoxButtons =
+                isYesNo
+                    ? MessageBoxButtons.OKCancel
+                    : MessageBoxButtons.OK;
+
+            MessageBoxIcon messageBoxIcon =
+                MessageBoxIcon.Information;
 
             Form? owner = Form.ActiveForm;
 
             if (owner == null && Application.OpenForms.Count > 0)
                 owner = Application.OpenForms[0];
 
-            var result = owner != null
-                ? MessageBox.Show(owner, message, title, messageBoxButtons, messageBoxIcon)
-                : MessageBox.Show(message, title, messageBoxButtons, messageBoxIcon);
+            var result =
+                owner != null
+                    ? MessageBox.Show(
+                        owner,
+                        message,
+                        title,
+                        messageBoxButtons,
+                        messageBoxIcon)
+                    : MessageBox.Show(
+                        message,
+                        title,
+                        messageBoxButtons,
+                        messageBoxIcon);
 
-            return Task.FromResult(result == DialogResult.OK);
+            return result == DialogResult.OK;
         }
 
         public void SetMainFormsSizeBarBackColor(Color colour)

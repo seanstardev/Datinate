@@ -54,6 +54,8 @@ namespace com.RADIO.Datinate.RMVC
 
                 if (collection is { })
                 {
+                    base.ExecuteCommand(new ShowProgressCmd("Importing Curated Set.", 1, 2));
+
                     try
                     {
                         DatGrouperEditDelta? delta = datGrouperModel.ImportCurated(
@@ -74,6 +76,8 @@ namespace com.RADIO.Datinate.RMVC
                     {
                         //
                     }
+
+                    base.ExecuteCommand(new ClearProgressCmd());
                 }
             }
 

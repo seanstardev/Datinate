@@ -64,7 +64,8 @@ namespace com.RADIO.Datinate.RMVC
             ExportSoftwareOptionsDTO softwareOptions,
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> familyMediaDictionary,
             IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSetByGroup,
-            IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary)
+            IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary,
+            Action<int, int, string>? progressCallback = null)
         {
             Dictionary<IGameFamily, string> familyUniqueNameDictionary =
                 BuildUniqueFamilyNames(curatedFamilies);
@@ -75,6 +76,8 @@ namespace com.RADIO.Datinate.RMVC
 
             if (string.IsNullOrWhiteSpace(softwareProjectPath))
                 return;
+
+            progressCallback?.Invoke(2, 2, "Deleting existing Software Export content");
 
             DeleteExportSoftwareProject(projectName);
 
@@ -90,7 +93,8 @@ namespace com.RADIO.Datinate.RMVC
                 flagFilterSetByGroup,
                 softwareIdDatGroupEnumDictionary,
                 softwareProjectPath,
-                M3uExportFolder);
+                M3uExportFolder,
+                progressCallback);
         }
 
         /*
@@ -99,12 +103,12 @@ namespace com.RADIO.Datinate.RMVC
         public void ExportMedia(
             IReadOnlyList<IGameFamily> curatedFamilies,
             DatGrouperProjectDTO project,
-            ExportSoftwareOptionsDTO softwareOptions,
             IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaPriorities,
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> familyMediaDictionary,
             IReadOnlyDictionary<IGameFamily, IReadOnlyDictionary<string, ResourceDetailsDTO>> resourceDetailsDictionary,
             IReadOnlyDictionary<string, DatVO> sourceIdDatDictionary,
-            IReadOnlyDictionary<string, ISourceDefinition> sourceIdContentDictionary)
+            IReadOnlyDictionary<string, ISourceDefinition> sourceIdContentDictionary,
+            Action<int, int, string>? progressCallback = null)
         {
             Dictionary<IGameFamily, string> familyUniqueNameDictionary =
                 BuildUniqueFamilyNames(curatedFamilies);
@@ -116,6 +120,7 @@ namespace com.RADIO.Datinate.RMVC
             if (string.IsNullOrWhiteSpace(mediaProjectPath))
                 return;
 
+            progressCallback?.Invoke(1, 2, "Deleting existing Media Export content");
             DeleteExportMediaProject(projectName);
 
             var exportInfoDelegate = new ExportInfoDelegate();
@@ -128,9 +133,10 @@ namespace com.RADIO.Datinate.RMVC
                     mediaPriorities,
                     familyMediaDictionary,
                     resourceDetailsDictionary,
-                    Path.Combine(mediaProjectPath, "Info"));
+                    Path.Combine(mediaProjectPath, "Info"),
+                    progressCallback);
 
-            string mediaDatName = CreateMediaDatName(projectName, softwareOptions);
+            string mediaDatName = CreateMediaDatName(projectName);
 
             var exportMediaDatDelegate = new ExportMediaDatDelegate();
 
@@ -148,13 +154,9 @@ namespace com.RADIO.Datinate.RMVC
                 mediaProjectPath);
         }
 
-        private static string CreateMediaDatName(
-            string projectName,
-            ExportSoftwareOptionsDTO softwareOptions)
+        private static string CreateMediaDatName(string projectName)
         {
-            return softwareOptions.ExportAs1G1R
-                ? projectName + " [1G1R][Media]"
-                : projectName + " [Media]";
+            return projectName + " [Media]";
         }
         private Dictionary<IGameFamily, string> BuildUniqueFamilyNames(IReadOnlyList<IGameFamily> curatedFamilies)
         {

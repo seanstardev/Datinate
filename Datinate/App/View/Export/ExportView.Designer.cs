@@ -236,7 +236,7 @@
             softwarePage.Padding = new Padding(3);
             softwarePage.Size = new Size(764, 548);
             softwarePage.TabIndex = 0;
-            softwarePage.Text = "Software && Global Export";
+            softwarePage.Text = "Software Export";
             softwarePage.UseVisualStyleBackColor = true;
             // 
             // softwarePanel
@@ -270,7 +270,7 @@
             label6.ForeColor = SystemColors.ControlDarkDark;
             label6.Location = new Point(17, 53);
             label6.Name = "label6";
-            label6.Size = new Size(529, 15);
+            label6.Size = new Size(572, 15);
             label6.TabIndex = 3;
             label6.Text = "Untick to create a 'flatter' DAT structure. This option is only available when every Game has exactly one Part.";
             // 
@@ -304,7 +304,7 @@
             label2.ForeColor = SystemColors.ControlDarkDark;
             label2.Location = new Point(17, 111);
             label2.Name = "label2";
-            label2.Size = new Size(277, 15);
+            label2.Size = new Size(249, 15);
             label2.TabIndex = 3;
             label2.Text = "Skip Games where all Parts are marked as Bad.";
             // 
@@ -323,7 +323,7 @@
             skipExcludedGamesCB.AutoSize = true;
             skipExcludedGamesCB.Location = new Point(17, 89);
             skipExcludedGamesCB.Name = "skipExcludedGamesCB";
-            skipExcludedGamesCB.Size = new Size(236, 19);
+            skipExcludedGamesCB.Size = new Size(208, 19);
             skipExcludedGamesCB.TabIndex = 2;
             skipExcludedGamesCB.Text = "Skip Games where all Parts are Bad";
             skipExcludedGamesCB.UseVisualStyleBackColor = true;
@@ -394,6 +394,7 @@
             // exportSoftwareBtn
             // 
             exportSoftwareBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            exportSoftwareBtn.Cursor = Cursors.Hand;
             exportSoftwareBtn.Location = new Point(595, 516);
             exportSoftwareBtn.Name = "exportSoftwareBtn";
             exportSoftwareBtn.Size = new Size(160, 23);
@@ -470,6 +471,7 @@
             // exportMediaBtn
             // 
             exportMediaBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            exportMediaBtn.Cursor = Cursors.Hand;
             exportMediaBtn.Location = new Point(595, 516);
             exportMediaBtn.Name = "exportMediaBtn";
             exportMediaBtn.Size = new Size(160, 23);

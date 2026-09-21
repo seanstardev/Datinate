@@ -30,6 +30,33 @@ namespace datinate.app
             Resize += OnResize;
         }
 
+        public void ClearView()
+        {
+            Ui(() =>
+            {
+                tabControl.SelectedIndex = 0;
+
+                export1g1rCB.Checked = false;
+                skipExcludedGamesCB.Checked = false;
+                skipExcludedDescriptorFamiliesCB.Checked = false;
+                exportAsM3uCB.Checked = false;
+                datStructureGroup.Enabled = false;
+
+                mediaContainer.SuspendLayout();
+
+                try
+                {
+                    ClearMediaContainerControls();
+                    ResizePriorityUis();
+                }
+                finally
+                {
+                    mediaContainer.ResumeLayout(true);
+                    ResetMediaContainerScroll();
+                }
+            });
+        }
+
         public void SetView(
             bool everyGameHasExactlyOnePart,
             ExportSoftwareOptionsDTO exportSoftwareOptions,

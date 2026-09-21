@@ -78,7 +78,24 @@ namespace com.RADIO.Datinate.RMVC
                     softwareOptions,
                     familyMediaDictionary,
                     flagFilterSet,
-                    softwareIdDatGroupEnumDictionary);
+                    softwareIdDatGroupEnumDictionary,
+                    async (current, total, info) =>
+                    {
+                        string message =
+                            "Creating M3U Files: " +
+                            DatinateHelper.GetReadableNumber(current) +
+                            " / " +
+                            DatinateHelper.GetReadableNumber(total) +
+                            ": " +
+                            info +
+                            ".";
+
+                        base.ExecuteCommand(new ShowProgressCmd(message, current, total));
+                    });
+
+                base.ExecuteCommand(new ClearProgressCmd());
+
+                base.ExecuteCommand(new ClearProgressCmd());
 
                 OpenFolderInExplorer(exportProxy.GetSoftwareProjectPath(activeProject));
 
@@ -99,22 +116,39 @@ namespace com.RADIO.Datinate.RMVC
                         return;
                 }
 
+                base.ExecuteCommand(new ShowProgressCmd("Building Media Export collection.", 1, 2));
+
                 var familyMediaDictionary = radioModel.CreateExportCollection(curatedFamilies);
                 var resourceDetailsDictionary = radioModel.GetResourceDetailsDictionary(curatedFamilies);
 
                 exportProxy.ExportMedia(
                     curatedFamilies,
                     activeProject,
-                    softwareOptions,
                     mediaPriorities,
                     familyMediaDictionary,
                     resourceDetailsDictionary,
                     radioModel.CreateSourceDatExportSnapshot(),
-                    radioModel.SourceIdContentDictionary);
+                    radioModel.SourceIdContentDictionary,
+                    async (current, total, info) =>
+                    {
+                        string message =
+                            "Creating Resource Files: " +
+                            DatinateHelper.GetReadableNumber(current) +
+                            " / " +
+                            DatinateHelper.GetReadableNumber(total) +
+                            ": " +
+                            info + 
+                            ".";
+
+                        base.ExecuteCommand(new ShowProgressCmd(message, current, total));
+                    });
+
+                base.ExecuteCommand(new ClearProgressCmd());
 
                 OpenFolderInExplorer(exportProxy.GetMediaProjectPath(activeProject));
 
                 await shell.ShowMessageBox("Attention", "Export completed.");
+
                 return;
             }
         }
