@@ -287,11 +287,6 @@ namespace datinate.app
             ProjectsForm.ProjectsView.ShowProjectsView();
         }
 
-        public void ShowContentPathsView()
-        {
-            ProjectsForm.ProjectsView.ShowRbContentPathsView();
-        }
-
         public void ShowDatGrouperWindowView()
         {
             ProjectsForm.ProjectsView.ShowCurationView();

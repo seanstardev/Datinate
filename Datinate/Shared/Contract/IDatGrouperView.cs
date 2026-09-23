@@ -25,7 +25,6 @@ namespace Datinate.Shared
         event Action? BackEvt;
         event Action? CurateEvt;
         event Action? ExportEvt;
-        event Action? ConfigureEvt;
         event Action? ExitMediaEvt;
         event Action<DatGrouperEditRequestDTO>? EditRequestEvt;
 

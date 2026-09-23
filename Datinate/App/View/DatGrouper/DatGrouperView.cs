@@ -30,7 +30,6 @@ namespace datinate.app
         public event Action? BackEvt;
         public event Action? CurateEvt;
         public event Action? ExportEvt;
-        public event Action? ConfigureEvt;
         public event Action? ExitMediaEvt;
         public event Action<IGameEntity?, bool>? GameEntitySelectedEvt;
 
@@ -381,25 +380,6 @@ namespace datinate.app
                     // NOTE: Do not remove: stops curated UI appearing when auto grouper layout is set again later.
                     SetScreenLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.AutoGrouper);
                     BackEvt?.Invoke();
-                }
-            };
-
-            cfgBtn.Click += (_, __) =>
-            {
-                bool proceed = false;
-
-                if (CurrentLayoutIsAuto)
-                    proceed = true;
-
-                else
-                {
-                    proceed = UIHelper.ShowDialogYesNo(
-                        "Any unsaved changes will be lost if you visit the Project Settings View. Do you wish to proceed?");
-                }
-                if (proceed)
-                {
-                    SetScreenLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.AutoGrouper);
-                    ConfigureEvt?.Invoke();
                 }
             };
 

@@ -37,7 +37,6 @@ namespace com.RADIO.Datinate
         void SetProgressFormVisible(bool doShow);
 
         void ShowDatGrouperWindowView();
-        void ShowContentPathsView();
         void ShowExportView();
         void ShowRbProjectsView();
         void HandleCompareFormClose();

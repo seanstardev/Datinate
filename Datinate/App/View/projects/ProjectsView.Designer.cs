@@ -32,9 +32,9 @@ namespace com.RADIO.Datinate.App.View.projects {
             tabPage2 = new TabPage();
             DatGrouperView = new DatGrouperView();
             tabPage3_pathsLoader = new TabPage();
-            rbContentPathsView = new DatGrouperProjectSettingsView();
             tabPage4 = new TabPage();
             ExportView = new ExportView();
+            label1 = new Label();
             tabControl.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -103,23 +103,13 @@ namespace com.RADIO.Datinate.App.View.projects {
             // 
             // tabPage3_pathsLoader
             // 
-            tabPage3_pathsLoader.Controls.Add(rbContentPathsView);
+            tabPage3_pathsLoader.Controls.Add(label1);
             tabPage3_pathsLoader.Location = new Point(0, 20);
             tabPage3_pathsLoader.Name = "tabPage3_pathsLoader";
             tabPage3_pathsLoader.Size = new Size(1164, 768);
             tabPage3_pathsLoader.TabIndex = 2;
             tabPage3_pathsLoader.Text = "tabPage3";
             tabPage3_pathsLoader.UseVisualStyleBackColor = true;
-            // 
-            // rbContentPathsView
-            // 
-            rbContentPathsView.BackColor = SystemColors.Control;
-            rbContentPathsView.Dock = DockStyle.Fill;
-            rbContentPathsView.Location = new Point(0, 0);
-            rbContentPathsView.Margin = new Padding(0);
-            rbContentPathsView.Name = "rbContentPathsView";
-            rbContentPathsView.Size = new Size(1164, 768);
-            rbContentPathsView.TabIndex = 0;
             // 
             // tabPage4
             // 
@@ -131,13 +121,23 @@ namespace com.RADIO.Datinate.App.View.projects {
             tabPage4.Text = "tabPage4";
             tabPage4.UseVisualStyleBackColor = true;
             // 
-            // exportView
+            // ExportView
             // 
+            ExportView.BackColor = SystemColors.Control;
             ExportView.Dock = DockStyle.Fill;
             ExportView.Location = new Point(0, 0);
-            ExportView.Name = "exportView";
+            ExportView.Name = "ExportView";
             ExportView.Size = new Size(1164, 768);
             ExportView.TabIndex = 0;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(25, 17);
+            label1.Name = "label1";
+            label1.Size = new Size(154, 15);
+            label1.TabIndex = 0;
+            label1.Text = "This tab is currently unused.";
             // 
             // ProjectsView
             // 
@@ -150,6 +150,7 @@ namespace com.RADIO.Datinate.App.View.projects {
             tabPage1.ResumeLayout(false);
             tabPage2.ResumeLayout(false);
             tabPage3_pathsLoader.ResumeLayout(false);
+            tabPage3_pathsLoader.PerformLayout();
             tabPage4.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -160,9 +161,9 @@ namespace com.RADIO.Datinate.App.View.projects {
         public datinate.app.ProjectLoaderView ProjectLoaderView;
         public datinate.app.DatGrouperView DatGrouperView;
         private TabPage tabPage3_pathsLoader;
-        private datinate.app.DatGrouperProjectSettingsView rbContentPathsView;
         private BorderlessTabControl tabControl;
         private TabPage tabPage4;
         public ExportView ExportView;
+        private Label label1;
     }
 }

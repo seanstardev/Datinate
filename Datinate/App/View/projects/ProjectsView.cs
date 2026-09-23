@@ -48,17 +48,5 @@ namespace com.RADIO.Datinate.App.View.projects
             }
             tabControl.SelectedIndex = 1;
         }
-        public void ShowRbContentPathsView()
-        {
-            if (InvokeRequired)
-            {
-                if (!IsDisposed && IsHandleCreated)
-                {
-                    BeginInvoke(new Action(() => ShowRbContentPathsView()));
-                }
-                return;
-            }
-            tabControl.SelectedIndex = 2;
-        }
     }
 }

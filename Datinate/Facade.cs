@@ -27,7 +27,6 @@ namespace com.RADIO.Datinate
         internal DatGrouperMediator? DatGrouperMediator => base.Mediator <DatGrouperMediator>();
         internal ProjectLoaderMediator? ProjectLoaderMediator => base.Mediator <ProjectLoaderMediator>();
         internal AddToProjectMediator? AddToProjectMediator => base.Mediator <AddToProjectMediator>();
-        internal DatGrouperSettingsMediator? ContentPathsMediator => base.Mediator <DatGrouperSettingsMediator>();
         internal MainWebMediator? MainWebMediator => base.Mediator <MainWebMediator>();
         internal RbWebSearchMediator? RbWebSearchMediator => base.Mediator<RbWebSearchMediator>();
         internal Media2Mediator? MediaMediator => base.Mediator<Media2Mediator>();
@@ -75,7 +74,6 @@ namespace com.RADIO.Datinate
                 new DatGrouperMediator(typeof(IDatGrouperView)),
                 new ProjectLoaderMediator(typeof(IProjectLoaderView)),
                 new AddToProjectMediator(typeof(IAddToProjectView)),
-                new DatGrouperSettingsMediator(typeof(IDatGrouperProjectSettingsView)),
                 new MainWebMediator(typeof(IMainWebView)),
                 new DatGrouperControlsMediator(typeof(IDatGrouperControlsView)),
                 new RbWebSearchMediator(typeof(IRbWebSearchView)),

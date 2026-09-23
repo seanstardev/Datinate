@@ -22,7 +22,7 @@ namespace com.RADIO.Datinate.RMVC
 
         protected override async Task RunAsync()
         {
-            var cmd = new LoadDatGrouperContentPathsCmd(false, false, false);
+            var cmd = new LoadDatGrouperContentPathsCmd(false);
             
             await base.ExecuteCommandAsync(cmd);
 

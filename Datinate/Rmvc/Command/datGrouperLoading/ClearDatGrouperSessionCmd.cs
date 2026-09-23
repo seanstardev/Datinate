@@ -23,7 +23,6 @@ namespace Datinate.Rmvc.Command
             Facade.Instance?.DatGrouperModel?.Teardown();
 
             Facade.Instance?.ProjectLoaderMediator?.ClearView();
-            Facade.Instance?.ContentPathsMediator?.ClearView();
             
             Facade.Instance?.ExportMediator?.ClearView();
 

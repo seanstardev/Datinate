@@ -118,7 +118,6 @@ namespace com.RADIO.Datinate.RMVC
             view.BackEvt += OnBack;
             view.CurateEvt += OnCurate;
             view.ExportEvt += OnExport;
-            view.ConfigureEvt += OnConfigure;
 
             view.GameEntitySelectedEvt += OnGameEntitySelected;
 
@@ -203,7 +202,7 @@ namespace com.RADIO.Datinate.RMVC
 
         private void OnCurate()
         {
-            base.ExecuteCommand(new LoadDatGrouperContentPathsCmd(true, false));
+            base.ExecuteCommand(new LoadDatGrouperContentPathsCmd(true));
         }
 
         protected override void Disposing()
@@ -216,7 +215,6 @@ namespace com.RADIO.Datinate.RMVC
             view.BackEvt -= OnBack;
             view.CurateEvt -= OnCurate;
             view.ExportEvt -= OnExport;
-            view.ConfigureEvt -= OnConfigure;
 
             view.GameEntitySelectedEvt -= OnGameEntitySelected;
 
@@ -238,11 +236,6 @@ namespace com.RADIO.Datinate.RMVC
         private void OnEditRequest(DatGrouperEditRequestDTO dto)
         {
             base.ExecuteCommand(new RequestDatGrouperEditCmd(dto));
-        }
-
-        private void OnConfigure()
-        {
-            base.ExecuteCommand(new LoadDatGrouperContentPathsCmd(true, true));
         }
     }
 }

@@ -9,13 +9,6 @@ namespace datinate.app
 {
     public partial class DatGrouperProjectSettingsView : UserControl
     {
-        public event Action<IReadOnlyList<DatGrouperProjectEntry>>? ContentPathsChanged;
-        public event Action<DatGrouperProjectDTO>? SaveEvt;
-        public event Action? BackEvt;
-        public event Action<int>? LoadingPercentEvt;
-        public event Action? ClearLoadingEvt;
-
-        public const int AuxRowHeightPx = 48;
         private const int MaxContentWidth = 1200;
 
         private DatGrouperProjectDTO? currentProject = null;
@@ -91,6 +84,7 @@ namespace datinate.app
 
             ScrollBodyToTop();
         }
+
         public void SetView(DatGrouperProjectDTO project, IReadOnlySet<DescriptorDefinitionDTO> descriptors)
         {
             if (InvokeRequired)
@@ -213,14 +207,6 @@ namespace datinate.app
             section.Controls.Clear();
         }
 
-        private void SaveBtn_Click(object? sender, EventArgs e)
-        {
-            var proj = GetProject();
-
-            if (proj != null)
-                SaveEvt?.Invoke(proj);
-        }
-
         public DatGrouperProjectDTO? GetProject()
         {
             var softwareDTOs = softwarePanel.GetRows();
@@ -297,11 +283,6 @@ namespace datinate.app
                 MessageBoxIcon.Error);
 
             return false;
-        }
-
-        private void BackBtn_Click(object? sender, EventArgs e)
-        {
-            BackEvt?.Invoke();
         }
 
         protected void HandleDisposing()

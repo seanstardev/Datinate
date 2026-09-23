@@ -53,7 +53,6 @@
             backBtn = new Button();
             saveBtn = new Button();
             curateBtn = new Button();
-            cfgBtn = new Button();
             exportBtn = new Button();
             datChipContainer = new FlowLayoutPanel();
             summaryLabel = new Label();
@@ -343,7 +342,6 @@
             btnLayoutPanel.Controls.Add(backBtn);
             btnLayoutPanel.Controls.Add(saveBtn);
             btnLayoutPanel.Controls.Add(curateBtn);
-            btnLayoutPanel.Controls.Add(cfgBtn);
             btnLayoutPanel.Controls.Add(exportBtn);
             btnLayoutPanel.FlowDirection = FlowDirection.RightToLeft;
             btnLayoutPanel.Location = new Point(607, 0);
@@ -388,23 +386,11 @@
             curateBtn.Text = "Curate";
             curateBtn.UseVisualStyleBackColor = true;
             // 
-            // cfgBtn
-            // 
-            cfgBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            cfgBtn.Cursor = Cursors.Hand;
-            cfgBtn.Location = new Point(4, 3);
-            cfgBtn.Margin = new Padding(0, 3, 0, 0);
-            cfgBtn.Name = "cfgBtn";
-            cfgBtn.Size = new Size(100, 26);
-            cfgBtn.TabIndex = 33;
-            cfgBtn.Text = "Project Settings";
-            cfgBtn.UseVisualStyleBackColor = true;
-            // 
             // exportBtn
             // 
             exportBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             exportBtn.Cursor = Cursors.Hand;
-            exportBtn.Location = new Point(304, 32);
+            exportBtn.Location = new Point(4, 3);
             exportBtn.Margin = new Padding(0, 3, 0, 0);
             exportBtn.Name = "exportBtn";
             exportBtn.Size = new Size(100, 26);
@@ -574,7 +560,6 @@
         private TableLayoutPanel webAndMainControlsContainer;
         private Panel webViewsContainer;
         private Panel fillerX;
-        private Button cfgBtn;
         private FlowLayoutPanel btnLayoutPanel;
         private SegmentedProgressBarUI progressBar;
         private CuratedWrapperUI curatedGrouperUI;

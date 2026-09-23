@@ -20,6 +20,13 @@ namespace com.RADIO.Datinate.RMVC
         {
             base.ExecuteCommand(new ClearDatGrouperSessionCmd());
 
+            var pathsCheckCmd = new CheckDatGrouperProjectValidCmd(projectVO);
+            base.ExecuteCommand(pathsCheckCmd);
+
+            // TODO: At least debug print this:
+            if (pathsCheckCmd.AllDatAndExpressionFilesExist == false)
+                return;
+
             Debug.WriteLine($"[TIMING] Start: AutoGrouper.");
 
             var stopwatch = Stopwatch.StartNew();
