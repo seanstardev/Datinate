@@ -3,9 +3,9 @@ using RMVC;
 
 namespace com.RADIO.Datinate.RMVC
 {
-    public class SaveCuratedCmd : RCommand 
+    public class SaveCuratedCmd : RCommandAsync 
     {
-        protected override void Run() 
+        protected override Task RunAsync()
         {
 
             RadioDatModel? radioDatModel = Facade.Instance?.RadioDatModel;
@@ -13,10 +13,12 @@ namespace com.RADIO.Datinate.RMVC
             CuratedDatProxy? curatedDatProxy = Facade.Instance?.CuratedDatProxy;
 
             if (radioDatModel == null || datGrouperModel == null || curatedDatProxy == null) 
-                return;
+                return Task.CompletedTask;
             
             if (string.IsNullOrWhiteSpace(radioDatModel.ProjectName) || radioDatModel.DatMeta == null)
-                return;
+                return Task.CompletedTask;
+
+            base.ExecuteCommand(new ShowProgressCmd("Saving Project", 1, 2));
 
             var familiesWithMedia = radioDatModel.CreateExportCollection(
                 datGrouperModel.CuratedFamilies);
@@ -27,6 +29,10 @@ namespace com.RADIO.Datinate.RMVC
                 radioDatModel.SourceIdContentDictionary,
                 radioDatModel.CreateSourceDatExportSnapshot(),
                 radioDatModel.DatMeta);
+
+            base.ExecuteCommand(new ClearProgressCmd());
+            
+            return Task.CompletedTask;
         }
 
         public static bool ContainsEntry(DatVO dat, string entryName)

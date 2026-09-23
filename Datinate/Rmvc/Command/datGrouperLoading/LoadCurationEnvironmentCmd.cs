@@ -54,7 +54,7 @@ namespace com.RADIO.Datinate.RMVC
 
                 if (collection is { })
                 {
-                    base.ExecuteCommand(new ShowProgressCmd("Importing Curated Set.", 1, 2));
+                    base.ExecuteCommand(new ShowProgressCmd("Importing Curated Set.", 2, 4));
 
                     try
                     {
@@ -67,6 +67,9 @@ namespace com.RADIO.Datinate.RMVC
                         if (delta != null)
                         {
                             var cache = radioDatModel.ImportMediaUpdates(collection, delta.ReplacementReferences);
+
+                            base.ExecuteCommand(new ShowProgressCmd("Rendering Curated Set.", 3, 4));
+
                             base.ExecuteCommand(new ApplyDatGrouperEditCmd(delta, false));
 
                             Facade.Instance?.DatGrouperMediator?.SetMediaCache(cache);

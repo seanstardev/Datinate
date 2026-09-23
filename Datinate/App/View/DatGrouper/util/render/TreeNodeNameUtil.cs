@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.Text;
 
@@ -170,6 +171,8 @@ namespace datinate.app
             var games = family.GetAllGames();
             var sources = GetFamilySources(family);
 
+            sb.AppendLine();
+
             sb.Append(family.GetFamilyDisplayName());
             sb.AppendLine().AppendLine();
 
@@ -181,51 +184,76 @@ namespace datinate.app
 
             if (sources.Count == 0)
                 sb.Append("none");
+
             else
-                sb.Append(string.Join(", ", sources));
+                sb.Append(string.Join(" | ", sources));
+
+            bool appendMediaInfo = true;
 
             if (mediaCollection == null ||
                 (mediaCollection.CheckedDescriptorCodes.Any() == false &&
                 string.IsNullOrWhiteSpace(mediaCollection.FamilyNotes) &&
                 mediaCollection.SourceIdAssignmentDictionary.Count == 0)
-            ) 
+            )
             {
-                return sb.ToString();
+                appendMediaInfo = false;
             }
 
-            sb.AppendLine().AppendLine();
-
-            if (mediaCollection.CheckedDescriptorCodes.Count > 0)
+            if (mediaCollection != null && appendMediaInfo == true)
             {
-                sb.Append("\tDescriptors:\t\t ");
+                sb.AppendLine().AppendLine();
+
+                if (mediaCollection.CheckedDescriptorCodes.Count > 0)
+                {
+                    sb.Append("\tDescriptors:\t\t ");
+                    sb.Append(
+                        string.Join(
+                            ", ",
+                            mediaCollection.CheckedDescriptorCodes
+                                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)));
+
+                    sb.AppendLine();
+                }
+
+                sb.Append("\tScoring Exempt:\t\t ");
+
                 sb.Append(
-                    string.Join(
-                        ", ",
-                        mediaCollection.CheckedDescriptorCodes
-                            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)));
+                    mediaCollection.IsScoringExempt
+                        ? "yes"
+                        : "no");
 
                 sb.AppendLine();
+
+                sb.Append("\tMedia & Resources:\t ");
+                sb.Append(mediaCollection.SourceIdAssignmentDictionary.Count);
+
+                if (!string.IsNullOrWhiteSpace(mediaCollection.FamilyNotes))
+                {
+                    sb.AppendLine().AppendLine();
+                    sb.Append("\tComment:");
+                    sb.AppendLine();
+                    sb.Append("\t\t" + GetTooltipComment(mediaCollection.FamilyNotes));
+                }
             }
 
-            sb.Append("\tScoring Exempt:\t\t ");
+            var allNames = DatinateFamilyHelper.GetAllNames(family);
+            HashSet<string> distinctNames = new HashSet<string>();
 
-            sb.Append(
-                mediaCollection.IsScoringExempt
-                    ? "yes"
-                    : "no");
+            if (allNames.Count > 1)
+                foreach (var str in allNames)
+                    _ = distinctNames.Add(DatinateHelper.UnBracket(str));
 
-            sb.AppendLine();
-
-            sb.Append("\tMedia & Resources:\t ");
-            sb.Append(mediaCollection.SourceIdAssignmentDictionary.Count);
-            sb.AppendLine();
-
-            if (!string.IsNullOrWhiteSpace(mediaCollection.FamilyNotes))
+            if (distinctNames.Count > 1) 
             {
-                sb.Append("\tComment:\t\t ");
-                sb.Append(GetTooltipComment(mediaCollection.FamilyNotes));
-            }
+                sb.AppendLine().AppendLine();
+                sb.Append("\tName Variations:");
 
+                foreach (var name in distinctNames)
+                {
+                    sb.AppendLine();
+                    sb.Append("\t\t" + name);
+                }
+            }
 
             return sb.ToString();
         }

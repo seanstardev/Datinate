@@ -67,13 +67,12 @@ namespace com.RADIO.Datinate.RMVC
 
                 exportDelegate.Export();
 
-
-                MessageBox.Show(
-                    "The Project '" + radioDatNameWithoutExt + ".xml" + "' has been Saved."
-                    , "OK"
-                    , MessageBoxButtons.OK
-                    , MessageBoxIcon.Information
-                );
+                //MessageBox.Show(
+                //    "The Project '" + radioDatNameWithoutExt + ".xml" + "' has been Saved."
+                //    , "OK"
+                //    , MessageBoxButtons.OK
+                //    , MessageBoxIcon.Information
+                //);
         }
         private string GetDatFullpath(string projectName)
         {
