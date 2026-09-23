@@ -7,7 +7,7 @@ using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace datinate.app
 {
-    public partial class DatGrouperProjectSettingsView : UserControl, IDatGrouperProjectSettingsView
+    public partial class DatGrouperProjectSettingsView : UserControl
     {
         public event Action<IReadOnlyList<DatGrouperProjectEntry>>? ContentPathsChanged;
         public event Action<DatGrouperProjectDTO>? SaveEvt;
@@ -23,7 +23,7 @@ namespace datinate.app
         public DatGrouperProjectSettingsView()
         {
             InitializeComponent();
-            Facade.RegisterActor(this);
+
             BackColor = SystemColors.Control;
             bodyPanel.BackColor = SystemColors.Control;
             Resize += OnResize;
@@ -88,6 +88,8 @@ namespace datinate.app
             PerformLayout();
             Invalidate(true);
             Update();
+
+            ScrollBodyToTop();
         }
         public void SetView(DatGrouperProjectDTO project, IReadOnlySet<DescriptorDefinitionDTO> descriptors)
         {
@@ -265,7 +267,19 @@ namespace datinate.app
 
             return proj;
         }
+        private void ScrollBodyToTop()
+        {
+            if (bodyPanel.IsDisposed || !bodyPanel.IsHandleCreated)
+                return;
 
+            bodyPanel.BeginInvoke((Action)(() =>
+            {
+                if (bodyPanel.IsDisposed || !bodyPanel.IsHandleCreated)
+                    return;
+
+                bodyPanel.AutoScrollPosition = Point.Empty;
+            }));
+        }
         private bool ValidatePathOrEmpty(string tableName, string id, string path)
         {
             if (path.Length == 0)
@@ -292,8 +306,6 @@ namespace datinate.app
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
-
             ClearSection(softwarePanel);
             ClearSection(auxPanel);
             ClearSection(supportPanel);

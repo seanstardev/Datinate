@@ -35,7 +35,6 @@ namespace datinate.app
         private bool ignoreProjectSelectionChange = false;
         private bool isCreatingNewProject = false;
         private string? projectNameBeforeNewMode = null;
-        private int hoveredProjectIndex = -1;
         private HashSet<ProjectDatUI> datUIs = new HashSet<ProjectDatUI>();
 
         private string? projectComment = null;
@@ -73,7 +72,6 @@ namespace datinate.app
             UIHelper.PopButton(cancelNewProjectBtn);
             //UIHelper.PopButton(cancelAdvancedSettingsBtn);
 
-            ConfigureProjectBrowser();
             projectNameText.TextChanged += projectNameText_TextChanged;
 
             ViewInitialisedEvt?.Invoke();
@@ -118,7 +116,8 @@ namespace datinate.app
                 projectComment = null;
                 datUIs = new HashSet<ProjectDatUI>();
                 activeCommentDatUI = null;
-                hoveredProjectIndex = -1;
+
+                projectListBox.ResetHover();
 
                 SetCommentEditActive(false);
             });
@@ -535,7 +534,7 @@ namespace datinate.app
         private void OnEditExpressions(ProjectDatUI ui, Control parentUI)
         {
             if (ui.GetData() != null)
-                EditExpressionsFileEvt?.Invoke(ui!.GetData());
+                EditExpressionsFileEvt?.Invoke(ui.GetData()!);
         }
 
         private void advancedSettingsBtn_Click(object sender, EventArgs e)
@@ -558,10 +557,14 @@ namespace datinate.app
             if (project != null && GetStandardViewDataOK()) 
                 BuildProjectEvt?.Invoke(project);
         }
-
-        private bool GetStandardViewDataOK()
+        private bool GetAdvancedViewDataOK(DatGrouperProjectDTO project)
         {
-            if (isCreatingNewProject)
+            return project.GetAllDatContentPathsAreValidOrEmpty();
+        }
+
+        private bool GetStandardViewDataOK(bool skipNewProjectChecks = false)
+        {
+            if (isCreatingNewProject && skipNewProjectChecks == false)
             {
                 ShowError("Cannot proceed while a new Project is being created.");
                 return false;
@@ -634,7 +637,7 @@ namespace datinate.app
                     if (!DatinatePointerHelper.IsDatFriendlyNameAcceptable(reference))
                     {
                         ShowError(
-                            $"The Quick Reference Name '{reference}' in '{setName}' is not in the correct format." +
+                            $"The Quick Reference Name '{reference}' in {setName} is not in the correct format." +
                             "Please ensure the Reference is alphanumeric and brief (underscores are allowed)."
                             );
 
@@ -678,10 +681,33 @@ namespace datinate.app
             if (!GetAllDatsHaveOkNames(errorMsg))
                 return;
 
+            if (!GetStandardViewDataOK(true))
+                return;
+
+            if (isCreatingNewProject == false && tabControl.SelectedIndex == 1)
+            {
+                var pathsProject = advancedSettingsView.GetProject();
+                if (pathsProject != null)
+                {
+                    ClearView();
+                    SetViewAsStandard();
+                    SaveProjectEvt?.Invoke(pathsProject);
+                }
+                return;
+            }
 
             var project = GetProject();
+
             if (project == null)
                 return;
+
+
+            if (!GetAdvancedViewDataOK(project))
+            {
+                ShowError("Cannot proceed. One or more Content Paths do not exist. All Content Paths must beither valid or empty.\r\rClick 'Advanced Project Settings' to review.");
+                return;
+            }
+
 
             string newName = projectNameText.Text.Trim();
 
@@ -762,24 +788,6 @@ namespace datinate.app
                 , MessageBoxIcon.Exclamation);
         }
 
-        private void ConfigureProjectBrowser()
-        {
-            projectListBox.DrawMode = DrawMode.OwnerDrawFixed;
-            projectListBox.ItemHeight = 34;
-            projectListBox.IntegralHeight = false;
-            projectListBox.BorderStyle = BorderStyle.None;
-            projectListBox.BackColor = Color.White;
-            projectListBox.ForeColor = Color.FromArgb(25, 25, 25);
-            projectListBox.Cursor = Cursors.Default;
-            projectNameText.Enabled = false;
-            createProjectPanel.Visible = false;
-
-            projectListBox.Resize -= projectListBox_Resize;
-            projectListBox.Resize += projectListBox_Resize;
-
-            projectListBox.MouseDown -= projectListBox_MouseDown;
-            projectListBox.MouseDown += projectListBox_MouseDown;
-        }
         private void projectListBox_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || ignoreProjectSelectionChange || isCreatingNewProject)
@@ -801,10 +809,7 @@ namespace datinate.app
 
             LoadProject(project);
         }
-        private void projectListBox_Resize(object? sender, EventArgs e)
-        {
-            EnsureSelectedProjectVisibleDeferred();
-        }
+
         private void UpdateProjectBrowserState()
         {
             bool hasProjects = projectListBox.Items.Count > 0;
@@ -823,6 +828,7 @@ namespace datinate.app
                 createProjectPanel.BringToFront();
             else
                 projectListBox.BringToFront();
+
             cancelNewProjectBtn.Enabled = hasProjects;
 
             commentText.Enabled = commentsEnabled;
@@ -833,17 +839,20 @@ namespace datinate.app
             commentGroup.Enabled = true;
 
             UpdateCurrentProjectNameLabel();
-            EnsureSelectedProjectVisibleDeferred();
+            projectListBox.EnsureSelectedProjectVisibleDeferred();
             projectListBox.Invalidate();
         }
         private bool SelectProjectInList(string projectName)
         {
             for (int i = 0; i < projectListBox.Items.Count; i++)
             {
-                if (string.Equals(projectListBox.Items[i]?.ToString(), projectName, StringComparison.Ordinal))
+                if (string.Equals(
+                    projectListBox.Items[i]?.ToString(),
+                    projectName,
+                    StringComparison.Ordinal))
                 {
                     projectListBox.SelectedIndex = i;
-                    EnsureSelectedProjectVisibleDeferred();
+                    projectListBox.EnsureSelectedProjectVisibleDeferred();
                     return true;
                 }
             }
@@ -912,94 +921,6 @@ namespace datinate.app
             if (!string.IsNullOrWhiteSpace(projectNameBeforeNewMode) && SelectProjectInList(projectNameBeforeNewMode))
                 return;
         }
-
-        private void projectListBox_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            e.DrawBackground();
-
-            if (e.Index < 0 || e.Index >= projectListBox.Items.Count)
-                return;
-
-            var bounds = e.Bounds;
-            var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
-            var hovered = e.Index == hoveredProjectIndex && !isCreatingNewProject;
-
-            Color backColor = Color.White;
-            Color textColor = Color.FromArgb(24, 24, 24);
-            Color accentColor = Color.FromArgb(35, 114, 198);
-
-            if (selected)
-            {
-                backColor = Color.FromArgb(226, 238, 252);
-                textColor = Color.FromArgb(16, 52, 92);
-            }
-            else if (hovered)
-            {
-                backColor = Color.FromArgb(242, 247, 252);
-            }
-            else if ((e.Index & 1) == 1)
-            {
-                backColor = Color.FromArgb(249, 250, 252);
-            }
-
-            using var backBrush = new SolidBrush(backColor);
-            e.Graphics.FillRectangle(backBrush, bounds);
-
-            using (var textBrush = new SolidBrush(textColor))
-            using (var font = new Font(Font, selected ? FontStyle.Bold : FontStyle.Regular))
-            {
-                var textRect = Rectangle.Inflate(bounds, -12, 0);
-                TextRenderer.DrawText(
-                    e.Graphics,
-                    projectListBox.Items[e.Index]?.ToString() ?? string.Empty,
-                    font,
-                    textRect,
-                    textColor,
-                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-            }
-
-            if (selected)
-            {
-                using var accentBrush = new SolidBrush(accentColor);
-                e.Graphics.FillRectangle(accentBrush, bounds.Left, bounds.Top, 4, bounds.Height);
-            }
-            else
-            {
-                using var dividerPen = new Pen(Color.FromArgb(232, 236, 241));
-                e.Graphics.DrawLine(dividerPen, bounds.Left + 8, bounds.Bottom - 1, bounds.Right - 8, bounds.Bottom - 1);
-            }
-
-            e.DrawFocusRectangle();
-        }
-
-        private void projectListBox_MouseMove(object sender, MouseEventArgs e)
-        {
-            int index = projectListBox.IndexFromPoint(e.Location);
-            projectListBox.Cursor = index >= 0 ? Cursors.Hand : Cursors.Default;
-
-            if (hoveredProjectIndex == index)
-                return;
-
-            int oldIndex = hoveredProjectIndex;
-            hoveredProjectIndex = index;
-
-            if (oldIndex >= 0)
-                projectListBox.Invalidate(projectListBox.GetItemRectangle(oldIndex));
-            if (hoveredProjectIndex >= 0)
-                projectListBox.Invalidate(projectListBox.GetItemRectangle(hoveredProjectIndex));
-        }
-
-        private void projectListBox_MouseLeave(object sender, EventArgs e)
-        {
-            projectListBox.Cursor = Cursors.Default;
-
-            if (hoveredProjectIndex < 0)
-                return;
-
-            int oldIndex = hoveredProjectIndex;
-            hoveredProjectIndex = -1;
-            projectListBox.Invalidate(projectListBox.GetItemRectangle(oldIndex));
-        }
         private void LoadNewProject()
         {
             ClearView();
@@ -1007,7 +928,7 @@ namespace datinate.app
             projectNameText.Text = string.Empty;
             projectNameText.Enabled = true;
             UpdateCurrentProjectNameLabel();
-            EnsureSelectedProjectVisibleDeferred();
+            projectListBox.EnsureSelectedProjectVisibleDeferred();
         }
         private void LoadProject(DatGrouperProjectDTO projectVO)
         {
@@ -1025,8 +946,13 @@ namespace datinate.app
                 projectNameText.Enabled = false;
                 projectNameText.Text = projectVO.ProjectName;
 
-                AddDatRange(projectVO.SoftwareEntries, DAT_GROUP_TARGET_ENUM.GAMES_INCLUDE_GROUP);
-                AddDatRange(projectVO.AuxEntries, DAT_GROUP_TARGET_ENUM.MEDIA_INCLUDE_GROUP);
+                AddDatRange(
+                    projectVO.SoftwareEntries,
+                    DAT_GROUP_TARGET_ENUM.GAMES_INCLUDE_GROUP);
+
+                AddDatRange(
+                    projectVO.AuxEntries,
+                    DAT_GROUP_TARGET_ENUM.MEDIA_INCLUDE_GROUP);
 
                 projectComment = commentText.Text =
                     string.IsNullOrWhiteSpace(projectVO.Comment)
@@ -1041,15 +967,15 @@ namespace datinate.app
             }
 
             UpdateCurrentProjectNameLabel();
-            EnsureSelectedProjectVisibleDeferred();
+            projectListBox.EnsureSelectedProjectVisibleDeferred();
 
             var project = GetProject();
-            if (project == null) return;
+            if (project == null)
+                return;
 
             HighlightEvt?.Invoke(project);
             DatFullpathsChangedEvt?.Invoke(project);
         }
-        
         private void cancelAdvancedSettingsBtn_Click(object sender, EventArgs e)
         {
             advancedSettingsView.ClearView();
@@ -1256,74 +1182,6 @@ namespace datinate.app
 
             if (!string.Equals(currentProjectNameLabel.Text, text, StringComparison.Ordinal))
                 currentProjectNameLabel.Text = text;
-        }
-        private void EnsureSelectedProjectVisible()
-        {
-            if (IsDisposed || !IsHandleCreated)
-                return;
-
-            if (projectListBox.IsDisposed || !projectListBox.IsHandleCreated)
-                return;
-
-            if (!projectListBox.Visible || projectListBox.Items.Count == 0)
-                return;
-
-            int selectedIndex = projectListBox.SelectedIndex;
-            if (selectedIndex < 0 || selectedIndex >= projectListBox.Items.Count)
-                return;
-
-            int itemHeight = Math.Max(1, projectListBox.ItemHeight);
-            int visibleCount = Math.Max(1, projectListBox.ClientSize.Height / itemHeight);
-            int topIndex = projectListBox.TopIndex;
-            int bottomIndex = topIndex + visibleCount - 1;
-
-            int targetTopIndex = topIndex;
-
-            if (selectedIndex < topIndex)
-            {
-                targetTopIndex = selectedIndex;
-            }
-            else if (selectedIndex > bottomIndex)
-            {
-                targetTopIndex = selectedIndex - visibleCount + 1;
-            }
-            else
-            {
-                return;
-            }
-
-            int maxTopIndex = Math.Max(0, projectListBox.Items.Count - visibleCount);
-            targetTopIndex = Math.Max(0, Math.Min(targetTopIndex, maxTopIndex));
-
-            if (projectListBox.TopIndex != targetTopIndex)
-            {
-                projectListBox.TopIndex = targetTopIndex;
-                projectListBox.Invalidate();
-            }
-        }
-        private void EnsureSelectedProjectVisibleDeferred()
-        {
-            if (IsDisposed || !IsHandleCreated)
-                return;
-
-            if (projectListBox.IsDisposed || !projectListBox.IsHandleCreated)
-                return;
-
-            projectListBox.BeginInvoke((Action)(() =>
-            {
-                if (IsDisposed || !IsHandleCreated)
-                    return;
-
-                if (projectListBox.IsDisposed || !projectListBox.IsHandleCreated)
-                    return;
-
-                EnsureSelectedProjectVisible();
-            }));
-        }
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-            EnsureSelectedProjectVisibleDeferred();
         }
     }
 }

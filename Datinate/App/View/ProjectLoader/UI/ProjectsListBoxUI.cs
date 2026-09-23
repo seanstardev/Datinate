@@ -15,6 +15,19 @@
             Cursor = Cursors.Default;
         }
 
+        public void ResetHover()
+        {
+            Cursor = Cursors.Default;
+
+            if (hoveredProjectIndex < 0)
+                return;
+
+            int oldIndex = hoveredProjectIndex;
+            hoveredProjectIndex = -1;
+
+            InvalidateItem(oldIndex);
+        }
+
         protected override void OnDrawItem(DrawItemEventArgs e)
         {
             e.DrawBackground();
@@ -122,15 +135,7 @@
         {
             base.OnMouseLeave(e);
 
-            Cursor = Cursors.Default;
-
-            if (hoveredProjectIndex < 0)
-                return;
-
-            int oldIndex = hoveredProjectIndex;
-            hoveredProjectIndex = -1;
-
-            InvalidateItem(oldIndex);
+            ResetHover();
         }
 
         protected override void OnResize(EventArgs e)

@@ -11,7 +11,7 @@
             selectProjectGroup = new GroupBox();
             newProjectBtn = new Button();
             projectListHostPanel = new Panel();
-            projectListBox = new ListBox();
+            projectListBox = new ProjectsListBoxUI();
             createProjectPanel = new Panel();
             saveNewProjectBtn = new Button();
             cancelNewProjectBtn = new Button();
@@ -73,10 +73,10 @@
             gamesIncludeContainer.AutoScroll = true;
             gamesIncludeContainer.BackColor = SystemColors.Control;
             gamesIncludeContainer.Dock = DockStyle.Fill;
-            gamesIncludeContainer.Location = new Point(4, 19);
+            gamesIncludeContainer.Location = new Point(0, 16);
             gamesIncludeContainer.Margin = new Padding(4, 3, 4, 3);
             gamesIncludeContainer.Name = "gamesIncludeContainer";
-            gamesIncludeContainer.Size = new Size(734, 370);
+            gamesIncludeContainer.Size = new Size(742, 376);
             gamesIncludeContainer.TabIndex = 1;
             // 
             // saveProjectBtn
@@ -134,18 +134,21 @@
             // 
             // projectListBox
             // 
+            projectListBox.BackColor = Color.White;
             projectListBox.BorderStyle = BorderStyle.None;
             projectListBox.Dock = DockStyle.Fill;
+            projectListBox.DrawMode = DrawMode.OwnerDrawFixed;
+            projectListBox.ForeColor = Color.FromArgb(25, 25, 25);
             projectListBox.FormattingEnabled = true;
+            projectListBox.IntegralHeight = false;
+            projectListBox.ItemHeight = 34;
             projectListBox.Location = new Point(1, 1);
             projectListBox.Margin = new Padding(0);
             projectListBox.Name = "projectListBox";
             projectListBox.Size = new Size(347, 510);
             projectListBox.TabIndex = 0;
-            projectListBox.DrawItem += projectListBox_DrawItem;
             projectListBox.SelectedIndexChanged += projectListBox_SelectedIndexChanged;
-            projectListBox.MouseLeave += projectListBox_MouseLeave;
-            projectListBox.MouseMove += projectListBox_MouseMove;
+            projectListBox.MouseDown += projectListBox_MouseDown;
             // 
             // createProjectPanel
             // 
@@ -201,6 +204,7 @@
             // projectNameText
             // 
             projectNameText.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            projectNameText.Enabled = false;
             projectNameText.Location = new Point(0, 17);
             projectNameText.Margin = new Padding(4, 3, 4, 3);
             projectNameText.Name = "projectNameText";
@@ -240,10 +244,10 @@
             mediaIncludeContainer.AutoScroll = true;
             mediaIncludeContainer.BackColor = SystemColors.Control;
             mediaIncludeContainer.Dock = DockStyle.Fill;
-            mediaIncludeContainer.Location = new Point(4, 19);
+            mediaIncludeContainer.Location = new Point(0, 16);
             mediaIncludeContainer.Margin = new Padding(4, 3, 4, 3);
             mediaIncludeContainer.Name = "mediaIncludeContainer";
-            mediaIncludeContainer.Size = new Size(734, 371);
+            mediaIncludeContainer.Size = new Size(742, 377);
             mediaIncludeContainer.TabIndex = 1;
             // 
             // commentGroup
@@ -403,6 +407,7 @@
             // 
             // tableLayoutPanel1
             // 
+            tableLayoutPanel1.BackColor = SystemColors.Control;
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(includeGroup, 0, 0);
@@ -526,7 +531,7 @@
         private System.Windows.Forms.TextBox projectNameText;
         private System.Windows.Forms.Button newProjectBtn;
         private System.Windows.Forms.Panel projectListHostPanel;
-        private System.Windows.Forms.ListBox projectListBox;
+        private ProjectsListBoxUI projectListBox;
         private System.Windows.Forms.GroupBox includeGroup;
         private System.Windows.Forms.GroupBox includeMediaGroup;
         private System.Windows.Forms.FlowLayoutPanel mediaIncludeContainer;

@@ -17,7 +17,8 @@ namespace com.RADIO.Datinate.RMVC
         {
             AllDatAndExpressionFilesExist =
                 DatGrouperProjectDTO.GetAllDatFilesExist(dto) &&
-                DatGrouperProjectDTO.GetAllExpressionFilesExistOrAreEmpty(dto);
+                DatGrouperProjectDTO.GetAllExpressionFilesExistOrAreEmpty(dto) &&
+                dto.GetAllDatContentPathsAreValidOrEmpty();
         }
     }
 }
