@@ -8,7 +8,6 @@ namespace datinate.app
     {
 
         public static readonly Dictionary<FlowLayoutPanel, System.Windows.Forms.Timer> reorderTimers = new();
-        private static readonly Dictionary<FlowLayoutPanel, bool> reorderLayoutLocked = new();
         private static readonly Dictionary<FlowLayoutPanel, Action> reorderCleanupByPanel = new();
         private static void CancelFlowAnimation(FlowLayoutPanel p)
         {

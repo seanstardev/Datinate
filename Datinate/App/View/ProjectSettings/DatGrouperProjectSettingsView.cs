@@ -20,13 +20,13 @@ namespace datinate.app
 
         private DatGrouperProjectDTO? currentProject = null;
 
-        public DatGrouperProjectSettingsView() 
-        { 
-            InitializeComponent(); 
-            Facade.RegisterActor(this); 
-            BackColor = SystemColors.Control; 
-            bodyPanel.BackColor = SystemColors.Control; 
-            Resize += OnResize; 
+        public DatGrouperProjectSettingsView()
+        {
+            InitializeComponent();
+            Facade.RegisterActor(this);
+            BackColor = SystemColors.Control;
+            bodyPanel.BackColor = SystemColors.Control;
+            Resize += OnResize;
         }
 
         private void OnResize(object? sender, EventArgs e)
@@ -213,20 +213,28 @@ namespace datinate.app
 
         private void SaveBtn_Click(object? sender, EventArgs e)
         {
+            var proj = GetProject();
+
+            if (proj != null)
+                SaveEvt?.Invoke(proj);
+        }
+
+        public DatGrouperProjectDTO? GetProject()
+        {
             var softwareDTOs = softwarePanel.GetRows();
             var auxDTOs = auxPanel.GetRows();
             var supportDTOs = supportPanel.GetRows();
 
-            if (currentProject == null) return;
+            if (currentProject == null) return null;
 
             foreach (var dto in softwareDTOs)
-                if (!ValidatePathOrEmpty("Software", dto.ID, dto.ContentPath ?? string.Empty)) return;
+                if (!ValidatePathOrEmpty("Software", dto.ID, dto.ContentPath ?? string.Empty)) return null;
 
             foreach (var dto in auxDTOs)
-                if (!ValidatePathOrEmpty("Media", dto.ID, dto.ContentPath ?? string.Empty)) return;
+                if (!ValidatePathOrEmpty("Media", dto.ID, dto.ContentPath ?? string.Empty)) return null;
 
             foreach (var dto in supportDTOs)
-                if (!ValidatePathOrEmpty("Support", dto.ID, dto.ContentPath ?? string.Empty)) return;
+                if (!ValidatePathOrEmpty("Support", dto.ID, dto.ContentPath ?? string.Empty)) return null;
 
             var ctrls = mediaDragDropUI.GetSelectedItems();
             var scoringMedia = new List<string>();
@@ -255,7 +263,7 @@ namespace datinate.app
                 currentProject.ExportSoftwareOptionsDTO,
                 currentProject.MediaExports);
 
-            SaveEvt?.Invoke(proj);
+            return proj;
         }
 
         private bool ValidatePathOrEmpty(string tableName, string id, string path)
@@ -296,7 +304,7 @@ namespace datinate.app
         {
             var ctrls = auxPanel.GetRowControls();
             var emuMoviesCtrls = new List<ContentPathRow>();
-            
+
             string? knownGoodPath = null;
 
             foreach (var ctrl in ctrls)
@@ -306,8 +314,8 @@ namespace datinate.app
                     emuMoviesCtrls.Add(ctrl);
 
                     if (string.IsNullOrWhiteSpace(knownGoodPath))
-                        if (!string.IsNullOrWhiteSpace(ctrl.Path) && Directory.Exists(ctrl.Path))    
-                            knownGoodPath = Path.GetDirectoryName(ctrl.Path);       
+                        if (!string.IsNullOrWhiteSpace(ctrl.Path) && Directory.Exists(ctrl.Path))
+                            knownGoodPath = Path.GetDirectoryName(ctrl.Path);
                 }
             }
 
@@ -319,14 +327,15 @@ namespace datinate.app
                     if (!string.IsNullOrWhiteSpace(pointer))
                     {
                         var subset = DatinatePointerHelper.GetPointerSubset(pointer);
-                        if (!string.IsNullOrWhiteSpace(subset)) {
+                        if (!string.IsNullOrWhiteSpace(subset))
+                        {
                             var path = Path.Combine(knownGoodPath, subset);
                             if (Directory.Exists(path))
                             {
                                 emuCtrl.Path = path;
                                 emuCtrl.UpdateFilesFoldersCount();
                             }
-                        } 
+                        }
                     }
                 }
             }

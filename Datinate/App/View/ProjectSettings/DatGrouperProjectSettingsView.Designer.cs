@@ -23,7 +23,9 @@ namespace datinate.app
         {
             rootLayout = new TableLayoutPanel();
             headerPanel = new Panel();
-            panel4 = new Panel();
+            panel2 = new Panel();
+            batchUpdateBtn = new Button();
+            filler = new Panel();
             titleLbl = new Label();
             bodyPanel = new Panel();
             bodyStackPanel = new Panel();
@@ -38,30 +40,19 @@ namespace datinate.app
             mediaDragDropUI = new DragDropUI();
             descriptorsCard = new ContentPathsHeader();
             descriptorsDragDropUI = new DragDropUI();
-            bottomBarPanel = new Panel();
-            panel3 = new Panel();
-            btnLayoutPanel = new FlowLayoutPanel();
-            backBtn = new Button();
-            saveBtn = new Button();
-            batchUpdateBtn = new Button();
+            panel1 = new Panel();
             softwareRowsPanel = new Panel();
             auxRowsHostPanel = new Panel();
             supportRowsPanel = new Panel();
             autoSizeContainer = new TableLayoutPanel();
             leftFillerPanel = new Panel();
-            panel1 = new Panel();
             rightFillerPanel = new Panel();
-            panel2 = new Panel();
             rootLayout.SuspendLayout();
             headerPanel.SuspendLayout();
             bodyPanel.SuspendLayout();
             bodyStackPanel.SuspendLayout();
             sectionsLayout.SuspendLayout();
-            bottomBarPanel.SuspendLayout();
-            btnLayoutPanel.SuspendLayout();
             autoSizeContainer.SuspendLayout();
-            leftFillerPanel.SuspendLayout();
-            rightFillerPanel.SuspendLayout();
             SuspendLayout();
             // 
             // rootLayout
@@ -71,20 +62,22 @@ namespace datinate.app
             rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             rootLayout.Controls.Add(headerPanel, 0, 0);
             rootLayout.Controls.Add(bodyPanel, 0, 1);
-            rootLayout.Controls.Add(bottomBarPanel, 0, 2);
+            rootLayout.Controls.Add(panel1, 0, 2);
             rootLayout.Location = new Point(39, 0);
             rootLayout.Margin = new Padding(0);
             rootLayout.Name = "rootLayout";
             rootLayout.RowCount = 3;
             rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
             rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
+            rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 1F));
             rootLayout.Size = new Size(800, 666);
             rootLayout.TabIndex = 0;
             // 
             // headerPanel
             // 
-            headerPanel.Controls.Add(panel4);
+            headerPanel.Controls.Add(panel2);
+            headerPanel.Controls.Add(batchUpdateBtn);
+            headerPanel.Controls.Add(filler);
             headerPanel.Controls.Add(titleLbl);
             headerPanel.Dock = DockStyle.Fill;
             headerPanel.Location = new Point(0, 0);
@@ -94,28 +87,50 @@ namespace datinate.app
             headerPanel.Size = new Size(800, 34);
             headerPanel.TabIndex = 0;
             // 
-            // panel4
+            // panel2
             // 
-            panel4.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panel4.BackColor = SystemColors.ControlDarkDark;
-            panel4.Location = new Point(0, 33);
-            panel4.Margin = new Padding(0);
-            panel4.Name = "panel4";
-            panel4.Size = new Size(800, 1);
-            panel4.TabIndex = 38;
+            panel2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            panel2.BackColor = SystemColors.ControlDarkDark;
+            panel2.Location = new Point(0, 0);
+            panel2.Margin = new Padding(0);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(800, 1);
+            panel2.TabIndex = 39;
+            // 
+            // batchUpdateBtn
+            // 
+            batchUpdateBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            batchUpdateBtn.Cursor = Cursors.Hand;
+            batchUpdateBtn.Location = new Point(628, 4);
+            batchUpdateBtn.Margin = new Padding(0, 3, 6, 0);
+            batchUpdateBtn.Name = "batchUpdateBtn";
+            batchUpdateBtn.Size = new Size(166, 27);
+            batchUpdateBtn.TabIndex = 2;
+            batchUpdateBtn.Text = "Batch Update Content Paths";
+            batchUpdateBtn.UseVisualStyleBackColor = true;
+            batchUpdateBtn.Click += batchUpdateBtn_Click;
+            // 
+            // filler
+            // 
+            filler.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            filler.BackColor = SystemColors.ControlDarkDark;
+            filler.Location = new Point(0, 33);
+            filler.Margin = new Padding(0);
+            filler.Name = "filler";
+            filler.Size = new Size(800, 1);
+            filler.TabIndex = 38;
             // 
             // titleLbl
             // 
             titleLbl.AutoSize = true;
-            titleLbl.Dock = DockStyle.Fill;
             titleLbl.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold);
             titleLbl.ForeColor = Color.FromArgb(30, 32, 36);
-            titleLbl.Location = new Point(14, 10);
+            titleLbl.Location = new Point(14, 7);
             titleLbl.Margin = new Padding(0);
             titleLbl.Name = "titleLbl";
-            titleLbl.Size = new Size(208, 20);
+            titleLbl.Size = new Size(187, 20);
             titleLbl.TabIndex = 0;
-            titleLbl.Text = "DAT Grouper Project Settings";
+            titleLbl.Text = "Advanced Project Settings";
             titleLbl.TextAlign = ContentAlignment.BottomLeft;
             // 
             // bodyPanel
@@ -128,7 +143,7 @@ namespace datinate.app
             bodyPanel.Margin = new Padding(0);
             bodyPanel.Name = "bodyPanel";
             bodyPanel.Padding = new Padding(14, 10, 14, 10);
-            bodyPanel.Size = new Size(800, 596);
+            bodyPanel.Size = new Size(800, 631);
             bodyPanel.TabIndex = 1;
             // 
             // bodyStackPanel
@@ -306,79 +321,15 @@ namespace datinate.app
             descriptorsDragDropUI.Size = new Size(749, 132);
             descriptorsDragDropUI.TabIndex = 6;
             // 
-            // bottomBarPanel
+            // panel1
             // 
-            bottomBarPanel.Controls.Add(panel3);
-            bottomBarPanel.Controls.Add(btnLayoutPanel);
-            bottomBarPanel.Dock = DockStyle.Bottom;
-            bottomBarPanel.Location = new Point(0, 630);
-            bottomBarPanel.Margin = new Padding(0);
-            bottomBarPanel.Name = "bottomBarPanel";
-            bottomBarPanel.Padding = new Padding(14, 10, 14, 10);
-            bottomBarPanel.Size = new Size(800, 36);
-            bottomBarPanel.TabIndex = 2;
-            // 
-            // panel3
-            // 
-            panel3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            panel3.BackColor = SystemColors.ControlDarkDark;
-            panel3.Location = new Point(0, 0);
-            panel3.Margin = new Padding(0);
-            panel3.Name = "panel3";
-            panel3.Size = new Size(800, 1);
-            panel3.TabIndex = 37;
-            // 
-            // btnLayoutPanel
-            // 
-            btnLayoutPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnLayoutPanel.Controls.Add(backBtn);
-            btnLayoutPanel.Controls.Add(saveBtn);
-            btnLayoutPanel.Controls.Add(batchUpdateBtn);
-            btnLayoutPanel.FlowDirection = FlowDirection.RightToLeft;
-            btnLayoutPanel.Location = new Point(384, 1);
-            btnLayoutPanel.Margin = new Padding(0);
-            btnLayoutPanel.Name = "btnLayoutPanel";
-            btnLayoutPanel.Size = new Size(412, 31);
-            btnLayoutPanel.TabIndex = 36;
-            // 
-            // backBtn
-            // 
-            backBtn.AutoSize = true;
-            backBtn.Cursor = Cursors.Hand;
-            backBtn.Location = new Point(312, 3);
-            backBtn.Margin = new Padding(0, 3, 0, 0);
-            backBtn.Name = "backBtn";
-            backBtn.Size = new Size(100, 27);
-            backBtn.TabIndex = 1;
-            backBtn.Text = "← Exit";
-            backBtn.UseVisualStyleBackColor = true;
-            backBtn.Click += BackBtn_Click;
-            // 
-            // saveBtn
-            // 
-            saveBtn.AutoSize = true;
-            saveBtn.Cursor = Cursors.Hand;
-            saveBtn.Location = new Point(206, 3);
-            saveBtn.Margin = new Padding(0, 3, 6, 0);
-            saveBtn.Name = "saveBtn";
-            saveBtn.Size = new Size(100, 27);
-            saveBtn.TabIndex = 0;
-            saveBtn.Text = "Save";
-            saveBtn.UseVisualStyleBackColor = true;
-            saveBtn.Click += SaveBtn_Click;
-            // 
-            // batchUpdateBtn
-            // 
-            batchUpdateBtn.AutoSize = true;
-            batchUpdateBtn.Cursor = Cursors.Hand;
-            batchUpdateBtn.Location = new Point(34, 3);
-            batchUpdateBtn.Margin = new Padding(0, 3, 6, 0);
-            batchUpdateBtn.Name = "batchUpdateBtn";
-            batchUpdateBtn.Size = new Size(166, 27);
-            batchUpdateBtn.TabIndex = 2;
-            batchUpdateBtn.Text = "Batch Update Content Paths";
-            batchUpdateBtn.UseVisualStyleBackColor = true;
-            batchUpdateBtn.Click += batchUpdateBtn_Click;
+            panel1.BackColor = SystemColors.ControlDarkDark;
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(0, 665);
+            panel1.Margin = new Padding(0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(800, 1);
+            panel1.TabIndex = 2;
             // 
             // softwareRowsPanel
             // 
@@ -434,7 +385,6 @@ namespace datinate.app
             // leftFillerPanel
             // 
             leftFillerPanel.BackColor = SystemColors.ControlDarkDark;
-            leftFillerPanel.Controls.Add(panel1);
             leftFillerPanel.Dock = DockStyle.Fill;
             leftFillerPanel.Location = new Point(0, 0);
             leftFillerPanel.Margin = new Padding(0);
@@ -442,36 +392,15 @@ namespace datinate.app
             leftFillerPanel.Size = new Size(39, 666);
             leftFillerPanel.TabIndex = 2;
             // 
-            // panel1
-            // 
-            panel1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panel1.BackColor = SystemColors.Control;
-            panel1.Location = new Point(0, 631);
-            panel1.Margin = new Padding(0);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(39, 35);
-            panel1.TabIndex = 1;
-            // 
             // rightFillerPanel
             // 
             rightFillerPanel.BackColor = SystemColors.ControlDarkDark;
-            rightFillerPanel.Controls.Add(panel2);
             rightFillerPanel.Dock = DockStyle.Fill;
             rightFillerPanel.Location = new Point(839, 0);
             rightFillerPanel.Margin = new Padding(0);
             rightFillerPanel.Name = "rightFillerPanel";
             rightFillerPanel.Size = new Size(40, 666);
             rightFillerPanel.TabIndex = 1;
-            // 
-            // panel2
-            // 
-            panel2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            panel2.BackColor = SystemColors.Control;
-            panel2.Location = new Point(0, 631);
-            panel2.Margin = new Padding(0);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(39, 35);
-            panel2.TabIndex = 2;
             // 
             // DatGrouperProjectSettingsView
             // 
@@ -490,12 +419,7 @@ namespace datinate.app
             bodyStackPanel.PerformLayout();
             sectionsLayout.ResumeLayout(false);
             sectionsLayout.PerformLayout();
-            bottomBarPanel.ResumeLayout(false);
-            btnLayoutPanel.ResumeLayout(false);
-            btnLayoutPanel.PerformLayout();
             autoSizeContainer.ResumeLayout(false);
-            leftFillerPanel.ResumeLayout(false);
-            rightFillerPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -505,10 +429,7 @@ namespace datinate.app
         private Panel headerPanel;
         private Label titleLbl;
         private Panel bodyPanel;
-        private Panel bottomBarPanel;
         private FlowLayoutPanel bottomBarFlow;
-        private Button saveBtn;
-        private Button backBtn;
 
         private Panel bodyStackPanel;
         private Panel softwareRowsPanel;
@@ -527,13 +448,11 @@ namespace datinate.app
         private ContentPathsHeader descriptorsCard;
         private DragDropUI descriptorsDragDropUI;
         private Button batchUpdateBtn;
-        private FlowLayoutPanel btnLayoutPanel;
         private TableLayoutPanel autoSizeContainer;
         private Panel leftFillerPanel;
         private Panel rightFillerPanel;
+        private Panel filler;
         private Panel panel1;
         private Panel panel2;
-        private Panel panel3;
-        private Panel panel4;
     }
 }

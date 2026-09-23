@@ -55,18 +55,23 @@ namespace datinate.app
         public ProjectLoaderView()
         {
             InitializeComponent();
+
             EnableDoubleBuffer(gamesIncludeContainer);
             EnableDoubleBuffer(mediaIncludeContainer);
 
             dragManagers[gamesIncludeContainer] = new FlowReorderDragManager(this, gamesIncludeContainer);
             dragManagers[mediaIncludeContainer] = new FlowReorderDragManager(this, mediaIncludeContainer);
+
+            SetViewAsStandard();
+
             Facade.RegisterActor(this);
 
             UIHelper.PopButton(saveProjectBtn);
-            UIHelper.PopButton(buildProjectBtn);
+            UIHelper.PopButton(runDatGrouperBtn);
             UIHelper.PopButton(newProjectBtn);
             UIHelper.PopButton(saveNewProjectBtn);
             UIHelper.PopButton(cancelNewProjectBtn);
+            //UIHelper.PopButton(cancelAdvancedSettingsBtn);
 
             ConfigureProjectBrowser();
             projectNameText.TextChanged += projectNameText_TextChanged;
@@ -88,7 +93,7 @@ namespace datinate.app
 
             TryApplyPendingSetView();
         }
-        
+
         public DatGrouperProjectEntry[] GetAllDatHeadlines()
         {
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
@@ -100,11 +105,28 @@ namespace datinate.app
             return list.ToArray();
         }
 
-        public void SetExpressionsFileForLastSelected(string expressionsXmlFullpath)
+        public void ClearView()
         {
-            lastClickedrojectDatUI?.SetExpressionsFullpath(expressionsXmlFullpath);
+            Ui(() =>
+            {
+                EmptyContainer(gamesIncludeContainer);
+                EmptyContainer(mediaIncludeContainer);
+
+                currentProject = null;
+                commentLabel.Text = GetProjectCommentName();
+                commentText.Text = "";
+                projectComment = null;
+                datUIs = new HashSet<ProjectDatUI>();
+                activeCommentDatUI = null;
+                hoveredProjectIndex = -1;
+
+                SetCommentEditActive(false);
+            });
         }
 
+        public void SetExpressionsFileForLastSelected(string expressionsXmlFullpath) =>
+            lastClickedrojectDatUI?.SetExpressionsFullpath(expressionsXmlFullpath);
+        
         public void AddDat(
             DatGrouperProjectEntry datHeadline,
             DAT_GROUP_TARGET_ENUM datGroupTargetEnum,
@@ -128,6 +150,43 @@ namespace datinate.app
             }
         }
 
+        private void SetViewAsStandard()
+        {
+            leftContainer.Enabled = true;
+            tabControl.SelectedIndex = 0;
+
+            cancelAdvancedSettingsBtn.Visible = false;
+            runDatGrouperBtn.Visible = true;
+            advancedSettingsBtn.Visible = true;
+        }
+
+        private void SetViewAsAdvanced()
+        {
+            SetCommentEditActive(false);
+            SetProjectCommentShowing();
+
+            if (GetStandardViewDataOK())
+            {
+                var project = GetProject();
+
+                if (project != null)
+                {
+                    tabControl.SelectedIndex = 1;
+
+                    leftContainer.Enabled = false;
+
+                    cancelAdvancedSettingsBtn.Visible = true;
+                    runDatGrouperBtn.Visible = false;
+                    advancedSettingsBtn.Visible = false;
+
+                    advancedSettingsView.ClearView();
+
+                    // TODO: Model should set this definition:
+                    advancedSettingsView.SetView(project, DescriptorChipUtil.DescriptorDefinitions);
+                }
+            }
+        }
+
         protected void HandleDisposing()
         {
             Facade.UnregisterActor(this);
@@ -137,7 +196,7 @@ namespace datinate.app
             if (IsDisposed || Disposing)
                 return;
 
-            // This is fine. We DON'T throw the request away.
+            // NOTE: This is fine. We DON'T throw the request away.
             // OnLoad will try again once the view is actually ready.
             if (!viewLoaded || !IsHandleCreated)
                 return;
@@ -147,6 +206,8 @@ namespace datinate.app
                 BeginInvoke((Action)TryApplyPendingSetView);
                 return;
             }
+
+            SetViewAsStandard();
 
             DatGrouperProjectDTO[]? projects;
             string? projectToLoad;
@@ -165,18 +226,20 @@ namespace datinate.app
 
             SetViewCore(projects, projectToLoad);
         }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
             viewLoaded = true;
 
-            // Defer once more so the initial WinForms layout/load cycle can finish.
+            // NOTE: Defer once more so the initial WinForms layout/load cycle can finish.
             BeginInvoke((Action)TryApplyPendingSetView);
         }
+
         private void SetViewCore(
-    DatGrouperProjectDTO[] projects,
-    string? projectToLoad)
+            DatGrouperProjectDTO[] projects,
+            string? projectToLoad)
         {
             if (isCreatingNewProject)
             {
@@ -187,6 +250,7 @@ namespace datinate.app
             ClearView();
 
             ignoreProjectSelectionChange = true;
+
             try
             {
                 projectListBox.Items.Clear();
@@ -223,6 +287,7 @@ namespace datinate.app
             projectNameText.Text = string.Empty;
             projectNameText.Enabled = false;
         }
+
         private DatGrouperProjectDTO? GetProject()
         {
             var projectName = projectNameText.Text.Trim();
@@ -246,6 +311,7 @@ namespace datinate.app
 
             return projectVO;
         }
+
         private void OnDatRemoved(ProjectDatUI datUI, Control parentUI)
         {
             if (parentUI is not FlowLayoutPanel p)
@@ -263,6 +329,7 @@ namespace datinate.app
                 p.ResumeLayout(true);
             }
         }
+
         DatGrouperProjectEntry[] GetAuxIncludeEntries()
         {
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
@@ -280,7 +347,7 @@ namespace datinate.app
             return list.ToArray();
         }
 
-        DatGrouperProjectEntry[] GetSoftwareIncludeDats(bool excludeThoseBeingRemoved = false)
+        private DatGrouperProjectEntry[] GetSoftwareIncludeDats(bool excludeThoseBeingRemoved = false)
         {
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
 
@@ -288,7 +355,8 @@ namespace datinate.app
             {
                 var ui = gamesIncludeContainer.Controls[i] as ProjectDatUI;
                 if (ui == null) continue;
-                // race condition:
+
+                // NOTE: race condition:
                 if (ui.IsBeingRemoved && excludeThoseBeingRemoved) continue;
 
                 var data = ui.GetData();
@@ -299,11 +367,13 @@ namespace datinate.app
             return list.ToArray();
         }
 
-        DatGrouperProjectEntry[] GetIgnoreDats()
+        // NOTE: Placeholder. May come back to this concept later:
+        private DatGrouperProjectEntry[] GetIgnoreDats()
         {
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
             return list.ToArray();
         }
+
         private void RemoveAndDisposeDatUI(FlowLayoutPanel p, ProjectDatUI datUI)
         {
             if (dragManagers.TryGetValue(p, out var mgr))
@@ -314,25 +384,7 @@ namespace datinate.app
             DisposeDatUI(datUI);
         }
 
-        public void ClearView()
-        {
-            Ui(() => { 
-                EmptyContainer(gamesIncludeContainer);
-                EmptyContainer(mediaIncludeContainer);
-
-                currentProject = null;
-                commentLabel.Text = GetProjectCommentName();
-                commentText.Text = "";
-                projectComment = null;
-                datUIs = new HashSet<ProjectDatUI>();
-                activeCommentDatUI = null;
-                hoveredProjectIndex = -1;
-
-                SetCommentEditActive(false);
-            });
-        }
-
-        void EmptyContainer(FlowLayoutPanel p)
+        private void EmptyContainer(FlowLayoutPanel p)
         {
             List<ProjectDatUI> list =
                 new List<ProjectDatUI>(p.Controls.Count);
@@ -355,16 +407,16 @@ namespace datinate.app
                 p.ResumeLayout(true);
             }
         }
-        public void CheckParentSetup(FlowLayoutPanel p)
+
+        internal void CheckParentSetup(FlowLayoutPanel p)
         {
             for (int i = 0; i < p.Controls.Count; i++)
             {
                 var ui = p.Controls[i] as ProjectDatUI;
 
                 if (ui != null)
-                {
                     ui.UpdateByIndex(i, i == p.Controls.Count - 1);
-                }
+                
             }
         }
         internal void UpdateAfterSwap(FlowLayoutPanel p, ProjectDatUI a, ProjectDatUI b)
@@ -374,10 +426,11 @@ namespace datinate.app
             var ia = p.Controls.GetChildIndex(a);
             var ib = p.Controls.GetChildIndex(b);
 
-            // Only these two indices changed for an adjacent swap.
+            // NOTE: Only these two indices changed for an adjacent swap.
             a.UpdateByIndex(ia, ia == last);
             b.UpdateByIndex(ib, ib == last);
         }
+
         void OnUiOrderChange(ProjectDatUI ui, Control parentUI)
         {
             var p = (FlowLayoutPanel)parentUI;
@@ -473,55 +526,80 @@ namespace datinate.app
             catch { }
         }
 
-        void OnLoadExpressions(ProjectDatUI ui, Control parentUI)
+        private void OnLoadExpressions(ProjectDatUI ui, Control parentUI)
         {
             lastClickedrojectDatUI = ui;
             LoadExpressionsFileEvt?.Invoke();
         }
 
-        void OnEditExpressions(ProjectDatUI ui, Control parentUI)
+        private void OnEditExpressions(ProjectDatUI ui, Control parentUI)
         {
             if (ui.GetData() != null)
                 EditExpressionsFileEvt?.Invoke(ui!.GetData());
         }
 
-        void buildProjectBtn_Click(object sender, EventArgs e)
+        private void advancedSettingsBtn_Click(object sender, EventArgs e)
+        {
+            if (GetStandardViewDataOK())
+            {
+                SetCommentEditActive(false);
+                SetProjectCommentShowing();
+                SetViewAsAdvanced();
+            }
+        }
+
+        private void buildProjectBtn_Click(object sender, EventArgs e)
         {
             SetCommentEditActive(false);
             SetProjectCommentShowing();
 
-            if (!GetAllDatsHaveOkNames("Cannot run DAT Grouper. No Project is loaded."))
-                return;
+            var project = GetProject();
+
+            if (project != null && GetStandardViewDataOK()) 
+                BuildProjectEvt?.Invoke(project);
+        }
+
+        private bool GetStandardViewDataOK()
+        {
+            if (isCreatingNewProject)
+            {
+                ShowError("Cannot proceed while a new Project is being created.");
+                return false;
+            }
+
+            if (!GetAllDatsHaveOkNames("Cannot proceed as no Project is loaded."))
+                return false;
 
             var project = GetProject();
 
-            if (project == null) return;
+            if (project == null) return false;
 
             if (project.SoftwareEntries.Count == 0)
             {
-                ShowError("Add at least one Software DAT to build the DAT Grouper Project.");
-                return;
+                ShowError("Add at least one Software DAT to proceed.");
+                return false;
             }
 
             var allDatsExist = DatGrouperProjectDTO.GetAllDatsExist(project);
             if (allDatsExist == false)
             {
-                ShowError("Dat Grouper cannot be run as one or more DAT files do not exist.");
-                return;
+                ShowError("Cannot proceed as one or more DAT files do not exist.");
+                return false;
             }
 
             var allExpressionFilesExist = DatGrouperProjectDTO.GetAllExpressionFilesExistOrAreEmpty(project);
             if (allExpressionFilesExist == false)
             {
-                ShowError("Dat Grouper cannot be run as one or more DAT Filter files do not exist.");
-                return;
+                ShowError("Cannot proceed as one or more DAT Filter files do not exist.");
+                return false;
             }
 
-            BuildProjectEvt?.Invoke(project);
+            return true;
         }
+
         private static void EnableDoubleBuffer(Control c)
         {
-            // Control.DoubleBuffered is protected; reflection is fine here and avoids a new subclass.
+            // NOTE: Control.DoubleBuffered is protected; reflection is fine here and avoids a new subclass.
             try
             {
                 typeof(Control)
@@ -586,17 +664,16 @@ namespace datinate.app
             }
 
             if (!CheckSet(project.SoftwareEntries, "Game DATs")) return false;
-            if (!CheckSet(project.AuxEntries, "Media DATs")) return false;
-            
+            if (!CheckSet(project.AuxEntries, "Media & Resource DATs")) return false;
+
             return true;
         }
 
-
-        void saveBtn_Click(object sender, EventArgs e)
+        private void saveBtn_Click(object sender, EventArgs e)
         {
-    var errorMsg = isCreatingNewProject
-        ? "Cannot proceed. Please enter a Project name."
-        : "Cannot proceed. No Project is loaded.";
+            var errorMsg = isCreatingNewProject
+                ? "Cannot proceed. Please enter a Project name."
+                : "Cannot proceed. No Project is loaded.";
 
             if (!GetAllDatsHaveOkNames(errorMsg))
                 return;
@@ -722,7 +799,6 @@ namespace datinate.app
             if (!projectModel.TryGetValue(clickedProjectName, out var project))
                 return;
 
-            //LoadingProjectEvt?.Invoke();
             LoadProject(project);
         }
         private void projectListBox_Resize(object? sender, EventArgs e)
@@ -820,15 +896,12 @@ namespace datinate.app
             if (string.Equals(currentProject?.ProjectName, projectName, StringComparison.Ordinal))
                 return;
 
-            //LoadingProjectEvt?.Invoke();
             LoadProject(project);
         }
 
-        private void newProjectBtn_Click(object sender, EventArgs e)
-        {
+        private void newProjectBtn_Click(object sender, EventArgs e) =>
             BeginNewProjectMode();
-        }
-
+        
         private void cancelNewProjectBtn_Click(object sender, EventArgs e)
         {
             if (!isCreatingNewProject)
@@ -927,7 +1000,7 @@ namespace datinate.app
             hoveredProjectIndex = -1;
             projectListBox.Invalidate(projectListBox.GetItemRectangle(oldIndex));
         }
-        void LoadNewProject()
+        private void LoadNewProject()
         {
             ClearView();
             currentProject = null;
@@ -936,7 +1009,7 @@ namespace datinate.app
             UpdateCurrentProjectNameLabel();
             EnsureSelectedProjectVisibleDeferred();
         }
-        void LoadProject(DatGrouperProjectDTO projectVO)
+        private void LoadProject(DatGrouperProjectDTO projectVO)
         {
             SuspendLayout();
             gamesIncludeContainer.SuspendLayout();
@@ -976,17 +1049,11 @@ namespace datinate.app
             HighlightEvt?.Invoke(project);
             DatFullpathsChangedEvt?.Invoke(project);
         }
-        private void highlightBtn_Click(object sender, EventArgs e)
+        
+        private void cancelAdvancedSettingsBtn_Click(object sender, EventArgs e)
         {
-            if (currentProject != null)
-                HighlightEvt?.Invoke(currentProject);
-        }
-
-        private void familyTreeBtn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            SetCommentEditActive(false);
-            SetProjectCommentShowing();
-            ShowTreeViewEvt?.Invoke(projectNameText.Text);
+            advancedSettingsView.ClearView();
+            SetViewAsStandard();
         }
 
         private void cancelCommentEditBtn_Click(object sender, EventArgs e)
@@ -998,7 +1065,6 @@ namespace datinate.app
 
         private void applyCommentEditBtn_Click(object sender, EventArgs e)
         {
-
             if (activeCommentDatUI != null)
             {
                 activeCommentDatUI.SetComment(commentText.Text.Trim());
@@ -1031,7 +1097,6 @@ namespace datinate.app
             SetCommentEditActive(true);
         }
 
-
         private void OnDatCommentPreviewStart(ProjectDatUI ui, Control parentUI)
         {
             if (!commentText.ReadOnly) return;
@@ -1042,13 +1107,13 @@ namespace datinate.app
 
             commentLabel.Text = ui.GetCommentName();
         }
+
         private void OnDatCommentPreviewEnd(ProjectDatUI ui, Control paremntUI)
         {
             if (!commentText.ReadOnly) return;
             commentLabel.Text = GetProjectCommentName();
             commentText.Text = string.IsNullOrWhiteSpace(projectComment) ? string.Empty : projectComment;
         }
-
 
         private void SetCommentEditActive(bool isActive)
         {
@@ -1067,7 +1132,6 @@ namespace datinate.app
             commentLabel.Text = GetProjectCommentName();
             commentText.Text = string.IsNullOrWhiteSpace(projectComment) ? string.Empty : projectComment;
         }
-
 
         private FlowLayoutPanel? GetContainer(DAT_GROUP_TARGET_ENUM datGroupTargetEnum)
         {
@@ -1138,6 +1202,7 @@ namespace datinate.app
                 return;
 
             container.SuspendLayout();
+
             try
             {
                 for (int i = 0; i < entries.Count; i++)
@@ -1165,10 +1230,9 @@ namespace datinate.app
 
             datUI.Dispose();
         }
-        private void projectNameText_TextChanged(object? sender, EventArgs e)
-        {
+        private void projectNameText_TextChanged(object? sender, EventArgs e) =>
             UpdateCurrentProjectNameLabel();
-        }
+        
         private void UpdateCurrentProjectNameLabel()
         {
             string text;

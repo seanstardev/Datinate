@@ -5,7 +5,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            buildProjectBtn = new Button();
+            runDatGrouperBtn = new Button();
             gamesIncludeContainer = new FlowLayoutPanel();
             saveProjectBtn = new Button();
             selectProjectGroup = new GroupBox();
@@ -26,37 +26,47 @@
             cancelCommentEditBtn = new Button();
             editCommentBtn = new Button();
             commentLabel = new Label();
-            settingsPanel = new Panel();
+            leftContainer = new Panel();
             currentProjectPanel = new Panel();
             currentProjectNameLabel = new Label();
-            familyTreeBtn = new LinkLabel();
             imageList1 = new ImageList(components);
-            referenceContainer2 = new Panel();
+            rightContainer = new Panel();
+            tabControl = new InvisibleTabControl();
+            tabPage1 = new TabPage();
             tableLayoutPanel1 = new TableLayoutPanel();
+            tabPage2 = new TabPage();
+            advancedSettingsView = new DatGrouperProjectSettingsView();
+            advancedSettingsBtn = new Button();
+            btnFlowPanel = new FlowLayoutPanel();
+            cancelAdvancedSettingsBtn = new Button();
             selectProjectGroup.SuspendLayout();
             projectListHostPanel.SuspendLayout();
             createProjectPanel.SuspendLayout();
             includeGroup.SuspendLayout();
             includeMediaGroup.SuspendLayout();
             commentGroup.SuspendLayout();
-            settingsPanel.SuspendLayout();
+            leftContainer.SuspendLayout();
             currentProjectPanel.SuspendLayout();
-            referenceContainer2.SuspendLayout();
+            rightContainer.SuspendLayout();
+            tabControl.SuspendLayout();
+            tabPage1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
+            tabPage2.SuspendLayout();
+            btnFlowPanel.SuspendLayout();
             SuspendLayout();
             // 
-            // buildProjectBtn
+            // runDatGrouperBtn
             // 
-            buildProjectBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buildProjectBtn.Cursor = Cursors.Hand;
-            buildProjectBtn.Location = new Point(970, 831);
-            buildProjectBtn.Margin = new Padding(4, 3, 4, 3);
-            buildProjectBtn.Name = "buildProjectBtn";
-            buildProjectBtn.Size = new Size(160, 27);
-            buildProjectBtn.TabIndex = 0;
-            buildProjectBtn.Text = "Run DAT Grouper";
-            buildProjectBtn.UseVisualStyleBackColor = true;
-            buildProjectBtn.Click += buildProjectBtn_Click;
+            runDatGrouperBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            runDatGrouperBtn.Cursor = Cursors.Hand;
+            runDatGrouperBtn.Location = new Point(322, 0);
+            runDatGrouperBtn.Margin = new Padding(4, 0, 4, 0);
+            runDatGrouperBtn.Name = "runDatGrouperBtn";
+            runDatGrouperBtn.Size = new Size(160, 27);
+            runDatGrouperBtn.TabIndex = 0;
+            runDatGrouperBtn.Text = "Run DAT Grouper";
+            runDatGrouperBtn.UseVisualStyleBackColor = true;
+            runDatGrouperBtn.Click += buildProjectBtn_Click;
             // 
             // gamesIncludeContainer
             // 
@@ -66,15 +76,15 @@
             gamesIncludeContainer.Location = new Point(4, 19);
             gamesIncludeContainer.Margin = new Padding(4, 3, 4, 3);
             gamesIncludeContainer.Name = "gamesIncludeContainer";
-            gamesIncludeContainer.Size = new Size(742, 384);
+            gamesIncludeContainer.Size = new Size(734, 370);
             gamesIncludeContainer.TabIndex = 1;
             // 
             // saveProjectBtn
             // 
             saveProjectBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             saveProjectBtn.Cursor = Cursors.Hand;
-            saveProjectBtn.Location = new Point(874, 831);
-            saveProjectBtn.Margin = new Padding(4, 3, 4, 3);
+            saveProjectBtn.Location = new Point(598, 0);
+            saveProjectBtn.Margin = new Padding(4, 0, 4, 0);
             saveProjectBtn.Name = "saveProjectBtn";
             saveProjectBtn.Size = new Size(88, 27);
             saveProjectBtn.TabIndex = 2;
@@ -206,7 +216,7 @@
             includeGroup.Margin = new Padding(4, 3, 4, 3);
             includeGroup.Name = "includeGroup";
             includeGroup.Padding = new Padding(4, 3, 4, 3);
-            includeGroup.Size = new Size(750, 406);
+            includeGroup.Size = new Size(742, 392);
             includeGroup.TabIndex = 5;
             includeGroup.TabStop = false;
             includeGroup.Text = "Software";
@@ -216,11 +226,11 @@
             includeMediaGroup.BackColor = SystemColors.ControlLight;
             includeMediaGroup.Controls.Add(mediaIncludeContainer);
             includeMediaGroup.Dock = DockStyle.Fill;
-            includeMediaGroup.Location = new Point(4, 415);
+            includeMediaGroup.Location = new Point(4, 401);
             includeMediaGroup.Margin = new Padding(4, 3, 4, 3);
             includeMediaGroup.Name = "includeMediaGroup";
             includeMediaGroup.Padding = new Padding(4, 3, 4, 3);
-            includeMediaGroup.Size = new Size(750, 407);
+            includeMediaGroup.Size = new Size(742, 393);
             includeMediaGroup.TabIndex = 6;
             includeMediaGroup.TabStop = false;
             includeMediaGroup.Text = "Media && Resource";
@@ -233,7 +243,7 @@
             mediaIncludeContainer.Location = new Point(4, 19);
             mediaIncludeContainer.Margin = new Padding(4, 3, 4, 3);
             mediaIncludeContainer.Name = "mediaIncludeContainer";
-            mediaIncludeContainer.Size = new Size(742, 385);
+            mediaIncludeContainer.Size = new Size(734, 371);
             mediaIncludeContainer.TabIndex = 1;
             // 
             // commentGroup
@@ -317,17 +327,17 @@
             commentLabel.TabIndex = 1;
             commentLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // settingsPanel
+            // leftContainer
             // 
-            settingsPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
-            settingsPanel.Controls.Add(currentProjectPanel);
-            settingsPanel.Controls.Add(selectProjectGroup);
-            settingsPanel.Controls.Add(commentGroup);
-            settingsPanel.Location = new Point(0, 3);
-            settingsPanel.Margin = new Padding(4, 3, 4, 3);
-            settingsPanel.Name = "settingsPanel";
-            settingsPanel.Size = new Size(365, 822);
-            settingsPanel.TabIndex = 11;
+            leftContainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            leftContainer.Controls.Add(currentProjectPanel);
+            leftContainer.Controls.Add(selectProjectGroup);
+            leftContainer.Controls.Add(commentGroup);
+            leftContainer.Location = new Point(0, 3);
+            leftContainer.Margin = new Padding(4, 3, 4, 3);
+            leftContainer.Name = "leftContainer";
+            leftContainer.Size = new Size(365, 822);
+            leftContainer.TabIndex = 11;
             // 
             // currentProjectPanel
             // 
@@ -350,37 +360,46 @@
             currentProjectNameLabel.Text = "Current Project Name\r\nCan be 2 lines";
             currentProjectNameLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
-            // familyTreeBtn
-            // 
-            familyTreeBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            familyTreeBtn.AutoSize = true;
-            familyTreeBtn.LinkColor = Color.Black;
-            familyTreeBtn.Location = new Point(720, 836);
-            familyTreeBtn.Margin = new Padding(4, 0, 4, 0);
-            familyTreeBtn.Name = "familyTreeBtn";
-            familyTreeBtn.Size = new Size(146, 15);
-            familyTreeBtn.TabIndex = 12;
-            familyTreeBtn.TabStop = true;
-            familyTreeBtn.Text = "Show DAT Grouper Project";
-            familyTreeBtn.Visible = false;
-            familyTreeBtn.LinkClicked += familyTreeBtn_LinkClicked;
-            // 
             // imageList1
             // 
             imageList1.ColorDepth = ColorDepth.Depth32Bit;
             imageList1.ImageSize = new Size(16, 16);
             imageList1.TransparentColor = Color.Transparent;
             // 
-            // referenceContainer2
+            // rightContainer
             // 
-            referenceContainer2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            referenceContainer2.AutoScroll = true;
-            referenceContainer2.Controls.Add(tableLayoutPanel1);
-            referenceContainer2.Location = new Point(376, 3);
-            referenceContainer2.Margin = new Padding(0);
-            referenceContainer2.Name = "referenceContainer2";
-            referenceContainer2.Size = new Size(758, 825);
-            referenceContainer2.TabIndex = 8;
+            rightContainer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            rightContainer.AutoScroll = true;
+            rightContainer.Controls.Add(tabControl);
+            rightContainer.Location = new Point(376, 3);
+            rightContainer.Margin = new Padding(0);
+            rightContainer.Name = "rightContainer";
+            rightContainer.Size = new Size(758, 825);
+            rightContainer.TabIndex = 8;
+            // 
+            // tabControl
+            // 
+            tabControl.Controls.Add(tabPage1);
+            tabControl.Controls.Add(tabPage2);
+            tabControl.Dock = DockStyle.Fill;
+            tabControl.Location = new Point(0, 0);
+            tabControl.Margin = new Padding(0);
+            tabControl.Name = "tabControl";
+            tabControl.Padding = new Point(0, 0);
+            tabControl.SelectedIndex = 0;
+            tabControl.Size = new Size(758, 825);
+            tabControl.TabIndex = 0;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(tableLayoutPanel1);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Margin = new Padding(0);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Size = new Size(750, 797);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel1
             // 
@@ -390,12 +409,75 @@
             tableLayoutPanel1.Controls.Add(includeMediaGroup, 0, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
+            tableLayoutPanel1.Margin = new Padding(0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 2;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.Size = new Size(758, 825);
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel1.Size = new Size(750, 797);
             tableLayoutPanel1.TabIndex = 2;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(advancedSettingsView);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Margin = new Padding(0);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Size = new Size(750, 797);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "tabPage2";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // advancedSettingsView
+            // 
+            advancedSettingsView.BackColor = SystemColors.Control;
+            advancedSettingsView.Dock = DockStyle.Fill;
+            advancedSettingsView.Location = new Point(0, 0);
+            advancedSettingsView.Margin = new Padding(0);
+            advancedSettingsView.Name = "advancedSettingsView";
+            advancedSettingsView.Size = new Size(750, 797);
+            advancedSettingsView.TabIndex = 0;
+            // 
+            // advancedSettingsBtn
+            // 
+            advancedSettingsBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            advancedSettingsBtn.Cursor = Cursors.Hand;
+            advancedSettingsBtn.Location = new Point(154, 0);
+            advancedSettingsBtn.Margin = new Padding(4, 0, 4, 0);
+            advancedSettingsBtn.Name = "advancedSettingsBtn";
+            advancedSettingsBtn.Size = new Size(160, 27);
+            advancedSettingsBtn.TabIndex = 12;
+            advancedSettingsBtn.Text = "Advanced Project Settings";
+            advancedSettingsBtn.UseVisualStyleBackColor = true;
+            advancedSettingsBtn.Click += advancedSettingsBtn_Click;
+            // 
+            // btnFlowPanel
+            // 
+            btnFlowPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnFlowPanel.Controls.Add(saveProjectBtn);
+            btnFlowPanel.Controls.Add(cancelAdvancedSettingsBtn);
+            btnFlowPanel.Controls.Add(runDatGrouperBtn);
+            btnFlowPanel.Controls.Add(advancedSettingsBtn);
+            btnFlowPanel.FlowDirection = FlowDirection.RightToLeft;
+            btnFlowPanel.Location = new Point(440, 832);
+            btnFlowPanel.Margin = new Padding(0);
+            btnFlowPanel.Name = "btnFlowPanel";
+            btnFlowPanel.Size = new Size(690, 27);
+            btnFlowPanel.TabIndex = 13;
+            // 
+            // cancelAdvancedSettingsBtn
+            // 
+            cancelAdvancedSettingsBtn.AutoSize = true;
+            cancelAdvancedSettingsBtn.Cursor = Cursors.Hand;
+            cancelAdvancedSettingsBtn.Location = new Point(490, 0);
+            cancelAdvancedSettingsBtn.Margin = new Padding(4, 0, 4, 0);
+            cancelAdvancedSettingsBtn.Name = "cancelAdvancedSettingsBtn";
+            cancelAdvancedSettingsBtn.Size = new Size(100, 27);
+            cancelAdvancedSettingsBtn.TabIndex = 13;
+            cancelAdvancedSettingsBtn.Text = "← Cancel";
+            cancelAdvancedSettingsBtn.UseVisualStyleBackColor = true;
+            cancelAdvancedSettingsBtn.Click += cancelAdvancedSettingsBtn_Click;
             // 
             // ProjectLoaderView
             // 
@@ -403,11 +485,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             BorderStyle = BorderStyle.FixedSingle;
-            Controls.Add(referenceContainer2);
-            Controls.Add(familyTreeBtn);
-            Controls.Add(settingsPanel);
-            Controls.Add(buildProjectBtn);
-            Controls.Add(saveProjectBtn);
+            Controls.Add(btnFlowPanel);
+            Controls.Add(rightContainer);
+            Controls.Add(leftContainer);
             Margin = new Padding(0);
             Name = "ProjectLoaderView";
             Padding = new Padding(0, 3, 0, 0);
@@ -420,18 +500,22 @@
             includeMediaGroup.ResumeLayout(false);
             commentGroup.ResumeLayout(false);
             commentGroup.PerformLayout();
-            settingsPanel.ResumeLayout(false);
+            leftContainer.ResumeLayout(false);
             currentProjectPanel.ResumeLayout(false);
-            referenceContainer2.ResumeLayout(false);
+            rightContainer.ResumeLayout(false);
+            tabControl.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
+            btnFlowPanel.ResumeLayout(false);
+            btnFlowPanel.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #region Component Designer generated code
 
         #endregion
-        private System.Windows.Forms.Button buildProjectBtn;
+        private System.Windows.Forms.Button runDatGrouperBtn;
         private System.Windows.Forms.FlowLayoutPanel gamesIncludeContainer;
         private System.Windows.Forms.Button saveProjectBtn;
         private System.Windows.Forms.GroupBox selectProjectGroup;
@@ -448,17 +532,23 @@
         private System.Windows.Forms.FlowLayoutPanel mediaIncludeContainer;
         private System.Windows.Forms.GroupBox commentGroup;
         private System.Windows.Forms.TextBox commentText;
-        private System.Windows.Forms.Panel settingsPanel;
-        private System.Windows.Forms.LinkLabel familyTreeBtn;
+        private System.Windows.Forms.Panel leftContainer;
         private System.Windows.Forms.Label commentLabel;
         private System.Windows.Forms.Button editCommentBtn;
         private System.Windows.Forms.Button cancelCommentEditBtn;
         private System.Windows.Forms.Button applyCommentEditBtn;
         private ImageList imageList1;
         private System.ComponentModel.IContainer components;
-        private Panel referenceContainer2;
+        private Panel rightContainer;
         private Panel currentProjectPanel;
         private Label currentProjectNameLabel;
         private TableLayoutPanel tableLayoutPanel1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
+        private DatGrouperProjectSettingsView advancedSettingsView;
+        private InvisibleTabControl tabControl;
+        private Button advancedSettingsBtn;
+        private FlowLayoutPanel btnFlowPanel;
+        private Button cancelAdvancedSettingsBtn;
     }
 }
