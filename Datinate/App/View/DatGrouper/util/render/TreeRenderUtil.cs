@@ -52,7 +52,6 @@ namespace datinate.app
             After
         }
         private static readonly Color AlphaChipTextColor = Color.SlateGray;
-        
         private static readonly ConditionalWeakTable<TreeNode, NodeRenderCache> RenderCache = [];
         private static readonly Color HOVER_ROW_FillRgb = Color.FromArgb(215, 228, 242);  // matches your selection family
         private static readonly Color HOVER_ROW_BorderRgb = Color.FromArgb(120, 145, 170); // neutral-ish
@@ -216,19 +215,50 @@ namespace datinate.app
                 contentBounds,
                 out contentRightMostDrawn);
 
-            if (renderNodeAsExcluded)
-            {
-                var fullRow = new Rectangle(0, bounds.Top, rowWidth, bounds.Height);
+            bool preserveFocusedFamilyBackground =
+                FOCUS_NODE_DARK_MODE &&
+                node.Tag is IGameFamily &&
+                ReferenceEquals(node, focusNode);
 
-                var state = g.Save();
-                try
+            if (renderNodeAsExcluded && !preserveFocusedFamilyBackground)
+            {
+                var excludedClip =
+                    new Rectangle(0, bounds.Top, rowWidth, bounds.Height);
+
+                // NOTE: The row immediately beneath the focus node uses its top half
+                // as part of the media/focus visual treatment. Do not hatch over it.
+                if (FOCUS_NODE_DARK_MODE &&
+                    GetFocusRelation(node, focusNode) == FocusRelation.Below)
                 {
-                    g.SetClip(fullRow);
-                    ApplyExcludedOverlay(g, tv, node, bounds, rowWidth, suppressSelectionHighlight);
+                    int blackY = bounds.Top + (bounds.Height / 2);
+
+                    // Preserve the top half plus the central black separator line.
+                    int exclusionTop = blackY + 1;
+
+                    excludedClip.Y = exclusionTop;
+                    excludedClip.Height = Math.Max(0, bounds.Bottom - exclusionTop);
                 }
-                finally
+
+                if (excludedClip.Height > 0)
                 {
-                    g.Restore(state);
+                    var state = g.Save();
+
+                    try
+                    {
+                        g.SetClip(excludedClip);
+
+                        ApplyExcludedOverlay(
+                            g,
+                            tv,
+                            node,
+                            bounds,
+                            rowWidth,
+                            suppressSelectionHighlight);
+                    }
+                    finally
+                    {
+                        g.Restore(state);
+                    }
                 }
             }
 

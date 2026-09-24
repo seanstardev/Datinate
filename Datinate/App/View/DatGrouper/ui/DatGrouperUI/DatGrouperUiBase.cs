@@ -1668,7 +1668,7 @@ namespace datinate.app
                     renderAliases,
                     searchUI.HighlightText,
                     searchUI.HighlightTextBackColour,
-                    IsExcludedAutoNode(node),
+                    IsExcludedAutoNode(node) || (IsScoringExemptNode(node) && isAutoUI == false),
                     treeView.DisabledTagTypes,
                     treeView.EnabledEntities,
                     suppressDragCaptureChrome ? null : treeView.FocusNode,
@@ -1731,7 +1731,22 @@ namespace datinate.app
 
             return false;
         }
+        private bool IsScoringExemptNode(TreeNode? node)
+        {
+            if (node == null || mediaCache == null)
+                return false;
 
+            TreeNode? familyNode = node;
+
+            while (familyNode != null && familyNode.Tag is not IGameFamily)
+                familyNode = familyNode.Parent;
+
+            if (familyNode?.Tag is not IGameFamily family)
+                return false;
+
+            return mediaCache.TryGetValue(family, out var media) &&
+                   media.IsScoringExempt;
+        }
         private void RefreshSearchUI()
         {
             var dict = new Dictionary<IGameFamily, object>(nodesDictionary.Count);
