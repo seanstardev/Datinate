@@ -1,5 +1,4 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Properties;
+﻿using Datinate.Properties;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -23,13 +22,7 @@ namespace datinate.app
         private static readonly Image SpinnerImage = Image.FromStream(SpinnerStream);
 
         private readonly PictureBox imageView;
-        
-        private static readonly object SharedEnvLock = new();
-        private static Task<CoreWebView2Environment>? sharedEnvTask;
-
-        private static readonly string WebView2UserDataFolder =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Datinate", "WebView2");
-
+     
         private static readonly HttpClient Http = new();
 
         private string? pendingUri;
@@ -197,8 +190,8 @@ namespace datinate.app
 
                     if (webView?.CoreWebView2 != null)
                     {
-                        try { webView.CoreWebView2.Stop(); } catch { }
-                        try { webView.CoreWebView2.Navigate("about:blank"); } catch { }
+                        WebHelper.Stop(webView.CoreWebView2);
+                        WebHelper.NavigateToAboutBlank(webView.CoreWebView2);
                     }
 
                     if (webView != null)
@@ -271,55 +264,6 @@ namespace datinate.app
 
             spinnerOverlay.Size = new Size(w, h);
             spinnerOverlay.Location = new Point((cs.Width - w) / 2, (cs.Height - h) / 2);
-        }
-
-        private static Task<CoreWebView2Environment> GetSharedEnvironmentAsync()
-        {
-            lock (SharedEnvLock)
-            {
-                if (sharedEnvTask != null)
-                    return sharedEnvTask;
-
-                Directory.CreateDirectory(WebView2UserDataFolder);
-
-                var opts = new CoreWebView2EnvironmentOptions();
-
-                if (DatinatePerformanceUtil.WV2_DoNotUseGpu)
-                {
-#pragma warning disable CS0162 // Unreachable code detected
-                    opts.AdditionalBrowserArguments = "--disable-gpu --disable-gpu-compositing";
-#pragma warning restore CS0162 // Unreachable code detected
-                }
-
-                sharedEnvTask = CoreWebView2Environment.CreateAsync(
-                    browserExecutableFolder: null,
-                    userDataFolder: WebView2UserDataFolder,
-                    options: opts);
-
-                return sharedEnvTask;
-            }
-        }
-
-        private static void ApplyCreationProperties(WebView2 wv)
-        {
-            Directory.CreateDirectory(WebView2UserDataFolder);
-
-            var cp = wv.CreationProperties ?? new CoreWebView2CreationProperties();
-            cp.UserDataFolder = WebView2UserDataFolder;
-
-            if (DatinatePerformanceUtil.WV2_DoNotUseGpu)
-            {
-#pragma warning disable CS0162 // Unreachable code detected
-                var args = cp.AdditionalBrowserArguments ?? string.Empty;
-
-                if (!args.Contains("--disable-gpu", StringComparison.OrdinalIgnoreCase))
-                    args = (args + " --disable-gpu --disable-gpu-compositing").Trim();
-
-                cp.AdditionalBrowserArguments = args;
-#pragma warning restore CS0162 // Unreachable code detected
-            }
-
-            wv.CreationProperties = cp;
         }
 
         private async Task LoadImageInternalAsync(Uri uri, int token)
@@ -404,16 +348,16 @@ namespace datinate.app
                 TabIndex = 0,
                 DefaultBackgroundColor = Color.Black
             };
+
             DatinateWebView2Manager.Register(newWv);
 
-            ApplyCreationProperties(newWv);
+            WebHelper.ApplyCreationProperties(newWv);
 
             webView = newWv;
 
             hostPanel.Controls.Add(webView);
             webView.SendToBack();
         }
-
         private void ConfigureCore(CoreWebView2 core)
         {
             core.DownloadStarting += Core_DownloadStarting;
@@ -424,23 +368,17 @@ namespace datinate.app
             core.Settings.AreDevToolsEnabled = false;
         }
 
-        private void Core_DownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
+        private void Core_DownloadStarting(
+            object? sender,
+            CoreWebView2DownloadStartingEventArgs e)
         {
-            try
-            {
-                var u = e.DownloadOperation?.Uri;
-                if (!string.IsNullOrWhiteSpace(u) && Uri.TryCreate(u, UriKind.Absolute, out var parsed))
-                {
-                    var ext = GetExtensionNoQuery(parsed);
-                    if (ext.Length != 0 && IsBlockedExtension(ext))
-                        e.Cancel = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
+            WebHelper.CancelDownload(e);
+
+            ShowUnavailableContent(
+                "Content Cannot be Previewed",
+                "This media type cannot currently be previewed.");
         }
+
 
         private void Core_NewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
@@ -476,106 +414,6 @@ namespace datinate.app
             imageView.Image = img;
             imageView.Visible = true;
             imageView.BringToFront();
-        }
-
-        private static Task EnableVideoLoopAsync(CoreWebView2 core)
-        {
-            const string js =
-                "(function(){"
-                + "let tries=0;"
-                + "const id=setInterval(()=>{"
-                + "  const v=document.querySelector('video');"
-                + "  if(v){"
-                + "    try{v.loop=true;}catch(e){}"
-                + "    try{v.muted=true;}catch(e){}"
-                + "    try{v.addEventListener('ended',()=>{try{v.currentTime=0;}catch(e){};v.play().catch(()=>{});});}catch(e){}"
-                + "    try{v.play().catch(()=>{});}catch(e){}"
-                + "    clearInterval(id);"
-                + "  }"
-                + "  if(++tries>60) clearInterval(id);"
-                + "},100);"
-                + "})();";
-
-            return core.ExecuteScriptAsync(js);
-        }
-
-        private static bool TryAcceptUri(string uri, out Uri parsed)
-        {
-            parsed = null!;
-
-            if (!Uri.TryCreate(uri, UriKind.Absolute, out parsed))
-                return false;
-
-            if (!(parsed.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
-                  parsed.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
-                  parsed.Scheme.Equals(Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase)))
-            {
-                return false;
-            }
-
-            var ext = GetExtensionNoQuery(parsed);
-            if (ext.Length != 0 && IsBlockedExtension(ext))
-                return false;
-
-            return true;
-        }
-
-        private static string GetExtensionNoQuery(Uri uri)
-        {
-            try
-            {
-                var path = uri.IsFile ? uri.LocalPath : uri.AbsolutePath;
-                return Path.GetExtension(path) ?? string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
-
-        private static bool IsBlockedExtension(string ext)
-        {
-            if (string.IsNullOrWhiteSpace(ext))
-                return false;
-
-            ext = ext.Trim();
-
-            if (!ext.StartsWith(".", StringComparison.Ordinal))
-                ext = "." + ext;
-
-            return ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".7z", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".rar", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".exe", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".msi", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool IsVideoExtension(string ext)
-        {
-            if (string.IsNullOrWhiteSpace(ext))
-                return false;
-
-            return ext.Equals(".mp4", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".webm", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".m4v", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".mov", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".ogg", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool IsImageExtension(string ext)
-        {
-            if (string.IsNullOrWhiteSpace(ext))
-                return false;
-
-            return ext.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".gif", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".bmp", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".webp", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".tif", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".tiff", StringComparison.OrdinalIgnoreCase) ||
-                   ext.Equals(".ico", StringComparison.OrdinalIgnoreCase);
         }
 
         private void Ui(Action action)
@@ -664,7 +502,7 @@ namespace datinate.app
             if (string.IsNullOrWhiteSpace(uri))
                 return;
 
-            if (!TryAcceptUri(uri, out var parsed))
+            if (!WebHelper.TryGetSupportedUri(uri, out var parsed))
                 return;
 
             var abs = parsed.AbsoluteUri;
@@ -687,7 +525,10 @@ namespace datinate.app
                 return;
             }
 
-            if (!IsHandleCreated || !Visible || hostPanel.ClientSize.Width < 2 || hostPanel.ClientSize.Height < 2)
+            if (!IsHandleCreated ||
+                !Visible ||
+                hostPanel.ClientSize.Width < 2 ||
+                hostPanel.ClientSize.Height < 2)
             {
                 pendingUri = abs;
                 return;
@@ -697,12 +538,22 @@ namespace datinate.app
 
             int token = unchecked(++navToken);
 
-            var ext = GetExtensionNoQuery(parsed);
+            string ext = WebHelper.GetExtensionNoQuery(parsed);
 
-            if (IsImageExtension(ext))
+            if (WebHelper.IsImageExtension(ext))
+            {
                 _ = LoadImageInternalAsync(parsed, token);
+            }
+            else if (WebHelper.IsMusicVgmExtension(ext))
+            {
+                ShowUnavailableContent(
+                    "Game Music Preview Unavailable",
+                    "Playback support for this video game music format is not yet available.");
+            }
             else
+            {
                 _ = LoadWebInternalAsync(parsed, token);
+            }
         }
         private void TryLoadPendingUri()
         {
@@ -753,8 +604,8 @@ namespace datinate.app
 
                     if (webView?.CoreWebView2 != null)
                     {
-                        try { webView.CoreWebView2.Stop(); } catch { }
-                        try { webView.CoreWebView2.Navigate("about:blank"); } catch { }
+                        WebHelper.Stop(webView.CoreWebView2);
+                        WebHelper.NavigateToAboutBlank(webView.CoreWebView2);
                     }
 
                     if (webView != null)
@@ -796,18 +647,16 @@ namespace datinate.app
                     }
                 });
 
-                CoreWebView2Environment? env = null;
-                try { env = await GetSharedEnvironmentAsync(); } catch { }
-
                 try
                 {
                     if (webView == null)
                         return;
 
                     var t = ensureCoreTask;
+
                     if (t == null)
                     {
-                        t = (env != null) ? webView.EnsureCoreWebView2Async(env) : webView.EnsureCoreWebView2Async();
+                        t = WebHelper.EnsureCoreAsync(webView);
                         ensureCoreTask = t;
                     }
 
@@ -840,18 +689,16 @@ namespace datinate.app
 
                 core.IsMuted = true;
 
-                var ext = GetExtensionNoQuery(uri);
-                bool isVideo = IsVideoExtension(ext);
+                string ext = WebHelper.GetExtensionNoQuery(uri);
+
+                bool isVideo =
+                    WebHelper.IsVideoExtension(ext);
 
                 bool looksLikeHtml =
-                    (ext.Length == 0) ||
-                    ext.Equals(".htm", StringComparison.OrdinalIgnoreCase) ||
-                    ext.Equals(".html", StringComparison.OrdinalIgnoreCase) ||
-                    ext.Equals(".php", StringComparison.OrdinalIgnoreCase) ||
-                    ext.Equals(".pdf", StringComparison.OrdinalIgnoreCase) ||
-                    ext.Equals(".aspx", StringComparison.OrdinalIgnoreCase);
+                    WebHelper.LooksLikeHtmlOrDocument(ext);
 
-                double targetZoom = looksLikeHtml ? 0.1 : 1.0;
+                double targetZoom =
+                    looksLikeHtml ? 0.1 : 1.0;
 
                 ulong targetNavId = 0;
 
@@ -901,17 +748,29 @@ namespace datinate.app
 
                     if (isVideo)
                     {
-                        try { await EnableVideoLoopAsync(core); }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                        try
+                        {
+                            await WebHelper.EnableVideoLoopAsync(core);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine(ex);
+                        }
                     }
                 };
 
                 core.NavigationStarting += onStarting;
                 core.NavigationCompleted += onCompleted;
 
-                try { core.Stop(); } catch { }
-                try { webView!.ZoomFactor = 1.0; } catch { }
-                try { core.NavigateToString(WebHelper.LoadingHtmlBlack); } catch { }
+                WebHelper.Stop(core);
+
+                try
+                {
+                    webView!.ZoomFactor = 1.0;
+                }
+                catch { }
+
+                WebHelper.NavigateToBlankPage(core);
 
                 core.Navigate(uri.AbsoluteUri);
             }

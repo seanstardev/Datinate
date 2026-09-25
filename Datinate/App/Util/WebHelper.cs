@@ -228,6 +228,31 @@ namespace datinate.app
                 ||
                 extension.Equals(
                     ".mov",
+                    StringComparison.OrdinalIgnoreCase);
+
+        }
+        public static bool IsMusicStandardExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension))
+                return false;
+
+            extension = NormaliseExtension(extension);
+
+            return
+                extension.Equals(
+                    ".mp3",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".wav",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".flac",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".m4a",
                     StringComparison.OrdinalIgnoreCase)
                 ||
                 extension.Equals(
@@ -235,6 +260,58 @@ namespace datinate.app
                     StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool IsMusicVgmExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension))
+                return false;
+
+            extension = NormaliseExtension(extension);
+
+            return
+                extension.Equals(
+                    ".spc",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".nsf",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".nsfe",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".gbs",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".hes",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".ay",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".kss",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".vgm",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".vgz",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".gym",
+                    StringComparison.OrdinalIgnoreCase)
+                ||
+                extension.Equals(
+                    ".sap",
+                    StringComparison.OrdinalIgnoreCase);
+        }
         public static bool IsImageExtension(string extension)
         {
             if (string.IsNullOrWhiteSpace(extension))
@@ -356,11 +433,6 @@ namespace datinate.app
 
             return core.ExecuteScriptAsync(javascript);
         }
-
-
-        // =========================================================
-        // Download helpers
-        // =========================================================
 
         // =========================================================
         // Download handling
