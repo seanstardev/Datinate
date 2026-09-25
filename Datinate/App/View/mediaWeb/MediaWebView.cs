@@ -2,21 +2,18 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Microsoft.Web.WebView2.Core;
-using System.Text;
 
 namespace datinate.app
 {
     public partial class MediaWebView : UserControl, IWebMediaView
     {
         private Control? dragDropOverlay;
-
         private bool blankRequested;
         private bool overlayWired;
-
         private bool dragSessionActive;
         private bool browserSuppressedForOverlay;
-
         private string? lastTempHtmlPath = null;
+
         public MediaWebView()
         {
             InitializeComponent();
@@ -41,18 +38,7 @@ namespace datinate.app
                 if (browser.CoreWebView2 == null)
                     await browser.EnsureCoreWebView2Async();
 
-                try
-                {
-                    browser.AllowExternalDrop = false;
-                }
-                catch (Exception) { }
-
-                try
-                {
-                    if (browser.CoreWebView2 != null)
-                        browser.CoreWebView2.IsMuted = true;
-                }
-                catch (Exception) { }
+                ConfigureCore();
             });
         }
 
@@ -83,50 +69,34 @@ namespace datinate.app
                 if (browser.CoreWebView2 == null)
                     await browser.EnsureCoreWebView2Async();
 
+                var core = browser.CoreWebView2;
+                if (core == null)
+                    return;
+
+                ConfigureCore();
+
                 try
                 {
-                    if (browser.CoreWebView2 != null)
-                        browser.CoreWebView2.IsMuted = true;
+                    core.IsMuted = true;
                 }
                 catch (Exception) { }
 
                 try
                 {
-                    string tempFolder = System.IO.Path.Combine(
-                        System.IO.Path.GetTempPath(),
-                        "Datinate",
-                        "MediaWebView");
-
-                    System.IO.Directory.CreateDirectory(tempFolder);
-
-                    string tempPath = System.IO.Path.Combine(
-                        tempFolder,
-                        Guid.NewGuid().ToString("N") + ".html");
-
-                    await System.IO.File.WriteAllTextAsync(
-                        tempPath,
-                        html,
-                        new UTF8Encoding(false));
+                    Uri tempUri =
+                        await WebHelper.CreateTempHtmlAsync(html);
 
                     string? oldPath = lastTempHtmlPath;
-                    lastTempHtmlPath = tempPath;
+                    lastTempHtmlPath = tempUri.LocalPath;
 
-                    browser.CoreWebView2?.Navigate(new Uri(tempPath).AbsoluteUri);
+                    core.Navigate(tempUri.AbsoluteUri);
 
-                    if (!string.IsNullOrWhiteSpace(oldPath))
-                    {
-                        try
-                        {
-                            if (System.IO.File.Exists(oldPath))
-                                System.IO.File.Delete(oldPath);
-                        }
-                        catch (Exception) { }
-                    }
+                    WebHelper.DeleteFile(oldPath);
                 }
                 catch (Exception) { }
             });
         }
-        
+
         public void LoadUrl(string url)
         {
             blankRequested = false;
@@ -137,19 +107,34 @@ namespace datinate.app
                 if (browser.CoreWebView2 == null)
                     await browser.EnsureCoreWebView2Async();
 
+                var core = browser.CoreWebView2;
+                if (core == null)
+                    return;
+
+                // NOTE: Ensure our handlers are attached BEFORE this navigation begins.
+                ConfigureCore();
+
                 try
                 {
-                    if (browser.CoreWebView2 != null)
-                        browser.CoreWebView2.IsMuted = true;
+                    core.IsMuted = true;
                 }
                 catch (Exception) { }
 
                 try
                 {
-                    browser.CoreWebView2?.Navigate(url);
+                    core.Navigate(url);
                 }
                 catch (Exception) { }
             });
+        }
+
+        public void LoadUriInBrowser()
+        {
+            Uri? source = WebHelper.TryGetSource(browser);
+
+            if (source == null) return;
+
+            BrowserUtil.LoadInBrowser(source.ToString());
         }
 
         public void ClearView()
@@ -167,22 +152,18 @@ namespace datinate.app
                     if (browser.CoreWebView2 == null)
                         return;
 
-                    LoadBlanHtml();
-                    
+                    LoadBlankHtml();
+
                 });
             });
         }
 
-        private void LoadBlanHtml()
+        private void LoadBlankHtml()
         {
             Ui(() =>
             {
-                if (browser.CoreWebView2 == null)
-                    return;
-                
-                try { browser.CoreWebView2.NavigateToString(DatinateHelper.LoadingHtmlBlack); }
-                catch (Exception) { }
-                
+                WebHelper.NavigateToBlankPage(
+                    browser.CoreWebView2);
             });
         }
 
@@ -190,20 +171,44 @@ namespace datinate.app
         {
             Facade.UnregisterActor(this);
 
+            try
+            {
+                browser.SourceChanged -= browser_SourceChanged;
+            }
+            catch (Exception) { }
+
+            try
+            {
+                var core = browser.CoreWebView2;
+
+                if (core != null)
+                {
+                    core.DownloadStarting -= Core_DownloadStarting;
+                    core.NavigationCompleted -= Core_NavigationCompleted;
+                }
+            }
+            catch (Exception) { }
+
             if (dragDropOverlay != null)
             {
-                try { dragDropOverlay.Dispose(); }
+                try
+                {
+                    dragDropOverlay.Dispose();
+                }
                 catch (Exception) { }
 
                 dragDropOverlay = null;
             }
+
+            WebHelper.DeleteFile(lastTempHtmlPath);
+            lastTempHtmlPath = null;
         }
 
         private void browser_SourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
         {
             Ui(() =>
             {
-                Uri? src = TryGetBrowserSource();
+                Uri? src = WebHelper.TryGetSource(browser);
                 UpdateBlankOverlayForSource(src);
             });
         }
@@ -216,7 +221,7 @@ namespace datinate.app
                 return;
             }
 
-            if (IsAboutBlank(src))
+            if (WebHelper.IsAboutBlank(src))
             {
                 ApplyOverlayState();
                 return;
@@ -226,9 +231,17 @@ namespace datinate.app
             {
                 var scheme = src.Scheme;
 
-                if (scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
-                    scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
-                    scheme.Equals(Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+                if (scheme.Equals(
+                        Uri.UriSchemeHttp,
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    scheme.Equals(
+                        Uri.UriSchemeHttps,
+                        StringComparison.OrdinalIgnoreCase)
+                    ||
+                    scheme.Equals(
+                        Uri.UriSchemeFile,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     blankRequested = false;
                     ApplyOverlayState();
@@ -237,20 +250,6 @@ namespace datinate.app
             }
 
             ApplyOverlayState();
-        }
-
-        private static bool IsAboutBlank(Uri? src)
-        {
-            if (src == null)
-                return false;
-
-            if (!src.IsAbsoluteUri)
-                return false;
-
-            if (!src.Scheme.Equals("about", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            return string.Equals(src.AbsoluteUri, "about:blank", StringComparison.OrdinalIgnoreCase);
         }
 
         private void ApplyOverlayState()
@@ -344,20 +343,93 @@ namespace datinate.app
             overlayWired = true;
         }
 
-        private void DragDropOverlay_DragEnter(object? sender, DragEventArgs e)
+        private void ConfigureCore()
         {
-            SetReceiptEffectOnly(e);
+            var core = browser.CoreWebView2;
+            if (core == null)
+                return;
+
+            try
+            {
+                browser.AllowExternalDrop = false;
+            }
+            catch (Exception) { }
+
+            try
+            {
+                core.IsMuted = true;
+            }
+            catch (Exception) { }
+
+            try
+            {
+                // Embedded media surface - do not expose browser-level
+                // Save As / download-style context menu operations.
+                core.Settings.AreDefaultContextMenusEnabled = false;
+            }
+            catch (Exception) { }
+
+            try
+            {
+                core.DownloadStarting -= Core_DownloadStarting;
+                core.DownloadStarting += Core_DownloadStarting;
+            }
+            catch (Exception) { }
+
+            try
+            {
+                core.NavigationCompleted -= Core_NavigationCompleted;
+                core.NavigationCompleted += Core_NavigationCompleted;
+            }
+            catch (Exception) { }
         }
 
-        private void DragDropOverlay_DragOver(object? sender, DragEventArgs e)
+        private void Core_DownloadStarting(
+            object? sender,
+            CoreWebView2DownloadStartingEventArgs e)
         {
-            SetReceiptEffectOnly(e);
+            WebHelper.CancelDownload(e);
         }
+
+        private async void Core_NavigationCompleted(
+          object? sender,
+          CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (sender is not CoreWebView2 core)
+                return;
+
+            Uri? source = WebHelper.TryGetSource(browser);
+            if (source == null)
+                return;
+
+            string extension = WebHelper.GetExtensionNoQuery(source);
+
+            if (!WebHelper.IsVideoExtension(extension))
+                return;
+
+            try
+            {
+                await WebHelper.EnableVideoLoopAsync(core);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
+
+        private void DragDropOverlay_DragEnter(object? sender, DragEventArgs e) =>
+            SetReceiptEffectOnly(e);
+        
+
+        private void DragDropOverlay_DragOver(object? sender, DragEventArgs e) =>
+            SetReceiptEffectOnly(e);
+        
 
         private void DragDropOverlay_DragDrop(object? sender, DragEventArgs e)
         {           
-            LoadBlanHtml();
+            LoadBlankHtml();
             SetReceiptEffectOnly(e);
+
             try
             {
                 if (e.Data is DataObject dobj)
@@ -366,7 +438,6 @@ namespace datinate.app
             catch (Exception)
             {
             }
-
         }
 
         private void SetReceiptEffectOnly(DragEventArgs e)
@@ -379,11 +450,6 @@ namespace datinate.app
                 e.Effect = DragDropEffects.None;
         }
 
-        private Uri? TryGetBrowserSource()
-        {
-            try { return browser.Source; }
-            catch (Exception) { return null; }
-        }
 
         private void Ui(Action action)
         {
@@ -407,11 +473,6 @@ namespace datinate.app
                 try { await action(); }
                 catch (Exception) { }
             }));
-        }
-
-        public void LoadUriInBrowser()
-        {
-            BrowserUtil.LoadInBrowser(browser.Source.ToString());
         }
     }
 }

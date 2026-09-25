@@ -194,7 +194,7 @@ namespace datinate.app
                     rawHtmlContentActive = false;
                     ApplyOverlayState();
 
-                    try { browser.CoreWebView2.NavigateToString(DatinateHelper.LoadingHtmlBlack); }
+                    try { browser.CoreWebView2.NavigateToString(WebHelper.LoadingHtmlBlack); }
                     catch (Exception) { }
                 });
             });
@@ -220,12 +220,6 @@ namespace datinate.app
 
             if (stack.TryGetCard(PromptCardIx_Search, out var searchCard))
                 stack.TrySetCard(PromptCardIx_Search, searchCard with { Hint = hint });
-
-            //if (stack.TryGetCard(PromptCardIx_PreviewMedia, out var previewCard))
-            //    stack.TrySetCard(PromptCardIx_PreviewMedia, previewCard with { Hint = hint });
-
-            //if (stack.TryGetCard(PromptCardIx_AssignMedia, out var assignCard))
-            //    stack.TrySetCard(PromptCardIx_AssignMedia, assignCard with { Hint = hint });
 
             if (curationModeIsActive == false)
                 hint = $"Drag from {autoSource} → Here";
@@ -295,7 +289,7 @@ namespace datinate.app
                     if (browser.CoreWebView2 == null)
                         return;
 
-                    browser.CoreWebView2.NavigateToString(DatinateHelper.LoadingHtmlBlack);
+                    browser.CoreWebView2.NavigateToString(WebHelper.LoadingHtmlBlack);
                 });
             });
         }

@@ -911,7 +911,7 @@ namespace datinate.app
 
                 try { core.Stop(); } catch { }
                 try { webView!.ZoomFactor = 1.0; } catch { }
-                try { core.NavigateToString(DatinateHelper.LoadingHtmlBlack); } catch { }
+                try { core.NavigateToString(WebHelper.LoadingHtmlBlack); } catch { }
 
                 core.Navigate(uri.AbsoluteUri);
             }

@@ -166,29 +166,6 @@ namespace com.RADIO.Datinate.RMVC.Shared
             return nbr.ToString("N" + decimals);
         }
 
-        
-        
-        public const string LoadingHtmlBlack =
-"""
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Black Page</title>
-        <style>
-            body {
-                background-color: #000000; /* Sets background to black */
-                margin: 0;                /* Removes default margins */
-                height: 100vh;            /* Ensures full viewport height */
-            }
-        </style>
-    </head>
-<body>
-</body>
-</html>
-""";
-
 
         public static Bitmap? GetMediaIconBmp(MEDIA_TYPE_ENUM mediaTypeEnum)
         {
