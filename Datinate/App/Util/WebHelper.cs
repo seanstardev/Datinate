@@ -1,5 +1,6 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
+using System.Net;
 using System.Text;
 
 namespace datinate.app
@@ -229,7 +230,6 @@ namespace datinate.app
                 extension.Equals(
                     ".mov",
                     StringComparison.OrdinalIgnoreCase);
-
         }
         public static bool IsMusicStandardExtension(string extension)
         {
@@ -259,7 +259,6 @@ namespace datinate.app
                     ".ogg",
                     StringComparison.OrdinalIgnoreCase);
         }
-
         public static bool IsMusicVgmExtension(string extension)
         {
             if (string.IsNullOrWhiteSpace(extension))
@@ -401,6 +400,7 @@ namespace datinate.app
             return extension;
         }
 
+        
 
         // =========================================================
         // Media playback
@@ -589,5 +589,61 @@ namespace datinate.app
 </body>
 </html>
 """;
+
+        public static string CreateContentUnavailableHtml(string title, string body)
+        {
+            string safeTitle = WebUtility.HtmlEncode(title);
+            string safeBody = WebUtility.HtmlEncode(body);
+
+            return
+$$"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background: #000000;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message {
+            text-align: center;
+            padding: 24px;
+            max-width: 600px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .body {
+            font-size: 14px;
+            color: #d0d0d0;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <div class="title">{{safeTitle}}</div>
+        <div class="body">{{safeBody}}</div>
+    </div>
+</body>
+</html>
+""";
+        }
     }
 }

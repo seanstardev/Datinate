@@ -2,6 +2,7 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Microsoft.Web.WebView2.Core;
+using System.Diagnostics;
 
 namespace datinate.app
 {
@@ -99,6 +100,39 @@ namespace datinate.app
 
         public void LoadUrl(string url)
         {
+            if (!WebHelper.TryGetSupportedUri(url, out var uri))
+            {
+                ShowUnavailableContent(
+                    "Content Cannot be Previewed",
+                    "This media source cannot currently be previewed.");
+
+                return;
+            }
+
+            string extension =
+                WebHelper.GetExtensionNoQuery(uri);
+
+            Debug.WriteLine("MUSIC:::: '" + uri + "'");
+            
+            if (WebHelper.IsMusicVgmExtension(extension))
+            {
+                ShowUnavailableContent(
+                    "Game Music Preview Unavailable",
+                    "Playback support for this video game music format is not yet available.");
+
+                return;
+            }
+
+            if (WebHelper.IsMusicStandardExtension(extension))
+            {
+                LoadWebUri(uri);
+                return;
+            }
+
+            LoadWebUri(uri);
+        }
+        private void LoadWebUri(Uri uri)
+        {
             blankRequested = false;
             Ui(ApplyOverlayState);
 
@@ -111,7 +145,7 @@ namespace datinate.app
                 if (core == null)
                     return;
 
-                // NOTE: Ensure our handlers are attached BEFORE this navigation begins.
+                // Ensure handlers exist before navigation.
                 ConfigureCore();
 
                 try
@@ -122,12 +156,16 @@ namespace datinate.app
 
                 try
                 {
-                    core.Navigate(url);
+                    core.Navigate(uri.AbsoluteUri);
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    ShowUnavailableContent(
+                        "Content Cannot be Previewed",
+                        "This media source cannot currently be previewed.");
+                }
             });
         }
-
         public void LoadUriInBrowser()
         {
             Uri? source = WebHelper.TryGetSource(browser);
@@ -166,7 +204,11 @@ namespace datinate.app
                     browser.CoreWebView2);
             });
         }
-
+        private void ShowUnavailableContent(string title, string body)
+        {
+            var html = WebHelper.CreateContentUnavailableHtml(title, body);
+            LoadPageContent(html);
+        }
         protected void HandleDisposing()
         {
             Facade.UnregisterActor(this);
@@ -389,6 +431,10 @@ namespace datinate.app
             CoreWebView2DownloadStartingEventArgs e)
         {
             WebHelper.CancelDownload(e);
+
+            ShowUnavailableContent(
+                "Content Cannot be Previewed",
+                "This media type cannot currently be previewed.");
         }
 
         private async void Core_NavigationCompleted(
