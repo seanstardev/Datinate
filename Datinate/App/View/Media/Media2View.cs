@@ -3,6 +3,7 @@ using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Properties;
 using Datinate.Shared;
 using Datinate.Shared.Rb;
+using System.Runtime.InteropServices;
 
 namespace datinate.app
 {
@@ -38,6 +39,16 @@ namespace datinate.app
         private readonly Queue<Action> showWorkQueue = new();
         private int showWorkToken;
         private bool showWorkRunning;
+        private bool showLayoutSuspended;
+        private bool showRedrawSuspended;
+        private const int WM_SETREDRAW = 0x000B;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(
+            IntPtr hWnd,
+            int msg,
+            IntPtr wParam,
+            IntPtr lParam);
 
         public Media2View()
         {
@@ -92,7 +103,10 @@ namespace datinate.app
                 closeRightBtn.Visible = true;
             }
         }
-        private void ShowView(IReadOnlySet<string> searchNames, IMediaCollection? mediaCollection, IReadOnlyList<string>? prompts)
+        private void ShowView(
+            IReadOnlySet<string> searchNames,
+            IMediaCollection? mediaCollection,
+            IReadOnlyList<string>? prompts)
         {
             if (awaitingInitialisationSets)
             {
@@ -117,6 +131,11 @@ namespace datinate.app
                 pendingInitialisationSets = null;
 
                 var existingUis = MediaAssignUIs;
+
+                // Stop native painting first, then stop managed FlowLayoutPanel
+                // layout processing while the card collection is being changed.
+                SuspendShowRedraw();
+                SuspendShowLayout();
 
                 if (existingUis.Count > 0)
                 {
@@ -146,7 +165,12 @@ namespace datinate.app
                             mediaContainer.Controls.Add(ui);
 
                             ui.PermitEnable();
-                            ui.SetUI(searchNames, readOnlyMode, mediaCollection, prompts);
+                            ui.SetUI(
+                                searchNames,
+                                readOnlyMode,
+                                mediaCollection,
+                                prompts);
+
                             ui.SetVisibleIfViable();
 
                             MaskUI.BringToFront();
@@ -160,7 +184,13 @@ namespace datinate.app
                         EnqueueShowWork(() =>
                         {
                             ui.PermitEnable();
-                            ui.SetUI(searchNames, readOnlyMode, mediaCollection, prompts);
+
+                            ui.SetUI(
+                                searchNames,
+                                readOnlyMode,
+                                mediaCollection,
+                                prompts);
+
                             ui.SetVisibleIfViable();
 
                             MaskUI.BringToFront();
@@ -170,6 +200,8 @@ namespace datinate.app
 
                 EnqueueShowWork(() =>
                 {
+                    ResumeShowBatch();
+
                     var visibleUis = VisibleMediaAssignUIs;
 
                     activelyDisplayingContent = visibleUis.Count > 0;
@@ -184,6 +216,7 @@ namespace datinate.app
                         if (readOnlyMode)
                         {
                             MaskUI.Visible = false;
+
                             dragDropOverlay.Visible = true;
                             dragDropOverlay.BringToFront();
 
@@ -198,6 +231,7 @@ namespace datinate.app
                         {
                             MaskUI.Visible = true;
                             dragDropOverlay.Visible = false;
+
                             MaskUI.BringToFront();
                             MaskUI.Update();
                         }
@@ -208,7 +242,6 @@ namespace datinate.app
                 StartShowWorkPump();
             });
         }
-
         private void PostWithYieldLayers(int layers, Action continuation)
         {
             if (IsDisposed || !IsHandleCreated)
@@ -455,12 +488,12 @@ namespace datinate.app
 
             ResetHoverManager();
 
+            mediaContainer.SuspendLayout();
+
             var uis = MediaAssignUIs;
 
             foreach (var ui in uis)
                 ui.Visible = false;
-
-            mediaContainer.SuspendLayout();
 
             for (int i = mediaContainer.Controls.Count - 1; i >= 0; i--)
             {
@@ -713,8 +746,11 @@ namespace datinate.app
         private void CancelShowWork()
         {
             unchecked { showWorkToken++; }
+
             showWorkQueue.Clear();
             showWorkRunning = false;
+
+            ResumeShowBatch();
         }
 
         private void EnqueueShowWork(Action action)
@@ -728,12 +764,25 @@ namespace datinate.app
                 return;
 
             if (IsDisposed || !IsHandleCreated)
+            {
+                ResumeShowBatch(invalidate: false);
                 return;
+            }
 
             showWorkRunning = true;
 
             int token = showWorkToken;
-            BeginInvoke(new Action(() => PumpShowWork(token)));
+
+            try
+            {
+                BeginInvoke(new Action(() => PumpShowWork(token)));
+            }
+            catch
+            {
+                showWorkRunning = false;
+                ResumeShowBatch(invalidate: false);
+                throw;
+            }
         }
 
         private void PumpShowWork(int token)
@@ -742,15 +791,21 @@ namespace datinate.app
             {
                 showWorkQueue.Clear();
                 showWorkRunning = false;
+
+                ResumeShowBatch(invalidate: false);
                 return;
             }
 
+            // IMPORTANT:
+            // Do not resume anything here. A newer ShowView may already have
+            // started its own suspended batch.
             if (token != showWorkToken)
                 return;
 
             if (showWorkQueue.Count == 0)
             {
                 showWorkRunning = false;
+                ResumeShowBatch();
                 return;
             }
 
@@ -769,19 +824,25 @@ namespace datinate.app
             {
                 showWorkQueue.Clear();
                 showWorkRunning = false;
+
+                ResumeShowBatch(invalidate: false);
                 return;
             }
 
+            // Again, an old pump must NEVER unsuspend a newer ShowView.
             if (token != showWorkToken)
                 return;
 
             if (showWorkQueue.Count == 0)
             {
                 showWorkRunning = false;
+                ResumeShowBatch();
                 return;
             }
 
-            PostWithYieldLayers(SHOW_WORK_YIELD_LAYERS, () => PumpShowWork(token));
+            PostWithYieldLayers(
+                SHOW_WORK_YIELD_LAYERS,
+                () => PumpShowWork(token));
         }
 
         private void EnqueueShowWorkCompletedMarker(int token)
@@ -812,6 +873,77 @@ namespace datinate.app
                     }
                 }
             }));
+        }
+        private void SuspendShowLayout()
+        {
+            if (showLayoutSuspended || mediaContainer.IsDisposed)
+                return;
+
+            mediaContainer.SuspendLayout();
+            showLayoutSuspended = true;
+        }
+
+        private void ResumeShowLayout(bool performLayout = true)
+        {
+            if (!showLayoutSuspended)
+                return;
+
+            showLayoutSuspended = false;
+
+            if (mediaContainer.IsDisposed)
+                return;
+
+            mediaContainer.ResumeLayout(performLayout);
+        }
+
+        private void SuspendShowRedraw()
+        {
+            if (showRedrawSuspended)
+                return;
+
+            if (mediaContainer.IsDisposed || !mediaContainer.IsHandleCreated)
+                return;
+
+            SendMessage(
+                mediaContainer.Handle,
+                WM_SETREDRAW,
+                IntPtr.Zero,
+                IntPtr.Zero);
+
+            showRedrawSuspended = true;
+        }
+
+        private void ResumeShowRedraw(bool invalidate = true)
+        {
+            if (!showRedrawSuspended)
+                return;
+
+            showRedrawSuspended = false;
+
+            if (mediaContainer.IsDisposed || !mediaContainer.IsHandleCreated)
+                return;
+
+            SendMessage(
+                mediaContainer.Handle,
+                WM_SETREDRAW,
+                new IntPtr(1),
+                IntPtr.Zero);
+
+            if (invalidate)
+                mediaContainer.Invalidate(true);
+        }
+        private void ResumeShowBatch(bool invalidate = true)
+        {
+            try
+            {
+                ResumeShowLayout();
+            }
+            finally
+            {
+                // Redraw must always be restored even if ResumeLayout somehow
+                // triggers an exception through layout processing.
+                ResumeShowRedraw(invalidate);
+            }
         }
     }
 }

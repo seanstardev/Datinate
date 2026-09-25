@@ -32,14 +32,8 @@
             searchPanel = new Panel();
             searchUI = new DatGrouperSearchUI();
             MainContainer = new Panel();
-            panel1 = new Panel();
-            hideExcludedPanel = new Panel();
-            hideExcludedLabel = new Label();
-            label1 = new Label();
             searchPanel.SuspendLayout();
             MainContainer.SuspendLayout();
-            panel1.SuspendLayout();
-            hideExcludedPanel.SuspendLayout();
             SuspendLayout();
             // 
             // treeView
@@ -79,7 +73,6 @@
             // 
             // MainContainer
             // 
-            MainContainer.Controls.Add(panel1);
             MainContainer.Controls.Add(searchPanel);
             MainContainer.Controls.Add(treeView);
             MainContainer.Dock = DockStyle.Fill;
@@ -88,46 +81,6 @@
             MainContainer.Name = "MainContainer";
             MainContainer.Size = new Size(1036, 495);
             MainContainer.TabIndex = 25;
-            // 
-            // panel1
-            // 
-            panel1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            panel1.BackColor = SystemColors.ControlDarkDark;
-            panel1.Controls.Add(hideExcludedPanel);
-            panel1.Location = new Point(869, 441);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(151, 22);
-            panel1.TabIndex = 31;
-            // 
-            // hideExcludedPanel
-            // 
-            hideExcludedPanel.BackColor = Color.White;
-            hideExcludedPanel.Controls.Add(hideExcludedLabel);
-            hideExcludedPanel.Controls.Add(label1);
-            hideExcludedPanel.Location = new Point(0, 1);
-            hideExcludedPanel.Margin = new Padding(0);
-            hideExcludedPanel.Name = "hideExcludedPanel";
-            hideExcludedPanel.Size = new Size(151, 22);
-            hideExcludedPanel.TabIndex = 30;
-            // 
-            // hideExcludedLabel
-            // 
-            hideExcludedLabel.BackColor = SystemColors.ControlLight;
-            hideExcludedLabel.Location = new Point(132, 3);
-            hideExcludedLabel.Name = "hideExcludedLabel";
-            hideExcludedLabel.Size = new Size(15, 15);
-            hideExcludedLabel.TabIndex = 1;
-            hideExcludedLabel.Text = "✓";
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.ForeColor = SystemColors.ControlDarkDark;
-            label1.Location = new Point(0, 3);
-            label1.Name = "label1";
-            label1.Size = new Size(133, 15);
-            label1.TabIndex = 0;
-            label1.Text = "Show Excluded Families";
             // 
             // DatGrouperUiBase
             // 
@@ -139,9 +92,6 @@
             Size = new Size(1036, 495);
             searchPanel.ResumeLayout(false);
             MainContainer.ResumeLayout(false);
-            panel1.ResumeLayout(false);
-            hideExcludedPanel.ResumeLayout(false);
-            hideExcludedPanel.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -155,9 +105,5 @@
         private Panel searchPanel;
         private Panel MainContainer;
         private DatGrouperSearchUI searchUI;
-        private Panel hideExcludedPanel;
-        private Label hideExcludedLabel;
-        private Label label1;
-        private Panel panel1;
     }
 }

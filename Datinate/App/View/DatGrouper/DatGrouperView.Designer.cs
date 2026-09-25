@@ -49,6 +49,9 @@
             mediaView = new Media2View();
             tableLayoutPanel = new TableLayoutPanel();
             controlsPanel = new Panel();
+            checboxPanel = new Panel();
+            showAliasesCheckBox = new CheckBox();
+            showExcludedCheckBox = new CheckBox();
             btnLayoutPanel = new FlowLayoutPanel();
             backBtn = new Button();
             saveBtn = new Button();
@@ -80,6 +83,7 @@
             rightPanel.SuspendLayout();
             tableLayoutPanel.SuspendLayout();
             controlsPanel.SuspendLayout();
+            checboxPanel.SuspendLayout();
             btnLayoutPanel.SuspendLayout();
             SuspendLayout();
             // 
@@ -324,6 +328,7 @@
             // 
             // controlsPanel
             // 
+            controlsPanel.Controls.Add(checboxPanel);
             controlsPanel.Controls.Add(btnLayoutPanel);
             controlsPanel.Controls.Add(datChipContainer);
             controlsPanel.Controls.Add(summaryLabel);
@@ -335,6 +340,47 @@
             controlsPanel.Name = "controlsPanel";
             controlsPanel.Size = new Size(1011, 30);
             controlsPanel.TabIndex = 0;
+            // 
+            // checboxPanel
+            // 
+            checboxPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            checboxPanel.Controls.Add(showAliasesCheckBox);
+            checboxPanel.Controls.Add(showExcludedCheckBox);
+            checboxPanel.Location = new Point(134, 0);
+            checboxPanel.Margin = new Padding(0, 0, 3, 0);
+            checboxPanel.Name = "checboxPanel";
+            checboxPanel.Size = new Size(152, 30);
+            checboxPanel.TabIndex = 37;
+            // 
+            // showAliasesCheckBox
+            // 
+            showAliasesCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            showAliasesCheckBox.AutoSize = true;
+            showAliasesCheckBox.CheckAlign = ContentAlignment.MiddleRight;
+            showAliasesCheckBox.Cursor = Cursors.Hand;
+            showAliasesCheckBox.ForeColor = SystemColors.ControlDarkDark;
+            showAliasesCheckBox.Location = new Point(32, 14);
+            showAliasesCheckBox.Margin = new Padding(0);
+            showAliasesCheckBox.Name = "showAliasesCheckBox";
+            showAliasesCheckBox.Size = new Size(118, 19);
+            showAliasesCheckBox.TabIndex = 38;
+            showAliasesCheckBox.Text = "Show Part Aliases";
+            showAliasesCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // showExcludedCheckBox
+            // 
+            showExcludedCheckBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            showExcludedCheckBox.AutoSize = true;
+            showExcludedCheckBox.CheckAlign = ContentAlignment.MiddleRight;
+            showExcludedCheckBox.Cursor = Cursors.Hand;
+            showExcludedCheckBox.ForeColor = SystemColors.ControlDarkDark;
+            showExcludedCheckBox.Location = new Point(-2, -1);
+            showExcludedCheckBox.Margin = new Padding(0);
+            showExcludedCheckBox.Name = "showExcludedCheckBox";
+            showExcludedCheckBox.Size = new Size(152, 19);
+            showExcludedCheckBox.TabIndex = 37;
+            showExcludedCheckBox.Text = "Show Excluded Families";
+            showExcludedCheckBox.UseVisualStyleBackColor = true;
             // 
             // btnLayoutPanel
             // 
@@ -354,8 +400,8 @@
             // 
             backBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             backBtn.Cursor = Cursors.Hand;
-            backBtn.Location = new Point(304, 3);
-            backBtn.Margin = new Padding(0, 3, 0, 0);
+            backBtn.Location = new Point(303, 3);
+            backBtn.Margin = new Padding(0, 3, 1, 0);
             backBtn.Name = "backBtn";
             backBtn.Size = new Size(100, 26);
             backBtn.TabIndex = 28;
@@ -366,7 +412,7 @@
             // 
             saveBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             saveBtn.Cursor = Cursors.Hand;
-            saveBtn.Location = new Point(204, 3);
+            saveBtn.Location = new Point(203, 3);
             saveBtn.Margin = new Padding(0, 3, 0, 0);
             saveBtn.Name = "saveBtn";
             saveBtn.Size = new Size(100, 26);
@@ -378,7 +424,7 @@
             // 
             curateBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             curateBtn.Cursor = Cursors.Hand;
-            curateBtn.Location = new Point(104, 3);
+            curateBtn.Location = new Point(103, 3);
             curateBtn.Margin = new Padding(0, 3, 0, 0);
             curateBtn.Name = "curateBtn";
             curateBtn.Size = new Size(100, 26);
@@ -390,7 +436,7 @@
             // 
             exportBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             exportBtn.Cursor = Cursors.Hand;
-            exportBtn.Location = new Point(4, 3);
+            exportBtn.Location = new Point(3, 3);
             exportBtn.Margin = new Padding(0, 3, 0, 0);
             exportBtn.Name = "exportBtn";
             exportBtn.Size = new Size(100, 26);
@@ -402,9 +448,9 @@
             // 
             datChipContainer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             datChipContainer.BackColor = Color.Transparent;
-            datChipContainer.Location = new Point(134, 4);
+            datChipContainer.Location = new Point(292, 4);
             datChipContainer.Name = "datChipContainer";
-            datChipContainer.Size = new Size(470, 23);
+            datChipContainer.Size = new Size(312, 23);
             datChipContainer.TabIndex = 26;
             datChipContainer.Click += datChipContainer_Click;
             // 
@@ -412,10 +458,10 @@
             // 
             summaryLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             summaryLabel.BackColor = Color.Transparent;
-            summaryLabel.Location = new Point(139, 8);
+            summaryLabel.Location = new Point(293, 8);
             summaryLabel.Margin = new Padding(4, 0, 4, 0);
             summaryLabel.Name = "summaryLabel";
-            summaryLabel.Size = new Size(465, 15);
+            summaryLabel.Size = new Size(308, 15);
             summaryLabel.TabIndex = 0;
             summaryLabel.Text = "-";
             summaryLabel.Click += summaryLabel_Click;
@@ -518,6 +564,8 @@
             rightPanel.ResumeLayout(false);
             tableLayoutPanel.ResumeLayout(false);
             controlsPanel.ResumeLayout(false);
+            checboxPanel.ResumeLayout(false);
+            checboxPanel.PerformLayout();
             btnLayoutPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -564,5 +612,9 @@
         private SegmentedProgressBarUI progressBar;
         private CuratedWrapperUI curatedGrouperUI;
         private Button exportBtn;
+        private CheckBox checkBox2;
+        private CheckBox showExcludedCheckBox;
+        private CheckBox showAliasesCheckBox;
+        private Panel checboxPanel;
     }
 }

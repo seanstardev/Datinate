@@ -22,8 +22,6 @@ namespace datinate.app
         public event Action<IGameEntity>? ShowGroupingReportEvt;
         public event Action<DatGrouperEntryDTO>? GameEntityDragStartEvt;
         public event Action? GameEntityDragStopEvt;
-        public event Action<DatGrouperUiBase, string?>? SurrogateToggleEvt;
-        public event Action<bool>? ToggleRenderAliasesEvt;
         public Action? ClearDragTargetDisabledNodesEvt;
         public Action<IReadOnlySet<Type>>? SetDragTargetDisabledNodesEvt;
 
@@ -135,8 +133,6 @@ namespace datinate.app
             contextMenu.RedoEvt += OnRedo;
             contextMenu.PartIncludeExcludeEvt += OnPartIncludeExclude;
             contextMenu.GameMoveTopOrBottomEvt += OnGameMoveTopOrBottom;
-            contextMenu.ToggleExcludedFamiliesShowHideEvt += OnToggleExcludedFamiliesShowHide;
-            contextMenu.ToggleAliasesShowHideEvt += OnToggleAliasesShowHide;
             contextMenu.CopyNameEvt += OnCopyNameEvt;
             contextMenu.GameAddAsNewFamilyEvt += OnGameAddAsNewFamily;
         }
@@ -259,7 +255,6 @@ namespace datinate.app
                     }
                 }
 
-                hideExcludedLabel.Text = !isSurrogate ? "✓" : "";
                 oldTreeView?.Dispose();
                 oldTreeView = null;
 
@@ -385,16 +380,6 @@ namespace datinate.app
             };
 
             EditRequestEvt?.Invoke(dto);
-        }
-
-        private void OnToggleAliasesShowHide()
-        {
-            ToggleRenderAliasesEvt?.Invoke(!renderAliases);
-        }
-
-        private void OnToggleExcludedFamiliesShowHide()
-        {
-            SurrogateToggleEvt?.Invoke(this, VisibleGameFamilyName);
         }
 
         private void OnCopyNameEvt(string gameName)
@@ -1571,9 +1556,6 @@ namespace datinate.app
                 else
                     contextMenu.SetGameAddAsNewFamilyEnabled(false);
 
-                contextMenu.SetAliasesShowHide(!renderAliases);
-                contextMenu.SetExcludedFamiliesShowHide(isSurrogate);
-
                 contextMenu.SetCopyNameEnabled(
                     node != null && (node.Tag is IGameEntity && node.Tag is not IGameEntityProxy));
 
@@ -1762,7 +1744,7 @@ namespace datinate.app
             PulseSelectedNodeChanged();
         }
 
-        // TODO: This needs review but ethos is right. We need to start by looking for the identical entity.
+        // TODO: This needs review but idea is right. We need to start by looking for the identical entity.
         public string? VisibleGameFamilyName 
         { 
             get

@@ -6,7 +6,6 @@ using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using static app.datinate.DatGrouperEditDelta;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
-using System.ComponentModel;
 
 namespace datinate.app
 {
@@ -107,6 +106,7 @@ namespace datinate.app
                 BeginInvoke(new Action(() => ResetView()));
                 return;
             }
+
             summaryLabel.Text = "-";
             datChipContainer.Controls.Clear();
 
@@ -119,6 +119,9 @@ namespace datinate.app
             curateBtn.Visible = true;
             saveBtn.Visible = false;
             exportBtn.Visible = false;
+
+            showAliasesCheckBox.Checked = showAliasesCheckBox.Enabled = true;
+            showExcludedCheckBox.Checked = showExcludedCheckBox.Enabled = true;
 
             autoGrouperUI.SetModeAutomated();
 
@@ -164,6 +167,8 @@ namespace datinate.app
                 if (layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Curated_Standard || layoutEnum == DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Curated_WebInMiddle)
                     autoGrouperUI.SetModeQueued();
 
+                showAliasesCheckBox.Enabled = showExcludedCheckBox.Enabled = true;
+
                 switch (layoutEnum)
                 {
                     case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.AutoGrouper:
@@ -200,7 +205,6 @@ namespace datinate.app
                         SetMainControlsVisible(true);
                         break;
 
-                    //case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_Assign:
                     case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Auto_ReadOnly:
                         ControlManagementUtil.EnsureParent(autoGrouperUI, leftPanel, true);
                         ControlManagementUtil.EnsureParent(mediaView, middlePanel, true);
@@ -213,10 +217,11 @@ namespace datinate.app
                         ApplyAutomatedLayout(false);
                         SetMainControlsVisible(false);
                         mediaView.SetCloseBtnPosition(true);
+
+                        showAliasesCheckBox.Enabled = showExcludedCheckBox.Enabled = false;
                         break;
 
                     case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_Assign:
-                    //case DatinateEnums.DAT_GROUPER_LAYOUT_ENUM.Media_Curated_ReadOnly:
                         ControlManagementUtil.EnsureParent(webAndMainControlsContainer, leftPanel, true);
                         ControlManagementUtil.EnsureParent(mediaView, middlePanel, true);
                         ControlManagementUtil.EnsureParent(curatedGrouperUI, rightPanel, true);
@@ -228,6 +233,8 @@ namespace datinate.app
                         ApplyAutomatedLayout(false);
                         SetMainControlsVisible(false);
                         mediaView.SetCloseBtnPosition(false);
+
+                        showAliasesCheckBox.Enabled = showExcludedCheckBox.Enabled = false;
                         break;
                 }
 
@@ -388,6 +395,10 @@ namespace datinate.app
                 curateBtn.Visible = false;
                 saveBtn.Visible = true;
                 exportBtn.Visible = true;
+
+                showExcludedCheckBox.Checked = true;
+                showAliasesCheckBox.Checked = true;
+
                 CurateEvt?.Invoke();
             };
 
@@ -395,23 +406,23 @@ namespace datinate.app
             {
                 if (CurrentLayoutIsAuto)
                     return;
-                
+
                 ExportEvt?.Invoke();
-                
+
             };
 
-        saveBtn.Click += (_, __) =>
-        {
-            var result = MessageBox.Show(
-                this,
-                "Do you want to Save this Project?",
-                "Attention",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+            saveBtn.Click += (_, __) =>
+            {
+                var result = MessageBox.Show(
+                    this,
+                    "Do you want to Save this Project?",
+                    "Attention",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
 
-            if (result == DialogResult.Yes)
-                SaveEvt?.Invoke();
-        };
+                if (result == DialogResult.Yes)
+                    SaveEvt?.Invoke();
+            };
 
             autoGrouperUI.DatChipsRefreshEvt += pointerIds => OnDatChipsRefresh(pointerIds);
 
@@ -475,32 +486,24 @@ namespace datinate.app
             curatedGrouperUI.PrimaryUI.EditRequestEvt += OnEditRequest;
             curatedGrouperUI.SurrogateUI.EditRequestEvt += OnEditRequest;
 
-            autoGrouperUI.PrimaryUI.ToggleRenderAliasesEvt += OnToggleRenderAliases;
-            autoGrouperUI.SurrogateUI.ToggleRenderAliasesEvt += OnToggleRenderAliases;
-            curatedGrouperUI.PrimaryUI.ToggleRenderAliasesEvt += OnToggleRenderAliases;
-            curatedGrouperUI.SurrogateUI.ToggleRenderAliasesEvt += OnToggleRenderAliases;
-
-            autoGrouperUI.PrimaryUI.SurrogateToggleEvt += OnExcludedFamiliesShowHide;
-            autoGrouperUI.SurrogateUI.SurrogateToggleEvt += OnExcludedFamiliesShowHide;
-            curatedGrouperUI.PrimaryUI.SurrogateToggleEvt += OnExcludedFamiliesShowHide;
-            curatedGrouperUI.SurrogateUI.SurrogateToggleEvt += OnExcludedFamiliesShowHide;
-
             autoGrouperUI.PrimaryUI.ActionEvt += (action, entity) => DatGrouperActionEvt?.Invoke(action, entity);
             autoGrouperUI.SurrogateUI.ActionEvt += (action, entity) => DatGrouperActionEvt?.Invoke(action, entity);
             curatedGrouperUI.PrimaryUI.ActionEvt += (action, entity) => DatGrouperActionEvt?.Invoke(action, entity);
             curatedGrouperUI.SurrogateUI.ActionEvt += (action, entity) => DatGrouperActionEvt?.Invoke(action, entity);
-        }
 
-        private void OnExcludedFamiliesShowHide(DatGrouperUiBase ui, string? familyNameToJumpTo)
-        {
-            autoGrouperUI.ActivateDatGrouperUI(ui.IsSurrogateUI, familyNameToJumpTo);
-            curatedGrouperUI.ActivateDatGrouperUI(ui.IsSurrogateUI, familyNameToJumpTo);
-        }
+            showAliasesCheckBox.CheckedChanged += (_, __) =>
+            {
+                var isChecked = showAliasesCheckBox.Checked;
+                autoGrouperUI.SetRenderAliases(isChecked);
+                curatedGrouperUI.SetRenderAliases(isChecked);
+            };
 
-        private void OnToggleRenderAliases(bool doRender)
-        {
-            autoGrouperUI.SetRenderAliases(doRender);
-            curatedGrouperUI.SetRenderAliases(doRender);
+            showExcludedCheckBox.CheckedChanged += (_, __) =>
+            {
+                var isChecked = showExcludedCheckBox.Checked;
+                autoGrouperUI.ActivateDatGrouperUI(isChecked, autoGrouperUI.VisibleGameFamilyName);
+                curatedGrouperUI.ActivateDatGrouperUI(isChecked, curatedGrouperUI.VisibleGameFamilyName);
+            };
         }
 
         private void OnEditRequest(DatGrouperEditRequestDTO dto)
@@ -598,10 +601,10 @@ namespace datinate.app
                     foreach (var id in pointerIds)
                     {
                         var chip = DatChipUtil.CreateChip(id);
-                        
+
                         chip.Margin = new Padding(2);
                         chip.Enabled = false; // NOTE: Just allows click through to container.
-                        
+
                         datChipContainer.Controls.Add(chip);
                     }
                 }

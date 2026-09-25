@@ -12,9 +12,7 @@ namespace datinate.app
         public event Action? RedoEvt;
         public event Action<bool, IGame>? GameMoveTopOrBottomEvt;
         public event Action<bool, IGamePart>? PartIncludeExcludeEvt;
-        public event Action? ToggleAliasesShowHideEvt;
         public event Action<IGame>? GameAddAsNewFamilyEvt;
-        public event Action? ToggleExcludedFamiliesShowHideEvt;
         public event Action<string>? CopyNameEvt;
 
         private readonly ContextMenuStrip _menu = new();
@@ -30,9 +28,6 @@ namespace datinate.app
 
         private readonly ToolStripMenuItem _copyNameItem = new("Copy Name to Clipboard");
         private readonly ToolStripMenuItem _copyNameFullItem = new("Copy Fullname to Clipboard");
-
-        private readonly ToolStripMenuItem _aliasesShowHideItem = new("Show Aliases");
-        private readonly ToolStripMenuItem _excludedFamiliesShowHideItem = new("Show Excluded Families");
 
         private const string TEXT_PART_INCLUDE = "Mark Part as Good";
         private const string TEXT_PART_EXCLUDE = "Mark Part as Bad";
@@ -54,9 +49,6 @@ namespace datinate.app
                 _undoItem,
                 _redoItem,
                 new ToolStripSeparator(),
-                _excludedFamiliesShowHideItem,
-                _aliasesShowHideItem,
-                new ToolStripSeparator(),
                 _copyNameItem,
                 _copyNameFullItem
             };
@@ -72,14 +64,6 @@ namespace datinate.app
                     _partIncludeExcludeItem
                 });
             }
-            else
-            {
-                //items.AddRange(new List<ToolStripItem>()
-                //{
-                //    new ToolStripSeparator(),
-                //    _gameAddAsNewFamilyItem
-                //});
-            }
 
             _menu.Items.AddRange(items.ToArray());
 
@@ -89,9 +73,6 @@ namespace datinate.app
 
             _undoItem.Enabled = false;
             _redoItem.Enabled = false;
-            
-            _excludedFamiliesShowHideItem.Enabled = false;
-            _aliasesShowHideItem.Enabled = false;
             
             _copyNameItem.Enabled = false;  
             _copyNameFullItem.Enabled = false;
@@ -112,20 +93,6 @@ namespace datinate.app
             _partIncludeExcludeItem.Text = include
                 ? TEXT_PART_INCLUDE
                 : TEXT_PART_EXCLUDE;
-        }
-        public void SetAliasesShowHide(bool show)
-        {
-            _aliasesShowHideItem.Enabled = true;
-            _aliasesShowHideItem.Text = show
-                ? TEXT_ALIASES_SHOW
-                : TEXT_ALIASES_HIDE;
-        }
-        public void SetExcludedFamiliesShowHide(bool show)
-        {
-            _excludedFamiliesShowHideItem.Enabled = true;
-            _excludedFamiliesShowHideItem.Text = show
-                ? TEXT_EXCLUDED_FAMILIES_SHOW
-                : TEXT_EXCLUDED_FAMILIES_HIDE;
         }
 
         public void SetGameAddAsNewFamilyEnabled(bool doEnable)
@@ -155,8 +122,6 @@ namespace datinate.app
             _redoItem.Enabled = false;
             _partIncludeExcludeItem.Enabled = false;
             _gameAddAsNewFamilyItem.Enabled = false;
-            _excludedFamiliesShowHideItem.Enabled = false;
-            _aliasesShowHideItem.Enabled = false;
             _copyNameFullItem.Enabled = false;
             _copyNameItem.Enabled = false;
 
@@ -173,8 +138,6 @@ namespace datinate.app
         {
             _undoItem.Click -= OnUndo;
             _redoItem.Click -= OnRedo;
-            _excludedFamiliesShowHideItem.Click -= OnExcludedFamiliesShowHide;
-            _aliasesShowHideItem.Click -= OnAliasesShowHide;
             _copyNameItem.Click -= OnCopyName;
             _copyNameFullItem.Click -= OnCopyFullname;
             _gameMoveTopItem.Click -= OnGameMoveTop;
@@ -184,8 +147,6 @@ namespace datinate.app
 
             _undoItem.Click += OnUndo;
             _redoItem.Click += OnRedo;
-            _excludedFamiliesShowHideItem.Click += OnExcludedFamiliesShowHide;
-            _aliasesShowHideItem.Click += OnAliasesShowHide;
             _copyNameItem.Click += OnCopyName;
             _copyNameFullItem.Click += OnCopyFullname;
             _gameMoveTopItem.Click += OnGameMoveTop;
@@ -193,12 +154,6 @@ namespace datinate.app
             _partIncludeExcludeItem.Click += OnPartIncludeExclude;
             _gameAddAsNewFamilyItem.Click += OnGameAddAsNewFamily;
         }
-
-        private void OnAliasesShowHide(object? sender, EventArgs e)
-            => ToggleAliasesShowHideEvt?.Invoke();
-
-        private void OnExcludedFamiliesShowHide(object? sender, EventArgs e)
-            => ToggleExcludedFamiliesShowHideEvt?.Invoke();
 
         private void OnCopyFullname(object? sender, EventArgs e)
             => InvokeCopy(true);
