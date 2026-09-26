@@ -8,7 +8,6 @@ namespace datinate.app
     public static class WebHelper
     {
         private static readonly object SharedEnvLock = new();
-
         private static Task<CoreWebView2Environment>? sharedEnvTask;
 
         private static readonly string WebView2UserDataFolder =
@@ -97,23 +96,16 @@ namespace datinate.app
         /// This does not apply UI/browser policy such as muting,
         /// context menu behaviour, zoom, download handling, etc.
         /// </summary>
-        public static async Task<CoreWebView2?> EnsureCoreAsync(WebView2 webView)
+        public static async Task<CoreWebView2> EnsureCoreAsync(WebView2 webView)
         {
-            if (webView == null)
-                throw new ArgumentNullException(nameof(webView));
-
-            if (webView.IsDisposed)
-                return null;
-
             if (webView.CoreWebView2 != null)
                 return webView.CoreWebView2;
 
-            CoreWebView2Environment environment =
-                await GetSharedEnvironmentAsync();
+            CoreWebView2Environment environment = await GetSharedEnvironmentAsync();
 
             await webView.EnsureCoreWebView2Async(environment);
 
-            return webView.CoreWebView2;
+            return webView.CoreWebView2!;
         }
 
 
@@ -126,11 +118,9 @@ namespace datinate.app
         {
             parsed = null!;
 
-            if (string.IsNullOrWhiteSpace(uri))
-                return false;
+            if (string.IsNullOrWhiteSpace(uri)) return false;
 
-            if (!Uri.TryCreate(uri, UriKind.Absolute, out parsed))
-                return false;
+            if (!Uri.TryCreate(uri, UriKind.Absolute, out parsed)) return false;
 
             return
                 parsed.Scheme.Equals(
@@ -148,15 +138,13 @@ namespace datinate.app
 
         public static string GetExtensionNoQuery(Uri uri)
         {
-            if (uri == null)
-                return string.Empty;
+            if (uri == null) return string.Empty;
 
             try
             {
-                string path =
-                    uri.IsFile
-                        ? uri.LocalPath
-                        : uri.AbsolutePath;
+                string path = uri.IsFile
+                    ? uri.LocalPath
+                    : uri.AbsolutePath;
 
                 return Path.GetExtension(path) ?? string.Empty;
             }
@@ -168,8 +156,7 @@ namespace datinate.app
 
         public static Uri? TryGetSource(WebView2 webView)
         {
-            if (webView == null)
-                return null;
+            if (webView == null) return null;
 
             try
             {
@@ -183,19 +170,13 @@ namespace datinate.app
 
         public static bool IsAboutBlank(Uri? uri)
         {
-            if (uri == null)
-                return false;
+            if (uri == null) return false;
 
-            if (!uri.IsAbsoluteUri)
-                return false;
+            if (!uri.IsAbsoluteUri) return false;
 
-            if (!uri.Scheme.Equals(
-                "about",
-                StringComparison.OrdinalIgnoreCase))
-            {
+            if (!uri.Scheme.Equals( "about", StringComparison.OrdinalIgnoreCase))
                 return false;
-            }
-
+            
             return string.Equals(
                 uri.AbsoluteUri,
                 "about:blank",
@@ -209,8 +190,7 @@ namespace datinate.app
 
         public static bool IsVideoExtension(string extension)
         {
-            if (string.IsNullOrWhiteSpace(extension))
-                return false;
+            if (string.IsNullOrWhiteSpace(extension)) return false;
 
             extension = NormaliseExtension(extension);
 
@@ -356,8 +336,7 @@ namespace datinate.app
                     StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool LooksLikeHtmlOrDocument(
-            string extension)
+        public static bool LooksLikeHtmlOrDocument(string extension)
         {
             if (string.IsNullOrWhiteSpace(extension))
                 return true;
@@ -443,9 +422,6 @@ namespace datinate.app
         /// </summary>
         public static void CancelDownload(CoreWebView2DownloadStartingEventArgs e)
         {
-            if (e == null)
-                return;
-
             try
             {
                 // Hide WebView2's normal download UI and cancel underlying download itself.
@@ -483,10 +459,9 @@ namespace datinate.app
         {
             Directory.CreateDirectory(TempHtmlFolder);
 
-            string path =
-                Path.Combine(
-                    TempHtmlFolder,
-                    Guid.NewGuid().ToString("N") + ".html");
+            string path = Path.Combine(
+                TempHtmlFolder,
+                Guid.NewGuid().ToString("N") + ".html");
 
             await File.WriteAllTextAsync(
                 path,
@@ -498,23 +473,19 @@ namespace datinate.app
 
         public static void DeleteFile(string? path)
         {
-            if (string.IsNullOrWhiteSpace(path))
-                return;
+            if (string.IsNullOrWhiteSpace(path)) return;
 
             try
             {
                 if (File.Exists(path))
                     File.Delete(path);
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         public static void DeleteFile(Uri? uri)
         {
-            if (uri == null || !uri.IsFile)
-                return;
+            if (uri == null || !uri.IsFile) return;
 
             DeleteFile(uri.LocalPath);
         }
@@ -526,47 +497,36 @@ namespace datinate.app
 
         public static void Stop(CoreWebView2? core)
         {
-            if (core == null)
-                return;
+            if (core == null) return;
 
             try
             {
                 core.Stop();
             }
-            catch
-            {
-            }
+            catch { }
         }
 
-        public static void NavigateToAboutBlank(
-            CoreWebView2? core)
+        public static void NavigateToAboutBlank(CoreWebView2? core)
         {
-            if (core == null)
-                return;
+            if (core == null) return;
 
             try
             {
                 core.Navigate("about:blank");
             }
-            catch
-            {
-            }
+            catch { }
         }
 
-        public static void NavigateToBlankPage(
-            CoreWebView2? core)
+        public static void NavigateToBlankPage(CoreWebView2? core)
         {
-            if (core == null)
-                return;
+            if (core == null) return;
 
             try
             {
-                core.NavigateToString(
-                    LoadingHtmlBlack);
+                core.NavigateToString(LoadingHtmlBlack);
             }
             catch
-            {
-            }
+            { }
         }
 
         public const string LoadingHtmlBlack =

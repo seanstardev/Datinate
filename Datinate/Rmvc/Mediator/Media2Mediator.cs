@@ -12,98 +12,73 @@ namespace com.RADIO.Datinate.RMVC
         {
         }
         public void InitialiseView(IReadOnlyCollection<ILookupSet> lookupSets)
-        {
-            view?.InitialiseView(lookupSets);
-        }
-        public void SetAssignedEntriesCache(IReadOnlyDictionary<string, HashSet<string>> assignedEntriesCache)
-        {
-            view?.SetAssignedEntriesCache(assignedEntriesCache);
-        }
+            => view?.InitialiseView(lookupSets);
+        
+        public void SetAudioEnvironmentPath(string? audioEnvironmentPath) 
+            => view?.SetAudioEnvironmentPath(audioEnvironmentPath);
+
+        public void SetAssignedEntriesCache(
+            IReadOnlyDictionary<string, HashSet<string>> assignedEntriesCache)
+            => view?.SetAssignedEntriesCache(assignedEntriesCache);
+        
         public void TeardownView()
-        {
-            view?.TeardownView();
-        }
+            => view?.TeardownView();
 
-        public void EmptyView()
-        {
-            view?.EmptyView();
-        }
+        public void EmptyView() 
+            => view?.EmptyView();
+        
         public void ShowViewPreview(IReadOnlySet<string> searchNames)
-        {
-            view?.ShowViewPreview(searchNames);
-        }
-
-        public void ShowViewAssign(IReadOnlySet<string> searchNames, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
-        {
-            view?.ShowViewAssign(searchNames, mediaCollection, prompts);
-        }
+            => view?.ShowViewPreview(searchNames);
+        
+        public void ShowViewAssign(
+            IReadOnlySet<string> searchNames, 
+            IMediaCollection mediaCollection, 
+            IReadOnlyList<string> prompts)
+            => view?.ShowViewAssign(searchNames, mediaCollection, prompts);
+        
         public void SetMediaCardContent(
             ILookupSet lookupSet, 
             string urlOrHtml, 
             bool isHtmlRawText, 
             bool entryWasSelectedByUser, 
             string entryName)
-        {
-            view?.SetMediaCardContent(lookupSet, urlOrHtml, isHtmlRawText, entryWasSelectedByUser, entryName);
-        }
-        public void SetMediaCardContentNotAvailable(ILookupSet lookupSet, string entryName, bool entryWasSelectedByUser)
-        {
-            view?.SetMediaCardContentNotAvailable(lookupSet, entryName, entryWasSelectedByUser);
-        }
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.ShowMediaCardEvt += OnShowMediaCard;
-            view.MediaAssignmentChangeEvt += OnMediaAssignmentChange;
-            view.MediaCardDragStartEvt += OnMediaCardDragStart;
-            view.MediaCardDragEndEvt += OnMediaCardDragEnd;
-            view.CloseMediaEvt += OnCloseMedia;
-            view.RequestMediaContentEvt += OnRequestMediaContent;
-        }
+            => view?.SetMediaCardContent(lookupSet, urlOrHtml, isHtmlRawText, entryWasSelectedByUser, entryName);
+        
+        public void SetMediaCardContentNotAvailable(
+            ILookupSet lookupSet, 
+            string entryName, 
+            bool entryWasSelectedByUser)
+            => view?.SetMediaCardContentNotAvailable(lookupSet, entryName, entryWasSelectedByUser);
+        
+        internal void StopReceiveGameEntityDrop()
+            => view?.StopReceiveMediaDrop();
+        
+        public void StartReceiveGameEntityDrop()
+            => view?.StartReceiveMediaDrop();
+        
+        private void OnMediaCardDragStart()
+            => base.ExecuteCommand(new SetMediaItemDragStartCmd());
+        
+        private void OnMediaCardDragEnd()
+            => base.ExecuteCommand(new SetMediaItemDragStopCmd());
+        
 
         private void OnRequestMediaContent(
-            ILookupSet lookupSet, 
-            string lookupName, 
-            bool entryWasSelectedByUser, 
+            ILookupSet lookupSet,
+            string lookupName,
+            bool entryWasSelectedByUser,
             string entryName)
-        {
-            base.ExecuteCommand(new FetchMediaCardContentCmd(lookupSet, lookupName, entryWasSelectedByUser, entryName));
-        }
+            => base.ExecuteCommand(
+                new FetchMediaCardContentCmd(lookupSet, lookupName, entryWasSelectedByUser, entryName));
 
         private void OnMediaAssignmentChange(RbMediaItemAssignmentUpdate assignment)
-        {
-            base.ExecuteCommand(new UpdateMediaCollectionItemCmd(assignment));
-        }
+            => base.ExecuteCommand(new UpdateMediaCollectionItemCmd(assignment));
 
         private void OnShowMediaCard(ILookupSet lookupSet, string entryName, bool isAutoLoaded)
-        {
-            base.ExecuteCommand(new ShowMediaCardCmd(lookupSet, entryName, isAutoLoaded));
-        }
+            => base.ExecuteCommand(new ShowMediaCardCmd(lookupSet, entryName, isAutoLoaded));
 
         private void OnCloseMedia()
-        {
-            base.ExecuteCommand(new ExitMediaModeCmd());
-        }
-
-        internal void StopReceiveGameEntityDrop()
-        {
-            view?.StopReceiveMediaDrop();
-        }
-        public void StartReceiveGameEntityDrop()
-        {
-            view?.StartReceiveMediaDrop();
-        }
-
-        private void OnMediaCardDragStart()
-        {
-            base.ExecuteCommand(new SetMediaItemDragStartCmd());
-        }
-
-        private void OnMediaCardDragEnd()
-        {
-            base.ExecuteCommand(new SetMediaItemDragStopCmd());
-        }
+            => base.ExecuteCommand(new ExitMediaModeCmd());
 
         protected override void Disposing()
         {
@@ -115,6 +90,17 @@ namespace com.RADIO.Datinate.RMVC
             view.CloseMediaEvt -= OnCloseMedia;
             view.ShowMediaCardEvt -= OnShowMediaCard;
             view.RequestMediaContentEvt -= OnRequestMediaContent;
+        }
+        protected override void Initialsed()
+        {
+            if (view == null) return;
+
+            view.ShowMediaCardEvt += OnShowMediaCard;
+            view.MediaAssignmentChangeEvt += OnMediaAssignmentChange;
+            view.MediaCardDragStartEvt += OnMediaCardDragStart;
+            view.MediaCardDragEndEvt += OnMediaCardDragEnd;
+            view.CloseMediaEvt += OnCloseMedia;
+            view.RequestMediaContentEvt += OnRequestMediaContent;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace com.RADIO.Datinate.RMVC
                 Facade.Instance?.ProjectProxy?.SetProjectRootPath(projectRootPath);
                 Facade.Instance?.CuratedDatProxy?.SetProjectRootPath(projectRootPath);
                 Facade.Instance?.ExportDatGrouperProjectProxy?.SetProjectRootPath(projectRootPath);
+                Facade.Instance?.AudioProxy?.SetProjectRootPath(projectRootPath);
 
                 Facade.Instance?.GlobalSettingsProxy?.Startup();
             }

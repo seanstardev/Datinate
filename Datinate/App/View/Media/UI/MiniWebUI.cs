@@ -7,6 +7,7 @@ namespace datinate.app
     public partial class MiniWebUI : UserControl
     {
         private const bool CLEARUI_DISPOSE_WEBVIEW = false;
+        private const double AUDIO_ZOOM = 0.1;
 
         private Task? ensureCoreTask;
 
@@ -37,6 +38,9 @@ namespace datinate.app
         private bool prevImageVisible;
         private bool prevWebVisible;
 
+        private string? audioEnvironmentPath;
+        private DatinateAudioWebSession? audioSession;
+        
         private int loaderPercentageScale = 40;
 
         public MiniWebUI()
@@ -127,6 +131,16 @@ namespace datinate.app
             blankOverlay.BringToFront();
         }
 
+        internal void SetAudioEnvironmentPath(string? audioEnvironmentPath)
+        {
+            if (string.Equals(this.audioEnvironmentPath, audioEnvironmentPath, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            audioSession?.Dispose();
+            audioSession = null;
+            this.audioEnvironmentPath = audioEnvironmentPath;
+        }
+
         internal void SetInteractionSuppressed(bool suppress)
         {
             Ui(() =>
@@ -183,6 +197,9 @@ namespace datinate.app
 
             Ui(() =>
             {
+                audioSession?.Dispose();
+                audioSession = null;
+
                 try
                 {
                     HideSpinnerOverlay();
@@ -266,8 +283,114 @@ namespace datinate.app
             spinnerOverlay.Location = new Point((cs.Width - w) / 2, (cs.Height - h) / 2);
         }
 
+        private async Task LoadAudioOrWebInternalAsync(Uri uri, int token)
+        {
+            if (string.IsNullOrWhiteSpace(audioEnvironmentPath))
+            {
+                await LoadWebInternalAsync(uri, token);
+                return;
+            }
+
+            bool canPlay;
+
+            try
+            {
+                canPlay = await DatinateAudioWebSession.CanPlayAsync(uri, audioEnvironmentPath);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (token != navToken) return;
+
+            if (!canPlay)
+            {
+                await LoadWebInternalAsync(uri, token);
+                return;
+            }
+
+            if (InvokeRequired)
+            {
+                Ui(() => _ = LoadAudioOrWebInternalAsync(uri, token));
+                return;
+            }
+
+            if (interactionSuppressed)
+            {
+                pendingUri = uri.AbsoluteUri;
+                return;
+            }
+
+            EnsureWebView();
+
+            ShowSpinnerOverlay();
+            imageView.Visible = false;
+
+            webView!.Visible = true;
+            webView.SendToBack();
+
+            try
+            {
+                var t = ensureCoreTask;
+
+                if (t == null)
+                {
+                    t = WebHelper.EnsureCoreAsync(webView);
+                    ensureCoreTask = t;
+                }
+
+                await t;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                return;
+            }
+
+            if (token != navToken) return;
+
+            var core = webView.CoreWebView2;
+            
+            if (core == null) return;
+
+            if (!coreConfigured)
+            {
+                ConfigureCore(core);
+                coreConfigured = true;
+            }
+
+            core.IsMuted = true;
+            webView.ZoomFactor = AUDIO_ZOOM;
+
+            await ResetAudioSessionAsync();
+
+            if (token != navToken) return;
+
+            audioSession ??= new DatinateAudioWebSession(webView, audioEnvironmentPath);
+
+            DatinateAudioWebLoadResult result = await audioSession.LoadPlayerAsync(uri);
+
+            if (token != navToken) return;
+
+            if (!result.Loaded)
+            {
+                await LoadWebInternalAsync(uri, token);
+                return;
+            }
+
+            HideSpinnerOverlay();
+
+            if (!interactionSuppressed)
+                blankOverlay.Visible = false;
+        }
+
         private async Task LoadImageInternalAsync(Uri uri, int token)
         {
+            await ResetAudioSessionAsync();
+
+            if (token != navToken) return;
+
             Ui(() =>
             {
                 ShowSpinnerOverlay();
@@ -283,8 +406,7 @@ namespace datinate.app
                 {
                     var path = uri.LocalPath;
 
-                    if (!File.Exists(path))
-                        throw new FileNotFoundException(path);
+                    if (!File.Exists(path)) throw new FileNotFoundException(path);
 
                     bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
                 }
@@ -299,7 +421,8 @@ namespace datinate.app
                 Image img;
 
                 using (var ms = new MemoryStream(bytes))
-                using (var tmp = Image.FromStream(ms, useEmbeddedColorManagement: true, validateImageData: true))
+                using (var tmp = Image.FromStream(
+                    ms, useEmbeddedColorManagement: true, validateImageData: true))
                 {
                     img = new Bitmap(tmp);
                 }
@@ -336,8 +459,7 @@ namespace datinate.app
 
         private void EnsureWebView()
         {
-            if (webView != null)
-                return;
+            if (webView != null) return;
 
             var newWv = new BorderlessWebView2
             {
@@ -403,9 +525,7 @@ namespace datinate.app
                 imageView.Image = null;
                 old?.Dispose();
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         private void SetImage(Image img)
@@ -430,11 +550,14 @@ namespace datinate.app
 
         private void DisposeMiniResources()
         {
+            audioSession?.Dispose();
+            audioSession = null;
+
             try { ClearImage(); } catch { }
 
             WebView2? wv = webView;
-            if (wv == null)
-                return;
+
+            if (wv == null) return;
 
             webView = null;
 
@@ -476,34 +599,11 @@ namespace datinate.app
             DisposeMiniResources();
         }
 
-        private sealed class BorderlessWebView2 : WebView2
-        {
-            protected override CreateParams CreateParams
-            {
-                get
-                {
-                    var cp = base.CreateParams;
-
-                    const int WS_BORDER = unchecked((int)0x00800000);
-                    const int WS_EX_CLIENTEDGE = 0x00000200;
-                    const int WS_EX_STATICEDGE = 0x00020000;
-                    const int WS_EX_WINDOWEDGE = 0x00000100;
-
-                    cp.Style &= ~WS_BORDER;
-                    cp.ExStyle &= ~(WS_EX_CLIENTEDGE | WS_EX_STATICEDGE | WS_EX_WINDOWEDGE);
-
-                    return cp;
-                }
-            }
-        }
-
         internal void LoadURI(string uri)
         {
-            if (string.IsNullOrWhiteSpace(uri))
-                return;
+            if (string.IsNullOrWhiteSpace(uri)) return;
 
-            if (!WebHelper.TryGetSupportedUri(uri, out var parsed))
-                return;
+            if (!WebHelper.TryGetSupportedUri(uri, out var parsed)) return;
 
             var abs = parsed.AbsoluteUri;
 
@@ -537,45 +637,36 @@ namespace datinate.app
             pendingUri = null;
 
             int token = unchecked(++navToken);
-
             string ext = WebHelper.GetExtensionNoQuery(parsed);
 
             if (WebHelper.IsImageExtension(ext))
             {
                 _ = LoadImageInternalAsync(parsed, token);
             }
-            else if (WebHelper.IsMusicVgmExtension(ext))
-            {
-                ShowUnavailableContent(
-                    "Game Music Preview Unavailable",
-                    "Playback support for this video game music format is not yet available.");
-            }
-            else
+            else if (WebHelper.IsVideoExtension(ext) || WebHelper.LooksLikeHtmlOrDocument(ext))
             {
                 _ = LoadWebInternalAsync(parsed, token);
             }
+            else
+            {
+                _ = LoadAudioOrWebInternalAsync(parsed, token);
+            }
         }
+
         private void TryLoadPendingUri()
         {
             var u = pendingUri;
-            if (string.IsNullOrWhiteSpace(u))
-                return;
 
-            if (IsDisposed || !IsHandleCreated)
-                return;
-
-            if (!Visible)
-                return;
-
-            if (interactionSuppressed)
-                return;
-
-            if (hostPanel.ClientSize.Width < 2 || hostPanel.ClientSize.Height < 2)
-                return;
+            if (string.IsNullOrWhiteSpace(u)) return;
+            if (IsDisposed || !IsHandleCreated) return;
+            if (!Visible) return;
+            if (interactionSuppressed) return;
+            if (hostPanel.ClientSize.Width < 2 || hostPanel.ClientSize.Height < 2) return;
 
             pendingUri = null;
             LoadURI(u);
         }
+
         internal void ClearUI()
         {
             pendingUri = null;
@@ -590,6 +681,9 @@ namespace datinate.app
                 try
                 {
                     unavailableOverlay.Visible = false;
+
+                    audioSession?.Dispose();
+                    audioSession = null;
 
                     ShowBlankOnly();
                     ClearImage();
@@ -617,6 +711,10 @@ namespace datinate.app
                 }
             });
         }
+        
+        private Task ResetAudioSessionAsync() =>
+            audioSession?.ResetAsync() ?? Task.CompletedTask;
+        
         private async Task LoadWebInternalAsync(Uri uri, int token)
         {
             try
@@ -632,6 +730,10 @@ namespace datinate.app
                     pendingUri = uri.AbsoluteUri;
                     return;
                 }
+
+                await ResetAudioSessionAsync();
+
+                if (token != navToken) return;
 
                 EnsureWebView();
 
@@ -649,8 +751,7 @@ namespace datinate.app
 
                 try
                 {
-                    if (webView == null)
-                        return;
+                    if (webView == null) return;
 
                     var t = ensureCoreTask;
 
@@ -668,8 +769,7 @@ namespace datinate.app
                     return;
                 }
 
-                if (token != navToken)
-                    return;
+                if (token != navToken) return;
 
                 if (interactionSuppressed)
                 {
@@ -678,8 +778,8 @@ namespace datinate.app
                 }
 
                 var core = webView?.CoreWebView2;
-                if (core == null)
-                    return;
+
+                if (core == null) return;
 
                 if (!coreConfigured)
                 {
@@ -691,14 +791,11 @@ namespace datinate.app
 
                 string ext = WebHelper.GetExtensionNoQuery(uri);
 
-                bool isVideo =
-                    WebHelper.IsVideoExtension(ext);
+                bool isVideo = WebHelper.IsVideoExtension(ext);
 
-                bool looksLikeHtml =
-                    WebHelper.LooksLikeHtmlOrDocument(ext);
+                bool looksLikeHtml = WebHelper.LooksLikeHtmlOrDocument(ext);
 
-                double targetZoom =
-                    looksLikeHtml ? 0.1 : 1.0;
+                double targetZoom = looksLikeHtml ? 0.1 : 1.0;
 
                 ulong targetNavId = 0;
 
@@ -737,8 +834,7 @@ namespace datinate.app
 
                     Ui(() =>
                     {
-                        if (token != navToken)
-                            return;
+                        if (token != navToken) return;
 
                         HideSpinnerOverlay();
 
@@ -777,6 +873,27 @@ namespace datinate.app
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
+
+        private sealed class BorderlessWebView2 : WebView2
+        {
+            protected override CreateParams CreateParams
+            {
+                get
+                {
+                    var cp = base.CreateParams;
+
+                    const int WS_BORDER = unchecked((int)0x00800000);
+                    const int WS_EX_CLIENTEDGE = 0x00000200;
+                    const int WS_EX_STATICEDGE = 0x00020000;
+                    const int WS_EX_WINDOWEDGE = 0x00000100;
+
+                    cp.Style &= ~WS_BORDER;
+                    cp.ExStyle &= ~(WS_EX_CLIENTEDGE | WS_EX_STATICEDGE | WS_EX_WINDOWEDGE);
+
+                    return cp;
+                }
             }
         }
     }

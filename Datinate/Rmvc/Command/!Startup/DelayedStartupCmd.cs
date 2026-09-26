@@ -10,6 +10,7 @@ namespace Datinate.Rmvc.Command
         protected async override Task RunAsync()
         {
             base.ExecuteCommand(new UpdateUnitDisplayCmd(UnitFormatHelper.Unit.GB, true));
+            base.ExecuteCommand(new SetAudioConfigurationCmd());
 
             DatGrouperProjectDTO? datGrouperStartupProject = null;
 

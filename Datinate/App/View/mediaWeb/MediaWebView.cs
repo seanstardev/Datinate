@@ -2,7 +2,6 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Microsoft.Web.WebView2.Core;
-using System.Diagnostics;
 
 namespace datinate.app
 {
@@ -14,6 +13,7 @@ namespace datinate.app
         private bool dragSessionActive;
         private bool browserSuppressedForOverlay;
         private string? lastTempHtmlPath = null;
+        private string? audioEnvironmentPath = null;
 
         public MediaWebView()
         {
@@ -42,6 +42,9 @@ namespace datinate.app
                 ConfigureCore();
             });
         }
+        
+        public void SetAudioEnvironmentPath(string? audioEnvironmentPath) =>
+            this.audioEnvironmentPath = null;
 
         public void StartReceiveMediaDrop()
         {
@@ -78,12 +81,6 @@ namespace datinate.app
 
                 try
                 {
-                    core.IsMuted = true;
-                }
-                catch (Exception) { }
-
-                try
-                {
                     Uri tempUri =
                         await WebHelper.CreateTempHtmlAsync(html);
 
@@ -111,8 +108,6 @@ namespace datinate.app
 
             string extension =
                 WebHelper.GetExtensionNoQuery(uri);
-
-            Debug.WriteLine("MUSIC:::: '" + uri + "'");
             
             if (WebHelper.IsMusicVgmExtension(extension))
             {
@@ -147,12 +142,6 @@ namespace datinate.app
 
                 // Ensure handlers exist before navigation.
                 ConfigureCore();
-
-                try
-                {
-                    core.IsMuted = true;
-                }
-                catch (Exception) { }
 
                 try
                 {
@@ -399,12 +388,6 @@ namespace datinate.app
 
             try
             {
-                core.IsMuted = true;
-            }
-            catch (Exception) { }
-
-            try
-            {
                 // Embedded media surface - do not expose browser-level
                 // Save As / download-style context menu operations.
                 core.Settings.AreDefaultContextMenusEnabled = false;
@@ -481,21 +464,20 @@ namespace datinate.app
                 if (e.Data is DataObject dobj)
                     dobj.SetData(DatinateHelper.WEB_BROWSER_MEDIA_ShowMediaCard, true);
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
         }
 
         private void SetReceiptEffectOnly(DragEventArgs e)
         {
             if ((e.AllowedEffect & DragDropEffects.Copy) != 0)
                 e.Effect = DragDropEffects.Copy;
+
             else if ((e.AllowedEffect & DragDropEffects.Move) != 0)
                 e.Effect = DragDropEffects.Move;
+            
             else
                 e.Effect = DragDropEffects.None;
         }
-
 
         private void Ui(Action action)
         {

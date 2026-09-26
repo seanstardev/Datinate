@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared.Rb;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 using static datinate.app.FastEntryListUI;
@@ -92,12 +93,15 @@ namespace datinate.app
                 Visible = true;
         }
 
-        public void InitialiseUI(ILookupSet lookupSet)
+        public void InitialiseUI(ILookupSet lookupSet, string? audioEnvironmentPath)
         {
             Ui(() =>
             {
                 UnhookListEvents();
 
+                Debug.WriteLine("MINI:::::::: "+audioEnvironmentPath);
+
+                miniWebUI.SetAudioEnvironmentPath(audioEnvironmentPath);
                 this.lookupSet = lookupSet;
 
                 var radioSource = lookupSet.RadioSource;

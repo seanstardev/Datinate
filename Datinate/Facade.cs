@@ -48,6 +48,7 @@ namespace com.RADIO.Datinate
         internal CuratedDatProxy? CuratedDatProxy => base.Model<CuratedDatProxy>();
         internal RbAuxItemLoaderProxy? RbAuxItemLoaderProxy => base.Model<RbAuxItemLoaderProxy>();
         internal ExportDatGrouperProjectProxy? ExportDatGrouperProjectProxy => base.Model<ExportDatGrouperProjectProxy>();
+        internal AudioProxy? AudioProxy => base.Model<AudioProxy>();
 
         // Model
         internal UnitDisplayModel? UnitDisplayModel => base.Model<UnitDisplayModel>();
@@ -85,9 +86,10 @@ namespace com.RADIO.Datinate
             };
         }
 
-        protected override RModel[] RegisterModels()
+        protected override IRModel[] RegisterModels()
         {
-            return new RModel[] {
+            return new IRModel[] 
+            {
                 new GlobalSettingsProxy(),
                 new DatGrouperSessionModel(),
                 new DatHierarchyProxy(),
@@ -106,7 +108,8 @@ namespace com.RADIO.Datinate
                 new CuratedDatProxy(),
                 new RbAuxItemLoaderProxy(),
                 new DatGrouperModel(),
-                new ExportDatGrouperProjectProxy()
+                new ExportDatGrouperProjectProxy(),
+                new AudioProxy()
             };
         }
        
