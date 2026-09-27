@@ -63,12 +63,11 @@ namespace datinate.app
             uiThreadId = Environment.CurrentManagedThreadId;
             uiContext = System.Threading.SynchronizationContext.Current;
 
-            // TODO: parse args:
-            if (DatinateHelper.IsDebugBuild)
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (args.Length > 1)
             {
-                //DatGrouperModeStartupProjectName = "Nintendo - SNES";
-                //DatGrouperModeStartupProjectName = "Nintendo - Virtual Boy";
-                //DatGrouperModeStartupProjectName = "Atari - Lynx";
+                DatGrouperModeStartupProjectName = args[1];
             }
 
             Facade.Create(typeof(Facade), this);

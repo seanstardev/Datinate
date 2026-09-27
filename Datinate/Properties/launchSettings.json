@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Datinate": {
+      "commandName": "Project"
+    },
+    "Datinate-Projects": {
+      "commandName": "Project",
+      "commandLineArgs": "\"Nintendo - SNES\""
+    }
+  }
+}
