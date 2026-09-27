@@ -66,7 +66,7 @@ namespace datinate.app
             // TODO: parse args:
             if (DatinateHelper.IsDebugBuild)
             {
-                DatGrouperModeStartupProjectName = "Nintendo - SNES";
+                //DatGrouperModeStartupProjectName = "Nintendo - SNES";
                 //DatGrouperModeStartupProjectName = "Nintendo - Virtual Boy";
                 //DatGrouperModeStartupProjectName = "Atari - Lynx";
             }

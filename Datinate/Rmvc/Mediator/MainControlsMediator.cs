@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Rmvc.Command;
 using Datinate.Shared;
 using RMVC;
 using static com.RADIO.Datinate.RMVC.Shared.UnitFormatHelper;
@@ -35,12 +36,14 @@ namespace com.RADIO.Datinate.RMVC
         private void OnShowCompareView() =>
             base.ExecuteCommand(new SetCompareViewVisibleCmd(true));
 
-        private void OnViewChange(Unit unit, bool shoInCells) 
-        {
+        private void OnViewChange(Unit unit, bool shoInCells)  =>
             base.ExecuteCommand(new UpdateUnitDisplayCmd(unit, shoInCells));
-        }
+        
         private void OnToggleMainView()
             => base.ExecuteCommand(new ToggleMainViewCmd());
+
+        private void OnInstallVgm()
+            => base.ExecuteCommand(new InstallOrUpdateVgmEngineCmd());
 
         protected override void Initialsed()
         {
@@ -51,6 +54,7 @@ namespace com.RADIO.Datinate.RMVC
                 view.ShowCompareViewEvt += OnShowCompareView;
                 view.ShowProjectsEvt += OnShowProjectsView;
                 view.ToggleMainViewEvt += OnToggleMainView;
+                view.InstallVgmEvt += OnInstallVgm;
             }
         }
 
@@ -63,6 +67,7 @@ namespace com.RADIO.Datinate.RMVC
                 view.ShowCompareViewEvt -= OnShowCompareView;
                 view.ShowProjectsEvt -= OnShowProjectsView;
                 view.ToggleMainViewEvt -= OnToggleMainView;
+                view.InstallVgmEvt -= OnInstallVgm;
             }
         }
     }

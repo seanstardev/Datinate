@@ -11,6 +11,7 @@ namespace Datinate.Shared
         event Action? ShowCompareViewEvt;
         event Action? ShowProjectsEvt;
         event Action? ToggleMainViewEvt;
+        event Action? InstallVgmEvt;
         void ActivateView();
         void SetActiveMainView(DatinateEnums.DAT_SCREEN_ENUM currentView);
         void SetMainControlEnabled(DatinateEnums.MAIN_CONTROL_ENUM mainCtrlEnum, bool doSetEnabled);

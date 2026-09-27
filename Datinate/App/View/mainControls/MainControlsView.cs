@@ -15,6 +15,7 @@ namespace datinate.app
         public event Action? ShowProjectsEvt;
         public event Action? DatPathRemovedEvt;
         public event Action? ToggleMainViewEvt;
+        public event Action? InstallVgmEvt;
 
         private const int MaxWideButtonWidthPx = 240;
         private const int MinWideButtonWidthPx = 48;
@@ -41,6 +42,11 @@ namespace datinate.app
             controlsLayoutPanel.AutoSize = false;
             controlsLayoutPanel.Margin = Padding.Empty;
             controlsLayoutPanel.Padding = Padding.Empty;
+
+            ToolTip tt = new ToolTip();
+            tt.SetToolTip(
+                vgmBtn,
+                @"Install or Update the Video Game Music engine");
 
             Facade.RegisterActor(this);
 
@@ -252,5 +258,8 @@ namespace datinate.app
 
             action();
         }
+
+        private void vgmBtn_Click(object sender, EventArgs e)
+            => InstallVgmEvt?.Invoke();
     }
 }
