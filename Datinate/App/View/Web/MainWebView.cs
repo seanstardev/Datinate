@@ -31,6 +31,7 @@ namespace datinate.app
         public MainWebView()
         {
             InitializeComponent();
+
             Facade.RegisterActor(this);
 
             DatinateWebView2Manager.Register(browser);
@@ -42,7 +43,7 @@ namespace datinate.app
             BrowserUi(async () =>
             {
                 if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
+                    await WebHelper.EnsureCoreAsync(browser);
 
                 if (browser.CoreWebView2 != null)
                 {
@@ -136,7 +137,7 @@ namespace datinate.app
             BrowserUi(async () =>
             {
                 if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
+                    await WebHelper.EnsureCoreAsync(browser);
 
                 try
                 {
@@ -154,7 +155,7 @@ namespace datinate.app
             BrowserUi(async () =>
             {
                 if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
+                    await WebHelper.EnsureCoreAsync(browser);
 
                 try
                 {
@@ -175,7 +176,7 @@ namespace datinate.app
                     try
                     {
                         if (browser.CoreWebView2 == null)
-                            await browser.EnsureCoreWebView2Async();
+                            await WebHelper.EnsureCoreAsync(browser);
                     }
                     catch (Exception) { return; }
 

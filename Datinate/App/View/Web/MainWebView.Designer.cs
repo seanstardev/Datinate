@@ -230,7 +230,6 @@ namespace datinate.app
             browser.Margin = new Padding(0);
             browser.Name = "browser";
             browser.Size = new Size(902, 496);
-            browser.Source = new Uri("about:blank", UriKind.Absolute);
             browser.TabIndex = 0;
             browser.ZoomFactor = 1D;
             browser.SourceChanged += browser_SourceChanged;

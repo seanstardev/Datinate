@@ -528,18 +528,20 @@ namespace datinate.app
             if (wv.IsDisposed || !wv.IsHandleCreated)
                 return null;
 
-            if (wv.CoreWebView2 == null)
-                await wv.EnsureCoreWebView2Async();
+            var core = await WebHelper.EnsureCoreAsync(wv);
 
-            var core = wv.CoreWebView2;
-            if (core == null)
-                return null;
+            if (core == null)return null;
 
             using var ms = new MemoryStream();
-            await core.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, ms);
+
+            await core.CapturePreviewAsync(
+                CoreWebView2CapturePreviewImageFormat.Png,
+                ms);
 
             ms.Position = 0;
+
             using var img = Image.FromStream(ms);
+
             return new Bitmap(img);
         }
 

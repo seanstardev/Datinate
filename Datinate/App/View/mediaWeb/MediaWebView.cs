@@ -2,8 +2,6 @@ using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Microsoft.Web.WebView2.Core;
-using System.Diagnostics;
-
 namespace datinate.app
 {
     public partial class MediaWebView : UserControl, IWebMediaView
@@ -39,8 +37,7 @@ namespace datinate.app
 
             BrowserUi(async () =>
             {
-                if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
+                _ = await WebHelper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
             });
@@ -88,12 +85,7 @@ namespace datinate.app
                 if (token != loadToken)
                     return;
 
-                if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
-
-                var core = browser.CoreWebView2;
-                if (core == null)
-                    return;
+                var core = await WebHelper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
 
@@ -182,13 +174,10 @@ namespace datinate.app
                     LoadWebUri(uri, token);
                     return;
                 }
-
-                if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
-
-                var core = browser.CoreWebView2;
-                if (core == null || token != loadToken)
+                if (token != loadToken)
                     return;
+
+                var core = await WebHelper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
 
@@ -231,12 +220,7 @@ namespace datinate.app
                 if (token != loadToken)
                     return;
 
-                if (browser.CoreWebView2 == null)
-                    await browser.EnsureCoreWebView2Async();
-
-                var core = browser.CoreWebView2;
-                if (core == null)
-                    return;
+                var core = await WebHelper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
 
@@ -288,12 +272,7 @@ namespace datinate.app
                     if (token != loadToken)
                         return;
 
-                    if (browser.CoreWebView2 == null)
-                        await browser.EnsureCoreWebView2Async();
-
-                    var core = browser.CoreWebView2;
-                    if (core == null)
-                        return;
+                    var core = await WebHelper.EnsureCoreAsync(browser);
 
                     LoadBlankHtml();
                 });
