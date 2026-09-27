@@ -7,7 +7,7 @@ namespace datinate.app
     public partial class MiniWebUI : UserControl
     {
         private const bool CLEARUI_DISPOSE_WEBVIEW = false;
-        private const double AUDIO_ZOOM = 0.1;
+        private const double AUDIO_ZOOM = 0.5;
 
         private Task? ensureCoreTask;
 
@@ -369,7 +369,8 @@ namespace datinate.app
 
             audioSession ??= new DatinateAudioWebSession(webView, audioEnvironmentPath);
 
-            DatinateAudioWebLoadResult result = await audioSession.LoadPlayerAsync(uri);
+            DatinateAudioWebLoadResult result =
+                await audioSession.LoadPlayerPreviewAsync(uri);
 
             if (token != navToken) return;
 

@@ -129,87 +129,191 @@ namespace datinate.app
             }
         }
 
-        /// <summary>
-        /// Navigates this session's existing WebView2 directly to player.html.
-        /// Call CanPlayAsync first when routing an unknown source.
-        /// </summary>
-        internal async Task<DatinateAudioWebLoadResult> LoadPlayerAsync(Uri source, CancellationToken cancellationToken = default)
+        internal Task<DatinateAudioWebLoadResult> LoadPlayerAsync(
+            Uri source,
+            CancellationToken cancellationToken = default) =>
+            LoadPlayerPageAsync(
+                source,
+                preview: false,
+                cancellationToken);
+
+        internal Task<DatinateAudioWebLoadResult> LoadPlayerPreviewAsync(
+            Uri source,
+            CancellationToken cancellationToken = default) =>
+            LoadPlayerPageAsync(
+                source,
+                preview: true,
+                cancellationToken);
+
+        private async Task<DatinateAudioWebLoadResult> LoadPlayerPageAsync(
+            Uri source,
+            bool preview,
+            CancellationToken cancellationToken)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
             if (webView.InvokeRequired)
-                return await InvokeOnUiAsync(() => LoadPlayerAsync(source, cancellationToken));
+            {
+                return await InvokeOnUiAsync(() =>
+                    LoadPlayerPageAsync(
+                        source,
+                        preview,
+                        cancellationToken));
+            }
 
             if (disposed || webView.IsDisposed || !webView.IsHandleCreated)
-                return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Unavailable, source, "webview-unavailable");
+                return new DatinateAudioWebLoadResult(
+                    DatinateAudioWebLoadStatus.Unavailable,
+                    source,
+                    "webview-unavailable");
 
-            CancellationToken token = BeginOperation(cancellationToken);
+            CancellationToken token =
+                BeginOperation(cancellationToken);
+
             TaskCompletionSource<PlayerMessage>? localPlayerTcs = null;
 
             try
             {
                 if (!HasRequiredFacadeFiles(audioWebRoot))
-                    return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Unavailable, source, "audio-facade-missing");
+                {
+                    return new DatinateAudioWebLoadResult(
+                        DatinateAudioWebLoadStatus.Unavailable,
+                        source,
+                        "audio-facade-missing");
+                }
 
-                CoreWebView2? currentCore = await EnsureCoreAsync();
+                CoreWebView2? currentCore =
+                    await EnsureCoreAsync();
+
                 if (currentCore == null)
-                    return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Unavailable, source, "webview-core-unavailable");
+                {
+                    return new DatinateAudioWebLoadResult(
+                        DatinateAudioWebLoadStatus.Unavailable,
+                        source,
+                        "webview-core-unavailable");
+                }
 
                 await ResetFacadeDocumentAsync(currentCore);
-                ClearMediaMapping(currentCore, ref mediaHostName);
+
+                ClearMediaMapping(
+                    currentCore,
+                    ref mediaHostName);
+
                 token.ThrowIfCancellationRequested();
 
-                string sessionId = Guid.NewGuid().ToString("N");
-                currentSessionId = sessionId;
+                string sessionId =
+                    Guid.NewGuid().ToString("N");
 
-                string? sourceUrl = PrepareBrowserSource(currentCore, source, sessionId, ref mediaHostName);
+                currentSessionId =
+                    sessionId;
+
+                string? sourceUrl =
+                    PrepareBrowserSource(
+                        currentCore,
+                        source,
+                        sessionId,
+                        ref mediaHostName);
+
                 if (string.IsNullOrWhiteSpace(sourceUrl))
-                    return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Unavailable, source, "source-cannot-be-exposed");
+                {
+                    return new DatinateAudioWebLoadResult(
+                        DatinateAudioWebLoadStatus.Unavailable,
+                        source,
+                        "source-cannot-be-exposed");
+                }
 
                 CurrentSource = source;
                 IsPlayerActive = false;
 
-                localPlayerTcs = NewTcs<PlayerMessage>();
-                playerTcs = localPlayerTcs;
+                localPlayerTcs =
+                    NewTcs<PlayerMessage>();
 
-                currentCore.Navigate(BuildPageUrl("player.html", sessionId, sourceUrl));
-                PlayerMessage player = await localPlayerTcs.Task.WaitAsync(PlayerReadyTimeout, token);
+                playerTcs =
+                    localPlayerTcs;
+
+                string playerUrl =
+                    BuildPageUrl(
+                        "player.html",
+                        sessionId,
+                        sourceUrl);
+
+                if (preview)
+                    playerUrl += "&preview=1";
+
+                currentCore.Navigate(playerUrl);
+
+                PlayerMessage player =
+                    await localPlayerTcs.Task
+                        .WaitAsync(
+                            PlayerReadyTimeout,
+                            token);
 
                 if (!player.Ready)
                 {
-                    await ResetFacadeDocumentAsync(currentCore);
-                    ClearMediaMapping(currentCore, ref mediaHostName);
+                    await ResetFacadeDocumentAsync(
+                        currentCore);
+
+                    ClearMediaMapping(
+                        currentCore,
+                        ref mediaHostName);
+
                     CurrentSource = null;
-                    return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.NotPlayable, source, player.Reason, player.Error);
+
+                    return new DatinateAudioWebLoadResult(
+                        DatinateAudioWebLoadStatus.NotPlayable,
+                        source,
+                        player.Reason,
+                        player.Error);
                 }
 
                 IsPlayerActive = true;
-                return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Loaded, source);
+
+                return new DatinateAudioWebLoadResult(
+                    DatinateAudioWebLoadStatus.Loaded,
+                    source);
             }
             catch (OperationCanceledException)
             {
-                return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Cancelled, source, "cancelled");
+                return new DatinateAudioWebLoadResult(
+                    DatinateAudioWebLoadStatus.Cancelled,
+                    source,
+                    "cancelled");
             }
             catch (TimeoutException ex)
             {
                 Debug.WriteLine(ex);
+
                 await SafeResetAndReleaseAsync();
-                return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Unavailable, source, "audio-player-timeout", ex.Message);
+
+                return new DatinateAudioWebLoadResult(
+                    DatinateAudioWebLoadStatus.Unavailable,
+                    source,
+                    "audio-player-timeout",
+                    ex.Message);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+
                 await SafeResetAndReleaseAsync();
-                return new DatinateAudioWebLoadResult(DatinateAudioWebLoadStatus.Unavailable, source, "audio-player-error", ex.Message);
+
+                return new DatinateAudioWebLoadResult(
+                    DatinateAudioWebLoadStatus.Unavailable,
+                    source,
+                    "audio-player-error",
+                    ex.Message);
             }
             finally
             {
-                if (ReferenceEquals(playerTcs, localPlayerTcs))
+                if (ReferenceEquals(
+                    playerTcs,
+                    localPlayerTcs))
+                {
                     playerTcs = null;
+                }
             }
         }
-
         /// <summary>
         /// Convenience path for callers that do not need a separate routing probe.
         /// </summary>
