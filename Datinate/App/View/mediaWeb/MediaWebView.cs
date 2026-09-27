@@ -1,4 +1,4 @@
-﻿using com.RADIO.Datinate;
+using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Microsoft.Web.WebView2.Core;
@@ -14,6 +14,9 @@ namespace datinate.app
         private bool dragSessionActive;
         private bool browserSuppressedForOverlay;
         private string? lastTempHtmlPath = null;
+        private string? audioEnvironmentPath = null;
+        private DatinateAudioWebSession? audioSession;
+        private int loadToken;
 
         public MediaWebView()
         {
@@ -42,6 +45,17 @@ namespace datinate.app
                 ConfigureCore();
             });
         }
+        
+        public void SetAudioEnvironmentPath(string? audioEnvironmentPath)
+        {
+            if (string.Equals(this.audioEnvironmentPath, audioEnvironmentPath, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            audioSession?.Dispose();
+            audioSession = null;
+            this.audioEnvironmentPath = audioEnvironmentPath;
+        }
+
 
         public void StartReceiveMediaDrop()
         {
@@ -62,11 +76,18 @@ namespace datinate.app
         }
         public void LoadPageContent(string html)
         {
+            int token = unchecked(++loadToken);
+
             blankRequested = false;
             Ui(ApplyOverlayState);
 
             BrowserUi(async () =>
             {
+                await ResetAudioSessionAsync();
+
+                if (token != loadToken)
+                    return;
+
                 if (browser.CoreWebView2 == null)
                     await browser.EnsureCoreWebView2Async();
 
@@ -78,14 +99,14 @@ namespace datinate.app
 
                 try
                 {
-                    core.IsMuted = true;
-                }
-                catch (Exception) { }
-
-                try
-                {
                     Uri tempUri =
                         await WebHelper.CreateTempHtmlAsync(html);
+
+                    if (token != loadToken)
+                    {
+                        WebHelper.DeleteFile(tempUri.LocalPath);
+                        return;
+                    }
 
                     string? oldPath = lastTempHtmlPath;
                     lastTempHtmlPath = tempUri.LocalPath;
@@ -109,35 +130,107 @@ namespace datinate.app
                 return;
             }
 
-            string extension =
-                WebHelper.GetExtensionNoQuery(uri);
+            int token = unchecked(++loadToken);
+            string extension = WebHelper.GetExtensionNoQuery(uri);
 
-            Debug.WriteLine("MUSIC:::: '" + uri + "'");
-            
-            if (WebHelper.IsMusicVgmExtension(extension))
+            if (WebHelper.IsImageExtension(extension) ||
+                WebHelper.IsVideoExtension(extension) ||
+                WebHelper.LooksLikeHtmlOrDocument(extension))
             {
-                ShowUnavailableContent(
-                    "Game Music Preview Unavailable",
-                    "Playback support for this video game music format is not yet available.");
-
+                LoadWebUri(uri, token);
                 return;
             }
 
-            if (WebHelper.IsMusicStandardExtension(extension))
-            {
-                LoadWebUri(uri);
-                return;
-            }
-
-            LoadWebUri(uri);
+            LoadAudioOrWebUri(uri, token);
         }
-        private void LoadWebUri(Uri uri)
+
+        private void LoadAudioOrWebUri(Uri uri, int token)
         {
             blankRequested = false;
             Ui(ApplyOverlayState);
 
             BrowserUi(async () =>
             {
+                if (token != loadToken)
+                    return;
+
+                if (string.IsNullOrWhiteSpace(audioEnvironmentPath))
+                {
+                    LoadWebUri(uri, token);
+                    return;
+                }
+
+                bool canPlay;
+
+                try
+                {
+                    canPlay =
+                        await DatinateAudioWebSession.CanPlayAsync(
+                            uri,
+                            audioEnvironmentPath);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+
+                if (token != loadToken)
+                    return;
+
+                if (!canPlay)
+                {
+                    LoadWebUri(uri, token);
+                    return;
+                }
+
+                if (browser.CoreWebView2 == null)
+                    await browser.EnsureCoreWebView2Async();
+
+                var core = browser.CoreWebView2;
+                if (core == null || token != loadToken)
+                    return;
+
+                ConfigureCore();
+
+                await ResetAudioSessionAsync();
+
+                if (token != loadToken)
+                    return;
+
+                audioSession ??=
+                    new DatinateAudioWebSession(
+                        browser,
+                        audioEnvironmentPath);
+
+                DatinateAudioWebLoadResult result =
+                    await audioSession.LoadPlayerAsync(uri);
+
+                if (token != loadToken)
+                    return;
+
+                if (!result.Loaded)
+                {
+                    LoadWebUri(uri, token);
+                    return;
+                }
+
+                blankRequested = false;
+                ApplyOverlayState();
+            });
+        }
+
+        private void LoadWebUri(Uri uri, int token)
+        {
+            blankRequested = false;
+            Ui(ApplyOverlayState);
+
+            BrowserUi(async () =>
+            {
+                await ResetAudioSessionAsync();
+
+                if (token != loadToken)
+                    return;
+
                 if (browser.CoreWebView2 == null)
                     await browser.EnsureCoreWebView2Async();
 
@@ -145,14 +238,7 @@ namespace datinate.app
                 if (core == null)
                     return;
 
-                // Ensure handlers exist before navigation.
                 ConfigureCore();
-
-                try
-                {
-                    core.IsMuted = true;
-                }
-                catch (Exception) { }
 
                 try
                 {
@@ -160,23 +246,36 @@ namespace datinate.app
                 }
                 catch (Exception)
                 {
+                    if (token != loadToken)
+                        return;
+
                     ShowUnavailableContent(
                         "Content Cannot be Previewed",
                         "This media source cannot currently be previewed.");
                 }
             });
         }
+
+        private Task ResetAudioSessionAsync() =>
+            audioSession?.ResetAsync() ?? Task.CompletedTask;
+
         public void LoadUriInBrowser()
         {
-            Uri? source = WebHelper.TryGetSource(browser);
+            Uri? source =
+                audioSession?.IsPlayerActive == true
+                    ? audioSession.CurrentSource
+                    : WebHelper.TryGetSource(browser);
 
-            if (source == null) return;
+            if (source == null)
+                return;
 
             BrowserUtil.LoadInBrowser(source.ToString());
         }
 
         public void ClearView()
         {
+            int token = unchecked(++loadToken);
+
             Ui(() =>
             {
                 blankRequested = true;
@@ -184,14 +283,19 @@ namespace datinate.app
 
                 BrowserUi(async () =>
                 {
+                    await ResetAudioSessionAsync();
+
+                    if (token != loadToken)
+                        return;
+
                     if (browser.CoreWebView2 == null)
                         await browser.EnsureCoreWebView2Async();
 
-                    if (browser.CoreWebView2 == null)
+                    var core = browser.CoreWebView2;
+                    if (core == null)
                         return;
 
                     LoadBlankHtml();
-
                 });
             });
         }
@@ -211,6 +315,11 @@ namespace datinate.app
         }
         protected void HandleDisposing()
         {
+            unchecked { ++loadToken; }
+
+            audioSession?.Dispose();
+            audioSession = null;
+
             Facade.UnregisterActor(this);
 
             try
@@ -399,7 +508,7 @@ namespace datinate.app
 
             try
             {
-                core.IsMuted = true;
+                core.IsMuted = false;
             }
             catch (Exception) { }
 
@@ -472,8 +581,17 @@ namespace datinate.app
         
 
         private void DragDropOverlay_DragDrop(object? sender, DragEventArgs e)
-        {           
-            LoadBlankHtml();
+        {
+            int token = unchecked(++loadToken);
+
+            BrowserUi(async () =>
+            {
+                await ResetAudioSessionAsync();
+
+                if (token == loadToken)
+                    LoadBlankHtml();
+            });
+
             SetReceiptEffectOnly(e);
 
             try

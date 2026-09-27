@@ -12,5 +12,6 @@ namespace Datinate.Shared
 
         void StopReceiveMediaDrop();
         void LoadUriInBrowser();
+        void SetAudioEnvironmentPath(string? audioEnvironmentPath);
     }
 }

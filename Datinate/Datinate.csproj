@@ -33,6 +33,13 @@
       <LogicalName>AppData/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="App\Assets\VGM\**\*" />
+    <EmbeddedResource Include="App\Assets\VGM\**\*">
+      <LogicalName>Seed/VGM/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="App\Assets\Icons\Web\chatgpt.png" />

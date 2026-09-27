@@ -13,12 +13,12 @@ namespace datinate.app
         public event Action<ILookupSet, string, bool>? ShowMediaCardEvt;
         public event Action? MediaCardDragStartEvt;
         public event Action? MediaCardDragEndEvt;
-
         public event Action<ILookupSet, string, bool, string>? RequestMediaContentEvt;
-
         public event Action? CloseMediaEvt;
-
+        
+        private const int WM_SETREDRAW = 0x000B;
         private const int SHOW_WORK_YIELD_LAYERS = 20;
+
         private static Image? LoadingSpinnerImage;
 
         private Media2AssignHoverManager? hoverManager;
@@ -41,7 +41,7 @@ namespace datinate.app
         private bool showWorkRunning;
         private bool showLayoutSuspended;
         private bool showRedrawSuspended;
-        private const int WM_SETREDRAW = 0x000B;
+        private string? audioEnvironmentPath = null;
 
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(
@@ -90,6 +90,10 @@ namespace datinate.app
             pendingSearchNames = null;
             pendingSearchPrompts = null;
         }
+
+        public void SetAudioEnvironmentPath(string? audioEnvironmentPath)
+            => this.audioEnvironmentPath = audioEnvironmentPath;
+        
         public void SetCloseBtnPosition(bool left)
         {
             if (left)
@@ -160,7 +164,7 @@ namespace datinate.app
 
                             WireAssignUI(ui);
 
-                            ui.InitialiseUI(lookupSet);
+                            ui.InitialiseUI(lookupSet, audioEnvironmentPath);
 
                             mediaContainer.Controls.Add(ui);
 
@@ -406,6 +410,7 @@ namespace datinate.app
                 }
             });
         }
+
         private void AssignUI_EntrySingleClicked(
             Media2AssignUI sourceUI,
             ILookupSet lookupSet,
@@ -419,6 +424,7 @@ namespace datinate.app
 
             RequestMediaContentEvt?.Invoke(lookupSet, lookup, entryWasSelectedByUser, info.Name);
         }
+
         private IReadOnlyCollection<Media2AssignUI> MediaAssignUIs
         {
             get
@@ -446,15 +452,12 @@ namespace datinate.app
             }
         }
 
-        private void Media2View_Disposed(object? sender, EventArgs e)
-        {
+        private void Media2View_Disposed(object? sender, EventArgs e) =>
             HandleDisposing();
-        }
-
+        
         protected void HandleDisposing()
         {
-            if (disposingHandled)
-                return;
+            if (disposingHandled) return;
 
             Facade.UnregisterActor(this);
 
@@ -543,27 +546,21 @@ namespace datinate.app
             ui.DragEndEvt -= AssignUI_DragEnd;
             ui.MediaAssignmentChangeEvt -= OnMediaAssignmentChange;
         }
-        private void AssignUI_DragStart(Media2AssignUI ui)
-        {
+        private void AssignUI_DragStart(Media2AssignUI ui) =>
             MediaCardDragStartEvt?.Invoke();
-        }
-        private void AssignUI_DragEnd(Media2AssignUI ui)
-        {
+        
+        private void AssignUI_DragEnd(Media2AssignUI ui) =>
             MediaCardDragEndEvt?.Invoke();
-        }
 
         private void AssignUI_LoadInMediaWebView(ILookupSet set, string entryName) =>
             ShowMediaCardEvt?.Invoke(set, entryName, false);
 
         private void AssignUI_EntryDoubleClicked(ILookupSet lookupSet, FastEntryListUI.EntryInfo info)
-        {
-
-        }
+        { }
 
         private void ScrollMediaContainerToTop()
         {
-            if (mediaContainer == null)
-                return;
+            if (mediaContainer == null) return;
 
             if (DatinatePerformanceUtil.SCROLLER_UseStock == false)
             {
@@ -651,9 +648,7 @@ namespace datinate.app
                 if (e.Data is DataObject dobj)
                     dobj.SetData(DatinateHelper.WEB_BROWSER_MEDIA_ShowMedia, true);
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
         }
 
         private void UpdateReceiptDragState(DragEventArgs e)
@@ -666,8 +661,10 @@ namespace datinate.app
 
             if ((e.AllowedEffect & DragDropEffects.Move) != 0)
                 e.Effect = DragDropEffects.Move;
+
             else if ((e.AllowedEffect & DragDropEffects.Copy) != 0)
                 e.Effect = DragDropEffects.Copy;
+            
             else
                 e.Effect = DragDropEffects.None;
         }
@@ -689,8 +686,7 @@ namespace datinate.app
         {
             payload = null!;
 
-            if (data == null)
-                return false;
+            if (data == null) return false;
 
             try
             {
@@ -700,9 +696,7 @@ namespace datinate.app
                     return true;
                 }
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
 
             try
             {
@@ -719,9 +713,7 @@ namespace datinate.app
                     }
                 }
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
 
             return false;
         }
@@ -738,11 +730,9 @@ namespace datinate.app
             action();
         }
 
-        private void closeBtn_Click(object sender, EventArgs e)
-        {
+        private void closeBtn_Click(object sender, EventArgs e) =>
             CloseMediaEvt?.Invoke();
-        }
-
+        
         private void CancelShowWork()
         {
             unchecked { showWorkToken++; }
@@ -753,11 +743,9 @@ namespace datinate.app
             ResumeShowBatch();
         }
 
-        private void EnqueueShowWork(Action action)
-        {
+        private void EnqueueShowWork(Action action) =>
             showWorkQueue.Enqueue(action);
-        }
-
+        
         private void StartShowWorkPump()
         {
             if (showWorkRunning)
@@ -845,11 +833,9 @@ namespace datinate.app
                 () => PumpShowWork(token));
         }
 
-        private void EnqueueShowWorkCompletedMarker(int token)
-        {
+        private void EnqueueShowWorkCompletedMarker(int token) =>
             EnqueueShowWork(() => ShowWorkCompleted(token));
-        }
-
+        
         private void ShowWorkCompleted(int token)
         {
             if (token != showWorkToken)

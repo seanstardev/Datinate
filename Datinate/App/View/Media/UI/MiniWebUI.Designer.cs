@@ -13,12 +13,12 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing) HandleDisposing();
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
-                DisposeMiniResources();
+                HandleDisposing();
+                components?.Dispose();
             }
+
             base.Dispose(disposing);
         }
 

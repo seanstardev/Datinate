@@ -30,6 +30,7 @@
             unitsCombo = new ComboBox();
             containerPanel = new Panel();
             splashPanel = new Panel();
+            vgmBtn = new Button();
             logoPic = new PictureBox();
             controlsPanel = new Panel();
             controlsLayoutPanel = new TableLayoutPanel();
@@ -89,8 +90,8 @@
             // containerPanel
             // 
             containerPanel.AutoSize = true;
-            containerPanel.Controls.Add(controlsPanel);
             containerPanel.Controls.Add(splashPanel);
+            containerPanel.Controls.Add(controlsPanel);
             containerPanel.Dock = DockStyle.Fill;
             containerPanel.Location = new Point(0, 0);
             containerPanel.Name = "containerPanel";
@@ -100,6 +101,7 @@
             // splashPanel
             // 
             splashPanel.BackColor = Color.Black;
+            splashPanel.Controls.Add(vgmBtn);
             splashPanel.Controls.Add(logoPic);
             splashPanel.Dock = DockStyle.Fill;
             splashPanel.Location = new Point(0, 0);
@@ -108,6 +110,18 @@
             splashPanel.Padding = new Padding(0, 32, 0, 6);
             splashPanel.Size = new Size(933, 60);
             splashPanel.TabIndex = 16;
+            // 
+            // vgmBtn
+            // 
+            vgmBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            vgmBtn.Cursor = Cursors.Hand;
+            vgmBtn.Location = new Point(888, 34);
+            vgmBtn.Name = "vgmBtn";
+            vgmBtn.Size = new Size(42, 23);
+            vgmBtn.TabIndex = 1;
+            vgmBtn.Text = "VGM";
+            vgmBtn.UseVisualStyleBackColor = true;
+            vgmBtn.Click += vgmBtn_Click;
             // 
             // logoPic
             // 
@@ -165,6 +179,7 @@
             compareBtn2.MinimumSize = new Size(48, 28);
             compareBtn2.Name = "compareBtn2";
             compareBtn2.Padding = new Padding(0, 0, 0, 6);
+            compareBtn2.ShowFocusCue = true;
             compareBtn2.Size = new Size(127, 39);
             compareBtn2.TabIndex = 4;
             compareBtn2.Text = "DAT Compare";
@@ -184,6 +199,7 @@
             customiseBtn2.MinimumSize = new Size(48, 28);
             customiseBtn2.Name = "customiseBtn2";
             customiseBtn2.Padding = new Padding(0, 0, 0, 6);
+            customiseBtn2.ShowFocusCue = true;
             customiseBtn2.Size = new Size(135, 39);
             customiseBtn2.TabIndex = 3;
             customiseBtn2.Text = "DAT Customiser";
@@ -202,6 +218,7 @@
             datGrouperBtn.MinimumSize = new Size(48, 28);
             datGrouperBtn.Name = "datGrouperBtn";
             datGrouperBtn.Padding = new Padding(0, 0, 0, 6);
+            datGrouperBtn.ShowFocusCue = true;
             datGrouperBtn.Size = new Size(135, 39);
             datGrouperBtn.TabIndex = 2;
             datGrouperBtn.Text = "DAT Grouper";
@@ -220,6 +237,7 @@
             datManagerBtn.MinimumSize = new Size(48, 28);
             datManagerBtn.Name = "datManagerBtn";
             datManagerBtn.Padding = new Padding(0, 0, 0, 6);
+            datManagerBtn.ShowFocusCue = true;
             datManagerBtn.Size = new Size(48, 39);
             datManagerBtn.TabIndex = 15;
             datManagerBtn.Text = "";
@@ -258,5 +276,6 @@
         private Panel splashPanel;
         private PictureBox logoPic;
         private DatActionButton datManagerBtn;
+        private Button vgmBtn;
     }
 }

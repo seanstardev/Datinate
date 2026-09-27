@@ -44,5 +44,9 @@ namespace com.RADIO.Datinate.RMVC
 
         public void LoadUriInBrowser()
             => view?.LoadUriInBrowser();
+
+        public void SetAudioEnvironmentPath(string? audioEnvironmentPath) =>
+            view?.SetAudioEnvironmentPath(audioEnvironmentPath);
+
     }
 }

@@ -24,5 +24,6 @@ namespace Datinate.Shared
         void SetAssignedEntriesCache(IReadOnlyDictionary<string, HashSet<string>> assignedEntriesCache);
         void SetMediaCardContent(ILookupSet lookupSet, string urlOrHtml, bool isHtmlRawText, bool entryWasSelectedByUser, string entryName);
         void SetMediaCardContentNotAvailable(ILookupSet lookupSet, string entryName, bool entryWasSelectedByUser);
+        void SetAudioEnvironmentPath(string? audioEnvironmentPath);
     }
 }
