@@ -99,8 +99,6 @@ namespace datinate.app
             {
                 UnhookListEvents();
 
-                Debug.WriteLine("MINI:::::::: "+audioEnvironmentPath);
-
                 miniWebUI.SetAudioEnvironmentPath(audioEnvironmentPath);
                 this.lookupSet = lookupSet;
 
