@@ -789,7 +789,6 @@ namespace datinate.app
                 VerboseDebug("[AUDIO PROBE] Hidden WebView2 core ready.");
 
                 core = currentCore;
-                core.Settings.AreDevToolsEnabled = false;
                 core.Settings.AreDefaultContextMenusEnabled = false;
                 core.WebMessageReceived += Core_WebMessageReceived;
 

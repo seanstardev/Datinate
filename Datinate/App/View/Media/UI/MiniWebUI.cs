@@ -468,7 +468,11 @@ namespace datinate.app
                 Dock = DockStyle.Fill,
                 Margin = Padding.Empty,
                 Name = "webView",
-                TabIndex = 0,
+
+                // MiniWebUI is display-only. Never allow user interaction.
+                Enabled = false,
+                TabStop = false,
+
                 DefaultBackgroundColor = Color.Black
             };
 
@@ -715,7 +719,7 @@ namespace datinate.app
         
         private Task ResetAudioSessionAsync() =>
             audioSession?.ResetAsync() ?? Task.CompletedTask;
-        
+
         private async Task LoadWebInternalAsync(Uri uri, int token)
         {
             try
@@ -832,6 +836,18 @@ namespace datinate.app
 
                     try { core.NavigationCompleted -= onCompleted; } catch { }
                     try { core.NavigationStarting -= onStarting; } catch { }
+
+                    // MiniWebUI is display-only, so remove scrolling and scrollbars.
+                    try
+                    {
+                        await core.ExecuteScriptAsync(
+                            "document.documentElement.style.overflow='hidden';" +
+                            "if(document.body) document.body.style.overflow='hidden';");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
 
                     Ui(() =>
                     {

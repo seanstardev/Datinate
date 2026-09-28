@@ -184,6 +184,9 @@ namespace datinate.app
 
                 ConfigureCore();
 
+                // Override ConfigureCore() for audio player:
+                core.Settings.AreDefaultContextMenusEnabled = false;
+
                 await ResetAudioSessionAsync();
 
                 if (token != loadToken)
@@ -496,9 +499,14 @@ namespace datinate.app
 
             try
             {
-                // Embedded media surface - do not expose browser-level
-                // Save As / download-style context menu operations.
-                core.Settings.AreDefaultContextMenusEnabled = false;
+                core.Settings.AreDefaultContextMenusEnabled = true;
+            }
+            catch (Exception) { }
+
+            try
+            {
+                core.ContextMenuRequested -= Core_ContextMenuRequested;
+                core.ContextMenuRequested += Core_ContextMenuRequested;
             }
             catch (Exception) { }
 
@@ -515,6 +523,22 @@ namespace datinate.app
                 core.NavigationCompleted += Core_NavigationCompleted;
             }
             catch (Exception) { }
+        }
+
+        private void Core_ContextMenuRequested(
+            object? sender,
+            CoreWebView2ContextMenuRequestedEventArgs e)
+        {
+            for (int i = e.MenuItems.Count - 1; i >= 0; i--)
+            {
+                string name = e.MenuItems[i].Name;
+
+                if (string.Equals(name, "back", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(name, "forward", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.MenuItems.RemoveAt(i);
+                }
+            }
         }
 
         private void Core_DownloadStarting(
@@ -541,12 +565,15 @@ namespace datinate.app
 
             string extension = WebHelper.GetExtensionNoQuery(source);
 
-            if (!WebHelper.IsVideoExtension(extension))
+            if (WebHelper.IsVideoExtension(extension) == false)
                 return;
 
             try
             {
                 await WebHelper.EnableVideoLoopAsync(core);
+
+                // Override ConfigureCore() for audio player:
+                core.Settings.AreDefaultContextMenusEnabled = false;
             }
             catch (Exception ex)
             {
@@ -557,11 +584,9 @@ namespace datinate.app
         private void DragDropOverlay_DragEnter(object? sender, DragEventArgs e) =>
             SetReceiptEffectOnly(e);
         
-
         private void DragDropOverlay_DragOver(object? sender, DragEventArgs e) =>
             SetReceiptEffectOnly(e);
         
-
         private void DragDropOverlay_DragDrop(object? sender, DragEventArgs e)
         {
             int token = unchecked(++loadToken);
@@ -596,7 +621,6 @@ namespace datinate.app
                 e.Effect = DragDropEffects.None;
         }
 
-
         private void Ui(Action action)
         {
             if (InvokeRequired)
@@ -608,7 +632,6 @@ namespace datinate.app
 
             action();
         }
-
 
         protected override void OnVisibleChanged(EventArgs e)
         {

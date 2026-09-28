@@ -89,13 +89,6 @@ namespace datinate.app
             webView.CreationProperties = creationProperties;
         }
 
-        /// <summary>
-        /// Ensures the WebView2 Core exists using Datinate's shared
-        /// WebView2 environment.
-        ///
-        /// This does not apply UI/browser policy such as muting,
-        /// context menu behaviour, zoom, download handling, etc.
-        /// </summary>
         public static async Task<CoreWebView2> EnsureCoreAsync(WebView2 webView)
         {
             if (webView.CoreWebView2 != null)
@@ -104,6 +97,9 @@ namespace datinate.app
             CoreWebView2Environment environment = await GetSharedEnvironmentAsync();
 
             await webView.EnsureCoreWebView2Async(environment);
+
+            if (webView.CoreWebView2 != null)
+                webView.CoreWebView2.Settings.AreDevToolsEnabled = false;
 
             return webView.CoreWebView2!;
         }
