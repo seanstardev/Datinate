@@ -13,18 +13,6 @@ namespace com.RADIO.Datinate
     {
         string? DatGrouperModeStartupProjectName { get; }
 
-        // Views:
-        CompareView CompareView { get; }
-        CreateDatView CreateDatView { get; }
-        ProjectLoaderView ProjectLoaderView { get; }
-        DatGrouperView GameFamilyView { get; }
-        CustomListView CustomListView { get; }
-        ProblemListView ProblemListView { get; }
-        DatPathsUpdateView DatPathsUpdateView { get; }
-        AddToProjectView AddToProjectView { get;  }
-        ProgressView ProgressView { get;  }
-        ExportView ExportView { get; }
-
         // Methods:
         void SetMainFormVisible(bool visible);
         void SetCompareFormVisible(bool doShow);
@@ -38,9 +26,8 @@ namespace com.RADIO.Datinate
 
         void ShowDatGrouperWindowView();
         void ShowExportView();
-        void ShowRbProjectsView();
+        void ShowProjectsView();
         void HandleCompareFormClose();
-        void HandleProjectsFormClose();
         void SetProjectsFormTitle(string title);
         void StartResizeMonitor();
         void SetMainFormsSizeBarBackColor(Color color);

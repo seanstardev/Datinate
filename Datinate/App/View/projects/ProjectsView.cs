@@ -9,8 +9,21 @@ namespace com.RADIO.Datinate.App.View.projects
             FormsHelper.HideTabs(tabControl);
         }
 
-        public bool CurrentProjectsPageIsProjectLoaderPage 
+        public bool CurrentProjectsPageIsProjectLoaderPage
             => tabControl.SelectedIndex == 0;
+         
+
+        //public bool CurrentProjectsPageIsProjectLoaderPage
+        //{
+        //    get
+        //    {
+        //        if (tabControl.InvokeRequired)
+        //            return (bool)tabControl.Invoke(
+        //                new Func<bool>(() => tabControl.SelectedIndex == 0));
+
+        //        return tabControl.SelectedIndex == 0;
+        //    }
+        //}
 
         public void ShowProjectsView()
         {

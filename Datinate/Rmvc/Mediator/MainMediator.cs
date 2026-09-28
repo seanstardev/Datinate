@@ -21,22 +21,29 @@ namespace com.RADIO.Datinate.RMVC
                 return DAT_SCREEN_ENUM.NOT_SET;
         }
         public void ToggleDatListView(DAT_SCREEN_ENUM datScreenEnum)
+            => view?.ToggleDatListView(datScreenEnum);
+
+        private void OnExitProjectsForm()
         {
-            view?.ToggleDatListView(datScreenEnum);
+            base.ExecuteCommand(new ExitDatGrouperProjectsCmd());
         }
 
         protected override void Disposing()
         {
-
+            if (view != null)
+            {
+                view.ExitProjectsFormEvt -= OnExitProjectsForm;
+            }
         }
 
         protected override void Initialsed()
         {
-            base.ExecuteCommand(new DelayedStartupCmd());
-        }
+            if (view != null) 
+            {
+                view.ExitProjectsFormEvt += OnExitProjectsForm;
+            }
 
-        private void OnProjectsFormHidden(object sender, EventArgs e) {
-            HighlightProjectDatsCmd.Execute();
+            base.ExecuteCommand(new DelayedStartupCmd());
         }
     }
 }

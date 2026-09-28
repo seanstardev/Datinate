@@ -13,6 +13,10 @@ namespace com.RADIO.Datinate.RMVC
                 var layout = Facade.Instance.DatGrouperSessionModel.ExitMediaMode();
                 Facade.Instance?.DatGrouperMediator?.SetScreenLayout(layout);
                 Facade.Instance?.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
+
+                Facade.Instance?.MediaAssignmentMediator?.ClearView();
+                Facade.Instance?.MediaWebMediator?.ClearView();
+                Facade.Instance?.MediaMediator?.EmptyView();
             }
         }
     }

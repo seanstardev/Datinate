@@ -9,7 +9,7 @@ namespace Datinate.Shared
         event Action<DatRootDTO[], string>? SaveDatRootPathsEvt;
         event Action? RootDatPathRemovedEvt;
         event Action? DatRootPathAddedEvt;
-        event Action<string?>? LoadDatGrouperViewEvt;
+        event Action<string>? LoadDatGrouperProjectEvt;
 
         void ActivateView();
         void SetDatRootPaths(DatRootDTO[] paths, string mameHashPath);

@@ -14,60 +14,39 @@ namespace com.RADIO.Datinate.RMVC
 
         }
         public bool IsProjectLoaded => view?.IsProjectLoaded ?? false;
-        public void ReloadCurrentProject()
-        {
-            view?.ReloadCurrentProject();
-        }
+
 
         public void SetView(DatGrouperProjectDTO[] projectVOs, string? projectNameToLoad = null) 
-        {
-            view?.SetView(projectVOs, projectNameToLoad);
-        }
-
+            => view?.SetView(projectVOs, projectNameToLoad);
+        
         public void ClearView()
-        {
-            view?.ClearView();
-        }
-
+            => view?.ClearView();
+        
         public void AddDat(
             DatGrouperProjectEntry datHeadlineVO, 
             DAT_GROUP_TARGET_ENUM datGroupTargetEnum) 
-        {
-            view?.AddDat(datHeadlineVO, datGroupTargetEnum, true);
-        }
-
+            => view?.AddDat(datHeadlineVO, datGroupTargetEnum, true);
+        
         public void SetExpressionsFile(string expressionsXmlFullpath) 
-        {
-            view?.SetExpressionsFileForLastSelected(expressionsXmlFullpath);
-        }
+            => view?.SetExpressionsFileForLastSelected(expressionsXmlFullpath);
 
         public DatGrouperProjectEntry[] GetAllDats() 
-        {
-            return (view == null) ? new DatGrouperProjectEntry[] { } : view.GetAllDatHeadlines();
-        }
-
+            => (view == null) ? new DatGrouperProjectEntry[] { } : view.GetAllDatHeadlines();
+        
         private void OnLoadExpressionsFile() 
-        {
-            base.ExecuteCommand(
+            => base.ExecuteCommand(
                 new SelectExpressionsFileCmd(EXPRESSIONS_FILE_TARGET_ENUM.PROJECT_LOADER));
-        }
-
+        
         private void OnDatFullpathsChanged(DatGrouperProjectDTO project) 
-        {
-            base.ExecuteCommand(
+            => base.ExecuteCommand(
                 new ProjectDatFullpathsChangedCmd(project));
-        }
-
+        
         private void OnBuildProject(DatGrouperProjectDTO project) 
-        {
-            base.ExecuteCommand(new StartDatGrouperCmd(project));
-        }
+            => base.ExecuteCommand(new StartDatGrouperCmd(project));
 
         private void OnSaveProject(DatGrouperProjectDTO project) 
-        {
-            base.ExecuteCommand(new SaveProjectCmd(project, false));
-        }
-
+            => base.ExecuteCommand(new SaveProjectCmd(project, false));
+       
         private void OnHighlight(DatGrouperProjectDTO project)
         {
             //base.ExecuteCommand(new HighlightProjectDatsCmd(
@@ -76,20 +55,14 @@ namespace com.RADIO.Datinate.RMVC
         }
 
         private void OnEditExpressions(DatGrouperProjectEntry headline) 
-        {
-            base.ExecuteCommand(new SetCustomiseViewCmd(headline));
-        }
-
-        private void OnShowTreeView(string projectName) 
-        {
-            base.ExecuteCommand(new SetDatGrouperFormActiveCmd(projectName));
-        }
-
+            =>base.ExecuteCommand(new SetCustomiseViewCmd(headline));
+        
+        private void OnShowTreeView(string projectName)
+            => base.ExecuteCommand(new SetDatGrouperFormActiveCmd(projectName));
+        
         private void OnLoadingProject() 
-        {
-            base.ExecuteCommand(new ClearDatGrouperViewCmd());
-        }
-
+            => base.ExecuteCommand(new ClearDatGrouperViewCmd());
+        
         protected override void Initialsed()
         {
             if (view == null) return;

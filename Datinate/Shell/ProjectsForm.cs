@@ -4,7 +4,7 @@ namespace datinate.app
 {
     public partial class ProjectsForm : Form 
     {
-        public Action? FormHiddenEvt;
+        public Action? FormCloseRequest;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool AppClosing { get; internal set; }
@@ -16,11 +16,12 @@ namespace datinate.app
         }
         public void ShowProjectsFormAndBringToFront()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.BeginInvoke(new Action(() => ShowProjectsFormAndBringToFront()));
+                BeginInvoke(new Action(ShowProjectsFormAndBringToFront));
                 return;
             }
+
             if (!Visible)
                 Show();
 
@@ -29,6 +30,14 @@ namespace datinate.app
 
             BringToFront();
             Activate();
+            
+            // NOTE: workaround for a race condition. Ensures this form is front
+            // ... when add dat to project command completes.
+            BeginInvoke(() =>
+            {
+                BringToFront();
+                Activate();
+            });
         }
 
         public void SetProjectTitle(string title)
@@ -46,9 +55,8 @@ namespace datinate.app
             if (AppClosing == false)
             {
                 e.Cancel = true;
-                Hide();
-                if (FormHiddenEvt != null)
-                    FormHiddenEvt.Invoke();
+                
+                FormCloseRequest?.Invoke();
             }
             else
                 sizeBar.Dispose();

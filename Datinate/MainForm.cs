@@ -1,10 +1,4 @@
 ﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.App.View.compare;
-using com.RADIO.Datinate.App.View.createDat;
-using com.RADIO.Datinate.App.View.customList;
-using com.RADIO.Datinate.App.View.datDetails.addToProject;
-using com.RADIO.Datinate.App.View.problemList;
-using com.RADIO.Datinate.App.View.projects.datPathsUpdate;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.App;
 using System.Runtime.InteropServices;
@@ -13,17 +7,6 @@ namespace datinate.app
 {
     public partial class MainForm : Form, IShell
     {
-        public ProjectLoaderView ProjectLoaderView => ProjectsForm.ProjectsView.ProjectLoaderView;
-        public DatGrouperView GameFamilyView => ProjectsForm.ProjectsView.DatGrouperView;
-        public CompareView CompareView => CompareForm.CompareView;
-        public CreateDatView CreateDatView => CreateDatForm.CreateDatView;
-        public CustomListView CustomListView => CustomListForm.CustomListView;
-        public ProblemListView ProblemListView => ProblemListForm.ProblemListView;
-        public DatPathsUpdateView DatPathsUpdateView => DatPathsUpdateForm.DatPathsUpdateView;
-        public ExportView ExportView => ProjectsForm.ProjectsView.ExportView;
-        public AddToProjectView AddToProjectView => AddToProjectForm.AddToProjectView;
-        public ProgressView ProgressView => ProgressForm.ProgressView;
-
         private CustomListForm CustomListForm;
         private ProblemListForm ProblemListForm;
         private CompareForm CompareForm;
@@ -85,7 +68,7 @@ namespace datinate.app
             CreateDatForm = new CreateDatForm();
 
             ProjectsForm = new ProjectsForm();
-            ProjectsForm.FormHiddenEvt += HandleProjectsFormClose;
+            ProjectsForm.FormCloseRequest += HandleProjectsFormCloseRequest;
 
             DatPathsUpdateForm = new DatPathsUpdateForm();
 
@@ -281,7 +264,7 @@ namespace datinate.app
             });
         }
 
-        public void ShowRbProjectsView()
+        public void ShowProjectsView()
         {
             ProjectsForm.ProjectsView.ShowProjectsView();
         }
@@ -399,22 +382,34 @@ namespace datinate.app
             BringToFront();
         }
 
-        public void HandleProjectsFormClose()
+        private void HandleProjectsFormCloseRequest()
         {
+
             if (string.IsNullOrWhiteSpace(DatGrouperModeStartupProjectName) == false)
             {
                 
                 StartAppExit();
                 Application.Exit();
             }
-                
-            BringToFront();
+            else
+            {
+                BringToFront();
+                mainView.HandleProjectsFormHidden();
+            }
         }
 
         public void SetProjectsFormVisible(bool doShow)
         {
             if (doShow)
                 ProjectsForm.ShowProjectsFormAndBringToFront();
+            else
+            {
+                Ui(() => {
+                    ProjectsForm.Hide();
+                });
+            }
+
+
         }
 
         public void SetProjectsFormTitle(string title)

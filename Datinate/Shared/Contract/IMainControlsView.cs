@@ -9,7 +9,7 @@ namespace Datinate.Shared
         event Action<Unit, bool>? UnitViewChangeEvt;
         event Action? ShowCustomiseViewEvt;
         event Action? ShowCompareViewEvt;
-        event Action? ShowProjectsEvt;
+        event Action? ShowDatGrouperProjectsEvt;
         event Action? ToggleMainViewEvt;
         event Action? InstallVgmEvt;
         void ActivateView();

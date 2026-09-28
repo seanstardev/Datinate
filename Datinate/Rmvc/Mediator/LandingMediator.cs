@@ -26,10 +26,9 @@ namespace com.RADIO.Datinate.RMVC
             view?.ActivateView();
         }
 
-        private void OnLoadDatGrouperView(string? projectName)
+        private void OnLoadDatGrouperView(string projectName)
         {
-            base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
-            base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(projectName));
+            base.ExecuteCommand(new LoadDatGrouperProjectsCmd(projectName, true, true));
         }
         private void OnLoadDatManager(DatRootDTO[] datRootVOs, string mameHashPath) =>
             base.ExecuteCommand(new LoadDatManagerCmd(datRootVOs, mameHashPath));    
@@ -56,7 +55,7 @@ namespace com.RADIO.Datinate.RMVC
                 view.DatRootPathAddedEvt += OnDatRootPathAdded;
                 view.RootDatPathRemovedEvt += OnRootDatPathRemoved;
                 view.SaveDatRootPathsEvt += OnSaveDatRootPaths;
-                view.LoadDatGrouperViewEvt += OnLoadDatGrouperView;
+                view.LoadDatGrouperProjectEvt += OnLoadDatGrouperView;
             }
         }
         protected override void Disposing()
@@ -67,7 +66,7 @@ namespace com.RADIO.Datinate.RMVC
                 view.DatRootPathAddedEvt -= OnDatRootPathAdded;
                 view.RootDatPathRemovedEvt -= OnRootDatPathRemoved;
                 view.SaveDatRootPathsEvt -= OnSaveDatRootPaths;
-                view.LoadDatGrouperViewEvt -= OnLoadDatGrouperView;
+                view.LoadDatGrouperProjectEvt -= OnLoadDatGrouperView;
             }
         }
     }

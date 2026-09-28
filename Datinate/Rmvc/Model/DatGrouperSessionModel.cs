@@ -6,7 +6,6 @@ namespace com.RADIO.Datinate.RMVC
 {
     public class DatGrouperSessionModel : RModel
     {
-        public DatGrouperProjectDTO? DatGrouperStartupProject { get; set; } = null;
         public bool ContentPathsResolved { get; set; }
         public bool MediaInitialisd { get; set; } = false;
 

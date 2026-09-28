@@ -2,6 +2,7 @@ using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
 using Microsoft.Web.WebView2.Core;
+
 namespace datinate.app
 {
     public partial class MediaWebView : UserControl, IWebMediaView
@@ -15,6 +16,7 @@ namespace datinate.app
         private string? audioEnvironmentPath = null;
         private DatinateAudioWebSession? audioSession;
         private int loadToken;
+        private Form? hostForm;
 
         public MediaWebView()
         {
@@ -135,6 +137,7 @@ namespace datinate.app
 
             LoadAudioOrWebUri(uri, token);
         }
+
 
         private void LoadAudioOrWebUri(Uri uri, int token)
         {
@@ -296,6 +299,12 @@ namespace datinate.app
         {
             unchecked { ++loadToken; }
 
+            if (hostForm != null)
+            {
+                hostForm.Resize -= HostForm_Resize;
+                hostForm = null;
+            }
+
             audioSession?.Dispose();
             audioSession = null;
 
@@ -333,7 +342,7 @@ namespace datinate.app
             WebHelper.DeleteFile(lastTempHtmlPath);
             lastTempHtmlPath = null;
         }
-
+        
         private void browser_SourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
         {
             Ui(() =>
@@ -487,12 +496,6 @@ namespace datinate.app
 
             try
             {
-                core.IsMuted = false;
-            }
-            catch (Exception) { }
-
-            try
-            {
                 // Embedded media surface - do not expose browser-level
                 // Save As / download-style context menu operations.
                 core.Settings.AreDefaultContextMenusEnabled = false;
@@ -606,6 +609,36 @@ namespace datinate.app
             action();
         }
 
+
+        protected override void OnVisibleChanged(EventArgs e)
+        {
+            base.OnVisibleChanged(e);
+
+            var form = FindForm();
+
+            if (ReferenceEquals(form, hostForm))
+                return;
+
+            if (hostForm != null)
+                hostForm.Resize -= HostForm_Resize;
+
+            hostForm = form;
+
+            if (hostForm != null)
+            {
+                hostForm.Resize += HostForm_Resize;
+                HostForm_Resize(hostForm, EventArgs.Empty);
+            }
+        }
+
+        private void HostForm_Resize(object? sender, EventArgs e)
+        {
+            if (browser.CoreWebView2 != null && hostForm != null)
+            {
+                browser.CoreWebView2.IsMuted =
+                    hostForm.WindowState == FormWindowState.Minimized;
+            }
+        }
         private void BrowserUi(Func<Task> action)
         {
             if (!browser.IsHandleCreated)

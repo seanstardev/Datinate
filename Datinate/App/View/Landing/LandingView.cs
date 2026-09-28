@@ -11,7 +11,7 @@ namespace datinate.app
         public event Action<DatRootDTO[], string>? SaveDatRootPathsEvt;
         public event Action? RootDatPathRemovedEvt;
         public event Action? DatRootPathAddedEvt;
-        public event Action<string?>? LoadDatGrouperViewEvt;
+        public event Action<string?>? LoadDatGrouperProjectEvt;
         private const int PathUiGapPx = 6;
         private const int PathUiInsetPx = 6;
 
@@ -32,7 +32,7 @@ namespace datinate.app
             pathsContainer.Resize += onPathsContainerResize;
             datGrouperContainer.Resize += onDatGrouperContainerResize;
             loadDatGrouperProjectBtn.Click += onLoadDatGrouperProjectClick;
-            newDatGrouperProjectBtn.Click += onNewDatGrouperProjectClick;
+            createProjectShortcutBtn.Click += onCreateProjectShortcutClick;
 
             UpdateDatGrouperLoadState();
             Facade.RegisterActor(this);
@@ -320,7 +320,8 @@ namespace datinate.app
 
         private void UpdateDatGrouperLoadState()
         {
-            loadDatGrouperProjectBtn.Enabled = selectedProjectUi != null;
+            loadDatGrouperProjectBtn.Enabled = createProjectShortcutBtn.Enabled =
+                selectedProjectUi != null;
         }
 
         private void InvokeSelectedDatGrouperProject()
@@ -328,7 +329,7 @@ namespace datinate.app
             if (selectedProjectUi == null)
                 return;
 
-            LoadDatGrouperViewEvt?.Invoke(selectedProjectUi.ProjectName);
+            LoadDatGrouperProjectEvt?.Invoke(selectedProjectUi.ProjectName);
         }
 
         private void EnsureSelectedProjectVisibleDeferred()
@@ -380,9 +381,70 @@ namespace datinate.app
         private void onLoadDatGrouperProjectClick(object? sender, EventArgs e)
             => InvokeSelectedDatGrouperProject();
 
-        private void onNewDatGrouperProjectClick(object? sender, EventArgs e)
-            => LoadDatGrouperViewEvt?.Invoke(null);
+        private void onCreateProjectShortcutClick(object? sender, EventArgs e)
+        {
+            if (selectedProjectUi == null)
+                return;
 
+            string projectName = selectedProjectUi.ProjectName;
+
+            bool create = UIHelper.ShowDialogYesNo(
+                $"Create a shortcut that opens Datinate and loads the DAT Grouper project '{projectName}'?");
+
+            if (!create)
+                return;
+
+            using SaveFileDialog dialog = new SaveFileDialog
+            {
+                Title = "Create DAT Grouper Project Shortcut",
+                Filter = "Windows Shortcut (*.lnk)|*.lnk",
+                FileName = projectName + ".lnk",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                AddExtension = true,
+                DefaultExt = "lnk",
+                OverwritePrompt = true
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            try
+            {
+                string executablePath = Application.ExecutablePath;
+
+                Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
+
+                if (shellType == null)
+                    throw new InvalidOperationException("Windows Script Host is unavailable.");
+
+                dynamic shell = Activator.CreateInstance(shellType)!;
+                dynamic shortcut = shell.CreateShortcut(dialog.FileName);
+
+                shortcut.TargetPath = executablePath;
+                shortcut.Arguments = $"\"{projectName}\"";
+                shortcut.WorkingDirectory = Path.GetDirectoryName(executablePath);
+                shortcut.Description = $"Open Datinate DAT Grouper project '{projectName}'";
+                shortcut.IconLocation = executablePath + ",0";
+
+                shortcut.Save();
+
+                MessageBox.Show(
+                    $"Shortcut created for '{projectName}'.",
+                    "Shortcut Created",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to create project shortcut: " + ex);
+
+                MessageBox.Show(
+                    "The shortcut could not be created.",
+                    "Unable to Create Shortcut",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+            }
+        }
         private void onPathsContainerResize(object? sender, EventArgs e)
             => RelayoutPathUIs();
 
@@ -451,7 +513,7 @@ namespace datinate.app
             pathsContainer.Resize -= onPathsContainerResize;
             datGrouperContainer.Resize -= onDatGrouperContainerResize;
             loadDatGrouperProjectBtn.Click -= onLoadDatGrouperProjectClick;
-            newDatGrouperProjectBtn.Click -= onNewDatGrouperProjectClick;
+            createProjectShortcutBtn.Click -= onCreateProjectShortcutClick;
 
             for (int i = 0; i < pathsContainer.Controls.Count; i++)
             {

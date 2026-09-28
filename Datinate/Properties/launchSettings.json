@@ -3,7 +3,7 @@
     "Datinate": {
       "commandName": "Project"
     },
-    "Datinate-Projects": {
+    "Datinate-Project": {
       "commandName": "Project",
       "commandLineArgs": "\"Nintendo - SNES\""
     }

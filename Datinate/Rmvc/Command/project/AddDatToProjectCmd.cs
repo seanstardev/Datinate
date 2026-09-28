@@ -8,7 +8,7 @@ namespace com.RADIO.Datinate.RMVC
     {
         public bool AddToProjectSucceeded { get; private set; } = true;
 
-        private readonly DatVO datVO;
+        private readonly DatVO dat;
         private readonly COLLECTION_SET_ENUM collectionSetEnum;
         private readonly DAT_GROUP_TARGET_ENUM datGroupTargetEnum;
         private readonly DAT_GROUP_ENUM datGroupEnum;
@@ -16,14 +16,14 @@ namespace com.RADIO.Datinate.RMVC
         private readonly DatSubsetFilter? datSubsetFilter;
 
         public AddDatToProjectCmd(
-            DatVO datVO, 
+            DatVO dat, 
             COLLECTION_SET_ENUM collectionSetEnum,
             DAT_GROUP_TARGET_ENUM datGroupTargetEnum, 
             DAT_GROUP_ENUM datGroupEnum, 
             string? internalDescriptor, 
             DatSubsetFilter? datSubsetFilter = null) 
         {
-            this.datVO = datVO;
+            this.dat = dat;
             this.collectionSetEnum = collectionSetEnum;
             this.datGroupTargetEnum = datGroupTargetEnum;
             this.datGroupEnum = datGroupEnum;
@@ -56,7 +56,7 @@ namespace com.RADIO.Datinate.RMVC
                 var trialVO = existingVOs[i];
 
                 // NOTE: No fullpath can be the same if even one vo is missing subset data:
-                if (trialVO.DatFullpath.ToLower().Trim() == datVO.DatFullpath.ToLower().Trim()) 
+                if (trialVO.DatFullpath.ToLower().Trim() == dat.DatFullpath.ToLower().Trim()) 
                 {
                     problemFound = false;
 
@@ -80,7 +80,7 @@ namespace com.RADIO.Datinate.RMVC
 
             DatGrouperProjectEntry datHeadlineVO = new DatGrouperProjectEntry(
                 collectionSetEnum,
-                datVO.DatFullpath,
+                dat.DatFullpath,
                 string.Empty,
                 string.Empty,
                 datGroupEnum,

@@ -27,7 +27,7 @@ namespace com.RADIO.Datinate.RMVC
         public void SetActiveMainView(DatinateEnums.DAT_SCREEN_ENUM currentView)
             => view?.SetActiveMainView(currentView);
 
-        private void OnShowProjectsView() =>
+        private void OnShowDatGrouperProjectsView() =>
             base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
 
         private void OnShowCustomiseView() =>
@@ -52,7 +52,7 @@ namespace com.RADIO.Datinate.RMVC
                 view.UnitViewChangeEvt += OnViewChange;
                 view.ShowCustomiseViewEvt += OnShowCustomiseView;
                 view.ShowCompareViewEvt += OnShowCompareView;
-                view.ShowProjectsEvt += OnShowProjectsView;
+                view.ShowDatGrouperProjectsEvt += OnShowDatGrouperProjectsView;
                 view.ToggleMainViewEvt += OnToggleMainView;
                 view.InstallVgmEvt += OnInstallVgm;
             }
@@ -65,7 +65,7 @@ namespace com.RADIO.Datinate.RMVC
                 view.UnitViewChangeEvt -= OnViewChange;
                 view.ShowCustomiseViewEvt -= OnShowCustomiseView;
                 view.ShowCompareViewEvt -= OnShowCompareView;
-                view.ShowProjectsEvt -= OnShowProjectsView;
+                view.ShowDatGrouperProjectsEvt -= OnShowDatGrouperProjectsView;
                 view.ToggleMainViewEvt -= OnToggleMainView;
                 view.InstallVgmEvt -= OnInstallVgm;
             }

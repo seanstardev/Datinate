@@ -26,8 +26,6 @@ namespace Datinate.Shared
 
         void SetExpressionsFileForLastSelected(string expressionsXmlFullpath);
         DatGrouperProjectEntry[] GetAllDatHeadlines();
-
-        void ReloadCurrentProject();
         void ClearView();
     }
 }

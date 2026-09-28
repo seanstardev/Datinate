@@ -14,28 +14,13 @@ namespace Datinate.Rmvc.Command
 
             DatGrouperProjectDTO? datGrouperStartupProject = null;
 
-            bool datGrouperStartupProjectNeedsEditing = false;
+            
 
             if (string.IsNullOrWhiteSpace(Facade.Instance?.Shell?.DatGrouperModeStartupProjectName) == false)
             {
                 datGrouperStartupProject = Facade.Instance?.ProjectProxy?.LoadProject(
                     Facade.Instance?.Shell?.DatGrouperModeStartupProjectName!);
 
-                if (datGrouperStartupProject != null)
-                {
-                    var cmd = new CheckDatGrouperProjectValidCmd(datGrouperStartupProject);
-                    base.ExecuteCommand(cmd);
-
-                    if (cmd.AllDatAndExpressionFilesExist)
-                    {
-                        if (Facade.Instance?.DatGrouperSessionModel is { } datGrouperSessionModel)
-                            datGrouperSessionModel.DatGrouperStartupProject = datGrouperStartupProject;
-                    }
-                    else
-                    {
-                        datGrouperStartupProjectNeedsEditing = true;
-                    }
-                }
             }
 
             if (datGrouperStartupProject == null)
@@ -51,7 +36,7 @@ namespace Datinate.Rmvc.Command
 
                 base.ExecuteCommand(new ShowProgressCmd("Loading DAT Grouper Project Summaries", 1, 4));
 
-                base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(null, true));
+                base.ExecuteCommand(new LoadDatGrouperProjectsCmd(null, false, false));
 
                 base.ExecuteCommand(new ShowProgressCmd("Initialising Database.", 2, 4));
 
@@ -79,10 +64,18 @@ namespace Datinate.Rmvc.Command
             {
                 Facade.Instance?.LandingMediator?.ActivateView();
                 base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
-                base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(datGrouperStartupProject!.ProjectName, true));
+
+                base.ExecuteCommand(new LoadDatGrouperProjectsCmd(
+                    datGrouperStartupProject!.ProjectName,
+                    false,
+                    false));
+                
                 Facade.Instance?.Shell?.SetMainFormVisible(false);
 
-                if (datGrouperStartupProjectNeedsEditing == false)
+                var cmd = new CheckDatGrouperProjectValidCmd(datGrouperStartupProject);
+                base.ExecuteCommand(cmd);
+                
+                if (cmd.AllDatAndExpressionFilesExist)
                     await base.ExecuteCommandAsync(new StartDatGrouperCmd(datGrouperStartupProject!));
             }
 

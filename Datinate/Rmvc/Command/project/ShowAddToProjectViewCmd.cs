@@ -21,7 +21,7 @@ namespace com.RADIO.Datinate.RMVC
             {
                 if (shell.CurrentProjectsPageIsProjectLoaderPage == false)
                 {
-                    shell.ShowMessageBox(
+                    _ = shell.ShowMessageBox(
                         "Attention",
                         "Cannot proceed. Please Exit the active DAT Grouper Project and try again.");
 
@@ -31,7 +31,7 @@ namespace com.RADIO.Datinate.RMVC
 
                 if (Facade.Instance?.ProjectLoaderMediator is { } projects && projects.IsProjectLoaded == false)
                 {
-                    shell.ShowMessageBox(
+                    _ = shell.ShowMessageBox(
                         "Attention",
                         "Cannot proceed. Please Load or Create a DAT Grouper Project and try again.");
 

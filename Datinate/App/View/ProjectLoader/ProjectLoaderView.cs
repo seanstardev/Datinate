@@ -276,15 +276,11 @@ namespace datinate.app
                 return;
             }
 
-            if (projectListBox.Items.Count == 0)
-            {
-                BeginNewProjectMode();
-                return;
-            }
-
             currentProject = null;
             projectNameText.Text = string.Empty;
             projectNameText.Enabled = false;
+
+            UpdateCurrentProjectNameLabel();
         }
 
         private DatGrouperProjectDTO? GetProject()
@@ -744,27 +740,6 @@ namespace datinate.app
             }
 
             SaveProjectEvt?.Invoke(project);
-        }
-
-        public void ReloadCurrentProject()
-        {
-            Ui(() =>
-            {
-                if (isCreatingNewProject)
-                {
-                    LoadNewProject();
-                    return;
-                }
-
-                if (projectListBox.SelectedItem is not string projectName ||
-                    !projectModel.TryGetValue(projectName, out var project))
-                {
-                    BeginNewProjectMode();
-                    return;
-                }
-
-                LoadProject(project);
-            });
         }
 
         private void Ui(Action action)

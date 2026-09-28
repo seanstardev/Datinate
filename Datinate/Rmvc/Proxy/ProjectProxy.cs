@@ -113,7 +113,8 @@ namespace com.RADIO.Datinate.RMVC
                 , MessageBoxButtons.OK
                 , MessageBoxIcon.Information
             );
-            base.ExecuteCommand(new SetDatGrouperLoaderViewCmd(project.ProjectName, true));
+            base.ExecuteCommand(new LoadDatGrouperProjectsCmd(
+                project.ProjectName, false, true));
         }
         private void AddSoftwareExportOptions(
             XmlElement exportEl,

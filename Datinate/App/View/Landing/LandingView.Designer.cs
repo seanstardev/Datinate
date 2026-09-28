@@ -46,7 +46,7 @@
             mameHashTextBox = new TextBox();
             panel2 = new Panel();
             loadDatGrouperProjectBtn = new LandingAccentButton();
-            newDatGrouperProjectBtn = new LandingAccentButton();
+            createProjectShortcutBtn = new LandingAccentButton();
             datGrouperContainer = new Panel();
             wallpaperPanel = new WallpaperPanel();
             mainLayoutPanel = new TableLayoutPanel();
@@ -303,7 +303,7 @@
             panel2.BackColor = Color.FromArgb(246, 246, 246);
             panel2.BorderStyle = BorderStyle.FixedSingle;
             panel2.Controls.Add(loadDatGrouperProjectBtn);
-            panel2.Controls.Add(newDatGrouperProjectBtn);
+            panel2.Controls.Add(createProjectShortcutBtn);
             panel2.Controls.Add(datGrouperContainer);
             panel2.Controls.Add(datGrouperBtn);
             panel2.Controls.Add(label2);
@@ -337,22 +337,22 @@
             // 
             // newDatGrouperProjectBtn
             // 
-            newDatGrouperProjectBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            newDatGrouperProjectBtn.BackColor = Color.FromArgb(250, 250, 250);
-            newDatGrouperProjectBtn.BorderColor = Color.FromArgb(188, 188, 188);
-            newDatGrouperProjectBtn.Cursor = Cursors.Hand;
-            newDatGrouperProjectBtn.DisabledBackColor = Color.FromArgb(238, 238, 238);
-            newDatGrouperProjectBtn.DisabledBorderColor = Color.FromArgb(208, 208, 208);
-            newDatGrouperProjectBtn.DisabledForeColor = Color.FromArgb(145, 145, 145);
-            newDatGrouperProjectBtn.FlatStyle = FlatStyle.Flat;
-            newDatGrouperProjectBtn.ForeColor = Color.FromArgb(36, 36, 36);
-            newDatGrouperProjectBtn.Location = new Point(806, 72);
-            newDatGrouperProjectBtn.Margin = new Padding(4, 3, 4, 3);
-            newDatGrouperProjectBtn.Name = "newDatGrouperProjectBtn";
-            newDatGrouperProjectBtn.Size = new Size(96, 27);
-            newDatGrouperProjectBtn.TabIndex = 7;
-            newDatGrouperProjectBtn.Text = "Create New";
-            newDatGrouperProjectBtn.UseVisualStyleBackColor = false;
+            createProjectShortcutBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            createProjectShortcutBtn.BackColor = Color.FromArgb(250, 250, 250);
+            createProjectShortcutBtn.BorderColor = Color.FromArgb(188, 188, 188);
+            createProjectShortcutBtn.Cursor = Cursors.Hand;
+            createProjectShortcutBtn.DisabledBackColor = Color.FromArgb(238, 238, 238);
+            createProjectShortcutBtn.DisabledBorderColor = Color.FromArgb(208, 208, 208);
+            createProjectShortcutBtn.DisabledForeColor = Color.FromArgb(145, 145, 145);
+            createProjectShortcutBtn.FlatStyle = FlatStyle.Flat;
+            createProjectShortcutBtn.ForeColor = Color.FromArgb(36, 36, 36);
+            createProjectShortcutBtn.Location = new Point(806, 72);
+            createProjectShortcutBtn.Margin = new Padding(4, 3, 4, 3);
+            createProjectShortcutBtn.Name = "createProjectShortcutBtn";
+            createProjectShortcutBtn.Size = new Size(96, 27);
+            createProjectShortcutBtn.TabIndex = 7;
+            createProjectShortcutBtn.Text = "Shortcut";
+            createProjectShortcutBtn.UseVisualStyleBackColor = false;
             // 
             // datGrouperContainer
             // 
@@ -433,7 +433,7 @@
         private WallpaperPanel wallpaperPanel;
         private TableLayoutPanel mainLayoutPanel;
         private LandingAccentButton loadDatGrouperProjectBtn;
-        private LandingAccentButton newDatGrouperProjectBtn;
+        private LandingAccentButton createProjectShortcutBtn;
         private Panel datGrouperContainer;
         private Panel panel1;
         private TextBox mameHashTextBox;

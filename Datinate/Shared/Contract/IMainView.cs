@@ -6,6 +6,7 @@ namespace Datinate.Shared
 {
     public interface IMainView : IRContract
     {
+        event Action? ExitProjectsFormEvt;
         DatinateEnums.DAT_SCREEN_ENUM GetCurrentView();
         void ToggleDatListView(DAT_SCREEN_ENUM datScreenEnum);
     }

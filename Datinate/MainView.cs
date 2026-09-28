@@ -6,6 +6,7 @@ namespace com.RADIO.Datinate
 {
     public partial class MainView : UserControl, IMainView 
     {
+        public event Action? ExitProjectsFormEvt;
         public MainControlsView MainControlsView => mainControlsView;
 
         public DatSummaryView DatSummaryView => datSummaryView;
@@ -21,10 +22,7 @@ namespace com.RADIO.Datinate
             ToggleDatListView(DatinateEnums.DAT_SCREEN_ENUM.Landing);
             Facade.RegisterActor(this);
         }
-        protected void HandleDisposing()
-        {
-            Facade.UnregisterActor(this);
-        }
+
         public DatinateEnums.DAT_SCREEN_ENUM GetCurrentView()
         {
             if (tabControl.SelectedTab == datManagerPage)
@@ -52,6 +50,13 @@ namespace com.RADIO.Datinate
                     splitContainer.Panel2Collapsed = true;
                     break;
             }
+        }
+        public void HandleProjectsFormHidden()
+            => ExitProjectsFormEvt?.Invoke();
+
+        protected void HandleDisposing()
+        {
+            Facade.UnregisterActor(this);
         }
     }
 }

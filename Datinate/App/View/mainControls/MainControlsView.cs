@@ -12,7 +12,7 @@ namespace datinate.app
         public event Action<Unit, bool>? UnitViewChangeEvt;
         public event Action? ShowCustomiseViewEvt;
         public event Action? ShowCompareViewEvt;
-        public event Action? ShowProjectsEvt;
+        public event Action? ShowDatGrouperProjectsEvt;
         public event Action? DatPathRemovedEvt;
         public event Action? ToggleMainViewEvt;
         public event Action? InstallVgmEvt;
@@ -167,7 +167,7 @@ namespace datinate.app
 
         void projectsBtn_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
-            ShowProjectsEvt?.Invoke();
+            ShowDatGrouperProjectsEvt?.Invoke();
         }
 
         private void compareBtn2_Click(object sender, EventArgs e)
@@ -182,7 +182,7 @@ namespace datinate.app
 
         private void datGrouperBtn_Click(object sender, EventArgs e)
         {
-            ShowProjectsEvt?.Invoke();
+            ShowDatGrouperProjectsEvt?.Invoke();
         }
 
         private void datManagerBtn_Click(object sender, EventArgs e)
