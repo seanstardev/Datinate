@@ -10,7 +10,7 @@ namespace com.RADIO.Datinate.RMVC
     {
         public string? CreateURI(string lookupName, RadioSourceDTO source)
         {
-            var resources = Facade.Instance?.AppDataProxy?.R2DatResources;
+            var resources = Facade.Instance?.ModelDataProxy?.R2DatResources;
             
             if (resources == null)
                 return null;

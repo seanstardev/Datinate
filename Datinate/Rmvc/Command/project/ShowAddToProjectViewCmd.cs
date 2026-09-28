@@ -40,7 +40,7 @@ namespace com.RADIO.Datinate.RMVC
                 }
             }
 
-            var resources = Facade.Instance?.AppDataProxy?.R2DatResources;
+            var resources = Facade.Instance?.ModelDataProxy?.R2DatResources;
             Facade.Instance?.AddToProjectMediator?.SetR2DatResources(resources ?? new List<R2DatResourceDTO>());
             Facade.Instance?.AddToProjectMediator?.SetView(datVO);
             

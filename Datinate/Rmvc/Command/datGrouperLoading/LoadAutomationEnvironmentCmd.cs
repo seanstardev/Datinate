@@ -36,7 +36,7 @@ namespace com.RADIO.Datinate.RMVC
             // NOTE: We need to do this because setting Exclude on GamePartVO is fragile:
             var baseFamilies = DatinateFamilyConverter.Convert(families, out partReportsDictionary);
 
-            var flagFilterSet = Facade.Instance?.AppDataProxy?.FlagFilterSetByGroup ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
+            var flagFilterSet = Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
 
             Facade.Instance?.DatGrouperModel?.CreateSession(baseFamilies.ToList(), flagFilterSet, softwareIdDatGroupEnumDictionary);
 

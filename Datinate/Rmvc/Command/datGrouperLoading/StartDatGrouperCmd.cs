@@ -32,7 +32,7 @@ namespace com.RADIO.Datinate.RMVC
             var stopwatch = Stopwatch.StartNew();
 
             var autoGroupModel = Facade.Instance?.AutoGrouperModel;
-            var appDataProxy = Facade.Instance?.AppDataProxy;
+            var appDataProxy = Facade.Instance?.ModelDataProxy;
             
             if (autoGroupModel == null || appDataProxy == null) 
                 return;

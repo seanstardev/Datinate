@@ -61,7 +61,7 @@ namespace com.RADIO.Datinate.RMVC
                         : new Dictionary<IGameFamily, IMediaCollectionImportExport?>();
 
                 var flagFilterSet =
-                    Facade.Instance?.AppDataProxy?.FlagFilterSetByGroup ??
+                    Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup ??
                     new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
 
                 Dictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary =

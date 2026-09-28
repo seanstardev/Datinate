@@ -42,7 +42,7 @@ namespace com.RADIO.Datinate
         internal ProjectProxy? ProjectProxy => base.Model<ProjectProxy>();
         internal GlobalSettingsProxy? GlobalSettingsProxy => base.Model<GlobalSettingsProxy>();
         internal DatDbProxy? DatDbProxy => base.Model<DatDbProxy>();
-        internal AppDataProxy? AppDataProxy => base.Model<AppDataProxy>();
+        internal ModelDataProxy? ModelDataProxy => base.Model<ModelDataProxy>();
         internal RbAuxResourceProxy? RbAuxResourceProxy => base.Model<RbAuxResourceProxy>();
         internal RbAuxMediaProxy? RbAuxMediaProxy => base.Model<RbAuxMediaProxy>();
         internal CuratedDatProxy? CuratedDatProxy => base.Model<CuratedDatProxy>();
@@ -102,7 +102,7 @@ namespace com.RADIO.Datinate
                 new ActiveDatsModel(),
                 new RadioDatModel(),
                 new AutoGrouperModel(),
-                new AppDataProxy(),
+                new ModelDataProxy(),
                 new RbAuxResourceProxy(),
                 new RbAuxMediaProxy(),
                 new CuratedDatProxy(),

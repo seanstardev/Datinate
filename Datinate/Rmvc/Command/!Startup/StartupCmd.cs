@@ -12,7 +12,7 @@ namespace com.RADIO.Datinate.RMVC
             {
                 Facade.Instance?.DatDbProxy?.SetProjectRootPath(projectRootPath);
 
-                Facade.Instance?.AppDataProxy?.SetProjectRootPath(projectRootPath);
+                Facade.Instance?.ModelDataProxy?.SetProjectRootPath(projectRootPath);
 
                 Facade.Instance?.ExpressionsProxy?.SetProjectRootPath(projectRootPath);
                 Facade.Instance?.ProjectProxy?.SetProjectRootPath(projectRootPath);

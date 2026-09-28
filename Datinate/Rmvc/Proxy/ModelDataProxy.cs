@@ -6,11 +6,11 @@ using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
-    public class AppDataProxy : RModel
+    public class ModelDataProxy : RModel
     {
         public IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> FlagFilterSetByGroup { get; private set; }
         public IReadOnlyList<R2DatResourceDTO> R2DatResources { get; private set; } = Array.Empty<R2DatResourceDTO>();
-        private const string embeddedPrefix = "AppData/";
+        private const string embeddedPrefix = "Seed/Default/";
 
         private const string R2DatResourceFilename = "R2DatResource.xml";
         private const string R2DatResourceEmbeddedFilename = @"Config/R2DatResource.xml";
@@ -19,7 +19,7 @@ namespace com.RADIO.Datinate.RMVC
 
         private string? projectsPath;
 
-        public AppDataProxy()
+        public ModelDataProxy()
         {
             assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
 

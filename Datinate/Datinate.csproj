@@ -6,12 +6,12 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-	<ApplicationIcon>logo.ico</ApplicationIcon>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-	<PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -23,36 +23,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="App\View\customList\Magic.cs" />
-    <Compile Remove="Rmvc\Model\AutoGroupDelegates\DatGameToPartHelper.cs" />
+    <None Remove="Rmvc\ModelData\Default\**\*" />
+    <EmbeddedResource Include="Rmvc\ModelData\Default\**\*">
+      <LogicalName>Seed/Default/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="AppData\**\*" />
-    <EmbeddedResource Include="AppData\**\*">
-      <LogicalName>AppData/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Remove="App\Assets\VGM\**\*" />
-    <EmbeddedResource Include="App\Assets\VGM\**\*">
+    <None Remove="Rmvc\ModelData\VGM\**\*" />
+    <EmbeddedResource Include="Rmvc\ModelData\VGM\**\*">
       <LogicalName>Seed/VGM/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="App\Assets\Icons\Web\chatgpt.png" />
-    <None Remove="App\Assets\Icons\Web\google.png" />
-    <None Remove="App\Assets\Icons\Web\wikipedia.png" />
-    <None Remove="App\Assets\Icons\Web\yourube.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="App\Assets\Icons\Web\chatgpt.png" />
-    <EmbeddedResource Include="App\Assets\Icons\Web\google.png" />
-    <EmbeddedResource Include="App\Assets\Icons\Web\wikipedia.png" />
-    <EmbeddedResource Include="App\Assets\Icons\Web\yourube.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,13 +56,11 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
-  <Target Name="RemoveWebView2XmlDocsFromPublish" AfterTargets="ComputeFilesToPublish">
-    <ItemGroup>
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'Microsoft.Web.WebView2.Core.xml'" />
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'Microsoft.Web.WebView2.WinForms.xml'" />
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'Microsoft.Web.WebView2.Wpf.xml'" />
-    </ItemGroup>
+  
+  <Target Name="CleanPublishedOutput" AfterTargets="Publish">
+    <Delete Files="
+      $(PublishDir)Microsoft.Web.WebView2.Core.xml;
+      $(PublishDir)Microsoft.Web.WebView2.WinForms.xml;
+      $(PublishDir)Microsoft.Web.WebView2.Wpf.xml" />
   </Target>
-
 </Project>

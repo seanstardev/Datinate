@@ -20,7 +20,7 @@ namespace com.RADIO.Datinate.RMVC
             var radioDatModel = Facade.Instance?.RadioDatModel;
             var grouperMediator = Facade.Instance?.DatGrouperMediator;
             var datGrouperModel = Facade.Instance?.DatGrouperModel;
-            var appDataProxy = Facade.Instance?.AppDataProxy;
+            var appDataProxy = Facade.Instance?.ModelDataProxy;
 
             Facade.Instance?.MainWebMediator?.ClearView(false);
 
