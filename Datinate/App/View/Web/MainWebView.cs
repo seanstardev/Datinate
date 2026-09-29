@@ -4,6 +4,7 @@ using datinate.shared;
 using Datinate.Properties;
 using Datinate.Shared;
 using Datinate.Shared.Util;
+using Microsoft.Web.WebView2.Core;
 using RadioLibCore.RadioDat;
 using System.Diagnostics;
 
@@ -157,9 +158,16 @@ namespace datinate.app
                 if (browser.CoreWebView2 == null)
                     await WebHelper.EnsureCoreAsync(browser);
 
+                var core = browser.CoreWebView2;
+                if (core == null)
+                    return;
+
+                core.NavigationCompleted -= OnNavigationCompleted;
+                core.NavigationCompleted += OnNavigationCompleted;
+
                 try
                 {
-                    browser.CoreWebView2?.Navigate(url);
+                    core.Navigate(url);
                 }
                 catch (Exception) { }
             });
@@ -741,6 +749,97 @@ namespace datinate.app
                 PromptCardIx_Reports,
                 visible: reportsVisible,
                 placeholder: !reportsVisible);
+        }
+
+        private async void OnNavigationCompleted(
+            object? sender,
+            CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (!e.IsSuccess || sender is not CoreWebView2 core)
+                return;
+
+            Uri? uri;
+
+            try
+            {
+                uri = new Uri(core.Source);
+            }
+            catch
+            {
+                return;
+            }
+
+            // TODO: Hack.
+            if (!uri.Host.Equals("chatgpt.com", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            try
+            {
+                await core.ExecuteScriptAsync(
+                    """
+            (() => {
+                const response =
+                    document.querySelector('[aria-label="Copy response"]');
+
+                if (!response)
+                    return;
+
+                const input =
+                    document.getElementById('mobile-composer-prompt');
+
+                if (input && input.value) {
+                    const setter =
+                        Object.getOwnPropertyDescriptor(
+                            HTMLTextAreaElement.prototype,
+                            'value'
+                        )?.set;
+
+                    if (setter) {
+                        setter.call(input, '');
+
+                        input.dispatchEvent(
+                            new Event('input', { bubbles: true })
+                        );
+                    }
+                }
+
+                let scrollContainer = response.parentElement;
+
+                while (scrollContainer) {
+                    const style = getComputedStyle(scrollContainer);
+
+                    const canScroll =
+                        scrollContainer.scrollHeight >
+                        scrollContainer.clientHeight;
+
+                    const allowsScroll =
+                        style.overflowY === 'auto' ||
+                        style.overflowY === 'scroll';
+
+                    if (canScroll && allowsScroll)
+                        break;
+
+                    scrollContainer = scrollContainer.parentElement;
+                }
+
+                if (scrollContainer) {
+                    scrollContainer.scrollTo({
+                        top: scrollContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    window.scrollTo({
+                        top: document.documentElement.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            })();
+            """);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("CHATGPT POST-RESPONSE UPDATE FAILED: " + ex);
+            }
         }
     }
 }

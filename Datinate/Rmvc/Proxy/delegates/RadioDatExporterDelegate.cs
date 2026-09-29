@@ -87,6 +87,34 @@ namespace Datinate.Rmvc.Proxy.delegates
         public void Export()
         {
             XmlDocument doc = CreateXml();
+
+            try
+            {
+                string? projectDirectory = Path.GetDirectoryName(radioDatFullpath);
+
+                if (!string.IsNullOrWhiteSpace(projectDirectory))
+                {
+                    string backupDirectory = Path.Combine(projectDirectory, "!backup");
+                    Directory.CreateDirectory(backupDirectory);
+
+                    if (File.Exists(radioDatFullpath))
+                    {
+                        string backupFullpath = Path.Combine(
+                            backupDirectory,
+                            radioDatNameWithoutExt + ".backup.xml");
+
+                        File.Copy(
+                            radioDatFullpath,
+                            backupFullpath,
+                            overwrite: true);
+                    }
+                }
+            }
+            catch
+            {
+                // Backup failure must not prevent the project from being saved.
+            }
+
             doc.Save(radioDatFullpath);
         }
 
