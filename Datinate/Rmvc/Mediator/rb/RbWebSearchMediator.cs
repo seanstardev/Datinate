@@ -1,7 +1,6 @@
-﻿using datinate.app;
-using Datinate.Shared;
+﻿using Datinate.Shared.Rmvc;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {

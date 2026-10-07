@@ -1,7 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared.Util;
+﻿using Datinate.Shared;
+using Datinate.Shared.Radio;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 namespace com.RADIO.Datinate.RMVC
 {
     public class LoadAutomationEnvironmentCmd : RCommandAsync

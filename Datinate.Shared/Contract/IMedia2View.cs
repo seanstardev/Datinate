@@ -1,8 +1,6 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared.Rb;
-using RMVC;
+﻿using RMVC;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IMedia2View : IRContract
     {

@@ -1,7 +1,6 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.Radio;
 
-namespace Datinate.Shared.Util
+namespace Datinate.Shared
 {
     public static class DatinateFamilyHelper
     {

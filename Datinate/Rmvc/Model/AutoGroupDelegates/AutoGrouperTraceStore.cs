@@ -1,9 +1,9 @@
-using com.RADIO.Datinate.RMVC.Shared;
-using datinate.shared;
-using RadioLibCore.RadioDat;
+using Datinate.Shared;
+using Datinate.Shared.Dat;
+using Datinate.Shared.Radio;
 using System.Runtime.CompilerServices;
 using System.Text;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
@@ -250,9 +250,8 @@ namespace com.RADIO.Datinate.RMVC
         }
 
         public void AddManagedListReport(string id, Dictionary<string, ManagedListItemReport> dictionary)
-        {
-            managedListDic[id] = new ManagedListWrapper(dictionary);
-        }
+            => managedListDic[id] = new ManagedListWrapper(dictionary);
+        
 
         public ManagedListItemReport? GetManagedReport(string entryName, string id)
         {

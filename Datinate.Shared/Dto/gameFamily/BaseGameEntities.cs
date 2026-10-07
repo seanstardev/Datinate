@@ -1,6 +1,5 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿namespace Datinate.Shared.Radio
 
-namespace RadioLibCore.RadioDat 
 {
     public class BaseGameFamily : IGameFamily 
     {

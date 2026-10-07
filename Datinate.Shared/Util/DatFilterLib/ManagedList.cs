@@ -1,8 +1,8 @@
-using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared.Dat;
 using System.Text.RegularExpressions;
-using static datinate.shared.DatFilterHelper;
+using static Datinate.Shared.DatFilterHelper;
 
-namespace datinate.shared
+namespace Datinate.Shared
 {
     public sealed class ManagedList
     {

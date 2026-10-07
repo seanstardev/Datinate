@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC;
-using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command

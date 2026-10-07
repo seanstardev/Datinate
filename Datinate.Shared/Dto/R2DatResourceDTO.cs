@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.Shared
 {
     public sealed class R2DatResourceDTO
     {

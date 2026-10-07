@@ -1,9 +1,9 @@
 ﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Properties;
 using Datinate.Shared;
+using Datinate.Shared.Rmvc;
 using System.Diagnostics;
-using static com.RADIO.Datinate.RMVC.Shared.UnitFormatHelper;
+using static Datinate.Shared.UnitFormatHelper;
 
 namespace datinate.app
 {

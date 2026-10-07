@@ -1,8 +1,8 @@
-﻿using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.Radio;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IDatGrouperControlsView : IRContract
     {

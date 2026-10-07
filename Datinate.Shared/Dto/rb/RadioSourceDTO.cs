@@ -1,7 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+﻿using Datinate.Shared.Dat;
+using static Datinate.Shared.DatinateEnums;
 
-namespace Datinate.Shared.Rb
+namespace Datinate.Shared
 {
     public interface ISourceDefinition
     {

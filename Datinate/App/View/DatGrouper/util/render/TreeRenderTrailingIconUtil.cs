@@ -1,6 +1,6 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.App.View.projects.gameFamily;
-using RadioLibCore.RadioDat;
+﻿using Datinate.App.View.projects.gameFamily;
+using Datinate.Shared;
+using Datinate.Shared.Radio;
 using System.Drawing.Drawing2D;
 
 namespace datinate.app

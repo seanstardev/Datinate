@@ -1,4 +1,4 @@
-﻿namespace RadioLibCore.RadioDat 
+﻿namespace Datinate.Shared.Radio
 {
     public interface IResourceCollection 
     {    

@@ -1,7 +1,6 @@
-﻿using Datinate.Shared.Rb;
-using RadioLibCore.RadioResource;
+﻿using Datinate.Shared.Radio;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.Shared
 {
     public static class DatinateMediaResolver
     {

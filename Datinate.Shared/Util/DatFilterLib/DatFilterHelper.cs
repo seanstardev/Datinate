@@ -1,8 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿using Datinate.Shared.Dat;
 using System.Text.RegularExpressions;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.shared
+namespace Datinate.Shared
 {
     public static class DatFilterHelper 
     {
@@ -130,6 +130,7 @@ namespace datinate.shared
             }
 
             var flagList = new List<Flag>(dic.Count);
+
             foreach (var pair in dic)
                 flagList.Add(new Flag(pair.Key, pair.Value));
 

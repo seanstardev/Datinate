@@ -1,6 +1,6 @@
-﻿using static datinate.shared.DatFilterHelper;
+﻿using static Datinate.Shared.DatFilterHelper;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.Shared.Dat
 {
     public class DatGameVO : IByteReporter 
     {

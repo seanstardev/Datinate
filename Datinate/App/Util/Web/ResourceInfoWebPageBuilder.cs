@@ -1,5 +1,6 @@
 using com.RADIO.Datinate.RMVC.Shared;
-using RadioLibCore.RadioResource;
+using Datinate.Shared;
+using Datinate.Shared.Radio;
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -61,10 +62,10 @@ namespace datinate.app
         //private const string MutedHex = "#C8B79E";
 
         public static string BuildDocumentHtml(
-    InfoVO? info,
-    string? assetRootRelativePath,
-    string url,
-    bool createSampleVersion)
+            InfoVO? info,
+            string? assetRootRelativePath,
+            string url,
+            bool createSampleVersion)
         {
             if (info == null ||
                 string.IsNullOrWhiteSpace(assetRootRelativePath) ||

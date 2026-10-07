@@ -1,8 +1,7 @@
-﻿using Datinate.Shared;
-using RadioLibCore.RadioDat;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+﻿using Datinate.Shared.Radio;
+using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.Shared.DatGrouper
 {
     public interface IDatGrouperDelta
     {

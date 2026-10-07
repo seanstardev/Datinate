@@ -1,5 +1,5 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared;
+using Datinate.Shared.Radio;
 using RMVC;
 
 namespace com.RADIO.Datinate.RMVC

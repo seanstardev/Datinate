@@ -1,4 +1,4 @@
-﻿namespace RadioLibCore.RadioResource
+﻿namespace Datinate.Shared.Radio
 {
     public class ReleaseVO
     {

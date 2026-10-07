@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Rmvc.Proxy.delegates;
+using Datinate.Shared.Dat;
 
 namespace Datinate.Tests
 {

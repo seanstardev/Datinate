@@ -1,6 +1,4 @@
-﻿using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
-
-namespace RadioLibCore.RadioResource 
+﻿namespace Datinate.Shared.Radio
 {
     public class InfoVO 
     {

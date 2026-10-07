@@ -1,6 +1,6 @@
 ﻿using RMVC;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IWebMediaView : IRContract
     {

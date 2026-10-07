@@ -1,8 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.shared;
+﻿using Datinate.Shared.Dat;
 using RMVC;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface ICustomListView : IRContract
     {

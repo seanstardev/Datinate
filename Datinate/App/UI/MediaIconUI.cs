@@ -2,7 +2,7 @@
 using Datinate.Properties;
 using System.ComponentModel;
 using System.Drawing.Imaging;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace datinate.app
 {

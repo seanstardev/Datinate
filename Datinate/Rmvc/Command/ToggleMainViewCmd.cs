@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using RMVC;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
@@ -11,10 +12,10 @@ namespace com.RADIO.Datinate.RMVC
             {
                 var currentView = mainMediator.GetCurrentView();
 
-                if (currentView == DatinateEnums.DAT_SCREEN_ENUM.Landing)
-                    mainMediator.ToggleDatListView(DatinateEnums.DAT_SCREEN_ENUM.DatManager);
+                if (currentView == DAT_SCREEN_ENUM.Landing)
+                    mainMediator.ToggleDatListView(DAT_SCREEN_ENUM.DatManager);
                 else
-                    mainMediator.ToggleDatListView(DatinateEnums.DAT_SCREEN_ENUM.Landing);
+                    mainMediator.ToggleDatListView(DAT_SCREEN_ENUM.Landing);
 
                 if (Facade.Instance?.MainControlsMediator is { } controlsMediator)
                 {

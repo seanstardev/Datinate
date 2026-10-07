@@ -1,6 +1,6 @@
-﻿using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.Radio;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.DatGrouper
 {
     public class DatGrouperEditRequestDTO
     {
@@ -11,7 +11,6 @@ namespace Datinate.Shared
         public enum EDIT_ACTION_ENUM
         {
             NOT_SET,
-            
             FamilyReset,
             FamilyAdd,
             FamilyMergeAsMain,

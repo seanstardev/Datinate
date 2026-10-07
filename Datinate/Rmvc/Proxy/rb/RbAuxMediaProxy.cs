@@ -1,10 +1,10 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Rmvc.Proxy.delegates;
-using Datinate.Shared.Rb;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+﻿using Datinate.Rmvc.Proxy.delegates;
+using Datinate.Shared;
+using Datinate.Shared.Dat;
 using RMVC;
 using System.Diagnostics;
 using System.Xml;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {

@@ -1,10 +1,11 @@
 ﻿using com.RADIO.Datinate.RMVC;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
-using RadioLibCore.RadioDat;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Radio;
 using System.Diagnostics;
 using static app.datinate.CurationOverlay;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace app.datinate
 {

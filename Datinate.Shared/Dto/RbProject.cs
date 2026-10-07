@@ -1,16 +1,15 @@
-﻿using Datinate.Shared;
-using RadioLibCore.RadioDat;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+﻿using Datinate.Shared.Radio;
+using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.Shared
 {
     public class DatGrouperScoringItem
     {
         public DatGrouperScoringItem(
-        MEDIA_TYPE_ENUM mediaTypeEnum,
-        IReadOnlyList<string> sourceIds,
-        MEDIA_TYPE_ENUM icon1Type,
-        MEDIA_TYPE_ENUM? icon2Type)
+            MEDIA_TYPE_ENUM mediaTypeEnum,
+            IReadOnlyList<string> sourceIds,
+            MEDIA_TYPE_ENUM icon1Type,
+            MEDIA_TYPE_ENUM? icon2Type)
         {
             MediaTypeEnum = mediaTypeEnum;
             SourceIds = sourceIds;

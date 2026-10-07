@@ -1,7 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿using Datinate.Shared.Dat;
+using Datinate.Shared.DatGrouper;
 using RMVC;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IDatSummaryView : IRContract
     {

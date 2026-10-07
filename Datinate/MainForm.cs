@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.App;
+using Datinate.Shared;
 using System.Runtime.InteropServices;
 
 namespace datinate.app

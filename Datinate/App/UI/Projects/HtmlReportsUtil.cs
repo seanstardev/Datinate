@@ -1,5 +1,5 @@
-﻿using datinate.shared;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared;
+using Datinate.Shared.Radio;
 
 namespace datinate.app
 {

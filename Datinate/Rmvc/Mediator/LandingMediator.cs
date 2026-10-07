@@ -1,5 +1,7 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Rmvc;
 using RMVC;
 
 namespace com.RADIO.Datinate.RMVC
@@ -12,29 +14,23 @@ namespace com.RADIO.Datinate.RMVC
         {
         }
 
-        public void LoadDatPaths(DatRootDTO[] paths, string mameHashPath)
-        {
-            view?.SetDatRootPaths(paths, mameHashPath);
-        }
-        public void SetDatGrouperProjects(DatGrouperProjectDTO[] projectVOs)
-        {
-            view?.SetDatGrouperProjects(projectVOs);
-        }
-
-        public void ActivateView()
-        {
-            view?.ActivateView();
-        }
-
-        private void OnLoadDatGrouperView(string projectName)
-        {
-            base.ExecuteCommand(new LoadDatGrouperProjectsCmd(projectName, true, true));
-        }
-        private void OnLoadDatManager(DatRootDTO[] datRootVOs, string mameHashPath) =>
-            base.ExecuteCommand(new LoadDatManagerCmd(datRootVOs, mameHashPath));    
+        public void LoadDatPaths(DatRootDTO[] paths, string mameHashPath)   
+            => view?.SetDatRootPaths(paths, mameHashPath);
         
-        private void OnSaveDatRootPaths(DatRootDTO[] datRootVOs, string mameHashPath) =>
-            base.ExecuteCommand(new SaveDatRootPathsCmd(datRootVOs, mameHashPath));
+        public void SetDatGrouperProjects(DatGrouperProjectDTO[] projectVOs)
+            => view?.SetDatGrouperProjects(projectVOs);
+        
+        public void ActivateView()
+            => view?.ActivateView();
+        
+        private void OnLoadDatGrouperView(string projectName)
+            => base.ExecuteCommand(new LoadDatGrouperProjectsCmd(projectName, true, true));
+        
+        private void OnLoadDatManager(DatRootDTO[] datRootVOs, string mameHashPath) 
+            => base.ExecuteCommand(new LoadDatManagerCmd(datRootVOs, mameHashPath));    
+        
+        private void OnSaveDatRootPaths(DatRootDTO[] datRootVOs, string mameHashPath) 
+            => base.ExecuteCommand(new SaveDatRootPathsCmd(datRootVOs, mameHashPath));
 
 
         private void OnRootDatPathRemoved() 

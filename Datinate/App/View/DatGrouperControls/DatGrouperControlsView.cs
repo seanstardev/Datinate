@@ -2,10 +2,10 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Properties;
 using Datinate.Shared;
-using Datinate.Shared.Util;
-using RadioLibCore.RadioDat;
+using Datinate.Shared.Radio;
+using Datinate.Shared.Rmvc;
 using System.ComponentModel;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace datinate.app
 {

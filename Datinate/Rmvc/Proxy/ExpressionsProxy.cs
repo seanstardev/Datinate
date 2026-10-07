@@ -1,9 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.shared;
+﻿using Datinate.Shared;
 using RMVC;
 using System.Xml;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
-using static datinate.shared.DatFilterHelper;
+using static Datinate.Shared.DatFilterHelper;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {

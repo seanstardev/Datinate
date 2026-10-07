@@ -1,8 +1,8 @@
-﻿using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.Radio;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.Shared
 {
     public static class FingerprintHelper
     {

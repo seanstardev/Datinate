@@ -1,4 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
+using Datinate.Shared.Dat;
 
 namespace com.RADIO.Datinate.RMVC
 {

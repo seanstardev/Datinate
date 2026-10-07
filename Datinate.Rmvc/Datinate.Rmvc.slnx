@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../Datinate.Shared/Datinate.Shared.csproj" />
+  <Project Path="Datinate.Rmvc.csproj" />
+</Solution>

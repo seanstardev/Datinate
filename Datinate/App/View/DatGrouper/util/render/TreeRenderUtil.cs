@@ -1,5 +1,5 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared;
+using Datinate.Shared.Radio;
 using System.Drawing.Drawing2D;
 using System.Runtime.CompilerServices;
 using static datinate.app.DatGrouperTreeView;

@@ -1,4 +1,4 @@
-﻿using datinate.shared;
+﻿using Datinate.Shared;
 using WinFormsView = System.Windows.Forms.View;
 
 namespace Datinate.App.View.customList

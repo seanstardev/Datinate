@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace com.RADIO.Datinate.RMVC

@@ -1,8 +1,8 @@
-﻿using datinate.shared;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Radio;
 using RMVC;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IMainWebView : IRContract
     {

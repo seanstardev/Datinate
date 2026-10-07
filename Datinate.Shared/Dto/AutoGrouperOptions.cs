@@ -1,4 +1,4 @@
-﻿namespace com.RADIO.Datinate.RMVC.Shared
+﻿namespace Datinate.Shared
 {
     public class AutoGrouperOptions
     {

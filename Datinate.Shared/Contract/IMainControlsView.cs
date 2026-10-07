@@ -1,8 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.UnitFormatHelper;
+﻿using RMVC;
+using static Datinate.Shared.UnitFormatHelper;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IMainControlsView : IRContract
     {

@@ -1,4 +1,4 @@
-﻿using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.Radio;
 using RMVC;
 
 namespace com.RADIO.Datinate.RMVC

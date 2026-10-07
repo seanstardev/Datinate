@@ -1,7 +1,8 @@
 ﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.RMVC.Shared;
-using datinate.shared;
 using Datinate.Shared;
+using Datinate.Shared.Dat;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Rmvc;
 using System.Diagnostics;
 
 namespace datinate.app

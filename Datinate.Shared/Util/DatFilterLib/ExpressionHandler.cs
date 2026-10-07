@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace datinate.shared
+namespace Datinate.Shared
 {
     public class ExpressionHandler {
 

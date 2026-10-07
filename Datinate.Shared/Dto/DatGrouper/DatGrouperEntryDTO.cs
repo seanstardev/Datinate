@@ -1,7 +1,7 @@
-﻿using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.Radio;
 
-namespace Datinate.Shared
-{
+namespace Datinate.Shared.DatGrouper
+{ 
     public class DatGrouperEntryDTO
     {
         public IGameEntity Entity { get; }

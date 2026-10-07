@@ -1,4 +1,4 @@
-﻿namespace Datinate.Shared.Rb
+﻿namespace Datinate.Shared
 {
     public class MediaLookupSet : ILookupSet
     {

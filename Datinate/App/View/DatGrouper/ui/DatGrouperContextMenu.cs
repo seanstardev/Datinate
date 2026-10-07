@@ -1,8 +1,5 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared.Util;
-using RadioLibCore.RadioDat;
-using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
+﻿using Datinate.Shared;
+using Datinate.Shared.Radio;
 
 namespace datinate.app
 {

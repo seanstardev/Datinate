@@ -1,8 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Rmvc.Command;
+﻿using Datinate.Rmvc.Command;
 using Datinate.Shared;
+using Datinate.Shared.Rmvc;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.UnitFormatHelper;
+using static Datinate.Shared.UnitFormatHelper;
 
 namespace com.RADIO.Datinate.RMVC
 {

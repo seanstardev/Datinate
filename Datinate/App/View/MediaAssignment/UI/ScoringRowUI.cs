@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using System.Drawing.Drawing2D;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace datinate.app
 {

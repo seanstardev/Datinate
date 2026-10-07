@@ -1,9 +1,6 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using RadioLibCore.RadioDat;
-using System.Xml;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+﻿using System.Xml;
 
-namespace RadioLibCore.RadioResource
+namespace Datinate.Shared.Radio
 {
     public static class InfoHelper 
     {

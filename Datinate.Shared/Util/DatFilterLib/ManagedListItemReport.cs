@@ -1,6 +1,6 @@
-﻿using static datinate.shared.DatFilterHelper;
+﻿using static Datinate.Shared.DatFilterHelper;
 
-namespace datinate.shared
+namespace Datinate.Shared
 {
     public sealed class ManagedListItemReport
     {

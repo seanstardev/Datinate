@@ -2,10 +2,11 @@
 using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC.Shared;
 using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Rmvc;
 using System.ComponentModel;
 using System.Reflection;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
-
+using static Datinate.Shared.DatinateEnums;
 namespace datinate.app
 {
     public partial class ProjectLoaderView : UserControl, IProjectLoaderView

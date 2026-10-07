@@ -1,9 +1,7 @@
-﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared;
-using System.Collections.Frozen;
+﻿using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
 using System.Diagnostics;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace datinate.app
 {

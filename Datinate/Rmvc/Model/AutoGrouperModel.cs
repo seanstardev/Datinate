@@ -1,9 +1,10 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.shared;
+﻿using Datinate.Shared;
+using Datinate.Shared.Dat;
+using Datinate.Shared.Radio;
 using RMVC;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {

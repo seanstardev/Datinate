@@ -1,6 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.app;
+﻿using datinate.app;
 using Datinate.Shared;
+using Datinate.Shared.Dat;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Rmvc;
 
 namespace com.RADIO.Datinate.App.View.projects.datPathsUpdate
 {
@@ -64,7 +66,10 @@ namespace com.RADIO.Datinate.App.View.projects.datPathsUpdate
                 if (ui == null)
                     continue;
 
-                list.Add(ui.GetVO());
+                var vo = ui.GetVO();
+                
+                if (vo != null)
+                    list.Add(vo);
             }
             return list.ToArray();
         }

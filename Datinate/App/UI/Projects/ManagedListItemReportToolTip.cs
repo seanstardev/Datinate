@@ -1,7 +1,7 @@
-﻿using datinate.shared;
+﻿using Datinate.Shared;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
-using static datinate.shared.DatFilterHelper;
+using static Datinate.Shared.DatFilterHelper;
 
 namespace datinate.app
 {

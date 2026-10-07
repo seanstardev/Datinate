@@ -1,4 +1,6 @@
-﻿namespace com.RADIO.Datinate.RMVC.Shared
+﻿using Datinate.Shared.DatGrouper;
+
+namespace Datinate.Shared
 {
     public class DatUpdateVO 
     {

@@ -1,6 +1,6 @@
-using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared.Dat;
 
-namespace datinate.shared
+namespace Datinate.Shared
 {
     public class Flag 
     {

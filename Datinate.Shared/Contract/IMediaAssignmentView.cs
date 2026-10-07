@@ -1,9 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared.Rb;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Radio;
 using RMVC;
 
-namespace Datinate.Shared
+namespace Datinate.Shared.Rmvc
 {
     public interface IMediaAssignmentView : IRContract
     {

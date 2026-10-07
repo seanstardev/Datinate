@@ -1,9 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared;
-using Datinate.Shared.Util;
-using RadioLibCore.RadioDat;
+﻿using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Radio;
 using static datinate.app.DatGrouperTreeView;
-using static Datinate.Shared.DatGrouperEditRequestDTO;
+using static Datinate.Shared.DatGrouper.DatGrouperEditRequestDTO;
 
 namespace datinate.app
 {
@@ -34,7 +33,6 @@ namespace datinate.app
                 types = [typeof(IGamePart), typeof(IGame), typeof(IGameEntityProxy)];
 
             treeView.SetDisabledNodes(types, enabledEntities, hiddenNodes);
-            //treeView.Refresh();
 
             var data = new DataObject();
             data.SetData(typeof(DatGrouperDragData), curatedPayload);

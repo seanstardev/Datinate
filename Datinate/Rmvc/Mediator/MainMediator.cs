@@ -1,8 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Rmvc.Command;
-using Datinate.Shared;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared.Rmvc;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
@@ -13,7 +12,7 @@ namespace com.RADIO.Datinate.RMVC
         public MainMediator(Type actor) : base(actor)
         {
         }
-        public DatinateEnums.DAT_SCREEN_ENUM GetCurrentView()
+        public DAT_SCREEN_ENUM GetCurrentView()
         {
             if (view is { })
                 return view.GetCurrentView();
