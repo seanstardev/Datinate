@@ -194,7 +194,7 @@ namespace com.RADIO.Datinate.RMVC
         }
         private static DatGrouperScoringItem? BuildMediaItem(DatGrouperProjectDTO project, IReadOnlyList<string> sourceIds, MEDIA_TYPE_ENUM mediaEnum)
         {
-            var icon1 = DatinateHelper.GetMediaIconBmp(mediaEnum);
+            var icon1 = UIHelper.GetMediaIconBmp(mediaEnum);
 
             if (icon1 == null) return null;
 
@@ -203,8 +203,8 @@ namespace com.RADIO.Datinate.RMVC
 
         private static DatGrouperScoringItem? BuildResourceItem(DatGrouperProjectDTO project, IReadOnlyList<string> sourceIds, MEDIA_TYPE_ENUM mediaEnum)
         {
-            var icon1 = DatinateHelper.GetMediaIconBmp(MEDIA_TYPE_ENUM.Info);
-            var icon2 = DatinateHelper.GetMediaIconBmp(mediaEnum);
+            var icon1 = UIHelper.GetMediaIconBmp(MEDIA_TYPE_ENUM.Info);
+            var icon2 = UIHelper.GetMediaIconBmp(mediaEnum);
             
             if (icon1 == null || icon2 == null) return null;
 

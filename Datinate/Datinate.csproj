@@ -58,9 +58,6 @@
   </ItemGroup>
   
   <Target Name="CleanPublishedOutput" AfterTargets="Publish">
-    <Delete Files="
-      $(PublishDir)Microsoft.Web.WebView2.Core.xml;
-      $(PublishDir)Microsoft.Web.WebView2.WinForms.xml;
-      $(PublishDir)Microsoft.Web.WebView2.Wpf.xml" />
+    <Delete Files="&#xD;&#xA;      $(PublishDir)Microsoft.Web.WebView2.Core.xml;&#xD;&#xA;      $(PublishDir)Microsoft.Web.WebView2.WinForms.xml;&#xD;&#xA;      $(PublishDir)Microsoft.Web.WebView2.Wpf.xml" />
   </Target>
 </Project>

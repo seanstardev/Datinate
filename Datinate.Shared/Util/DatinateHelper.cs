@@ -1,5 +1,4 @@
-﻿using datinate.app;
-using Datinate.Properties;
+﻿using Datinate.Shared;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
@@ -8,29 +7,30 @@ namespace com.RADIO.Datinate.RMVC.Shared
 {
     public static class DatinateHelper 
     {
-        public static readonly IReadOnlySet<MEDIA_TYPE_ENUM> ScoringMediaMasterSet = new HashSet<MEDIA_TYPE_ENUM>()
-        {
-            MEDIA_TYPE_ENUM.Advert,
-            MEDIA_TYPE_ENUM.Box,
-            MEDIA_TYPE_ENUM.Box_Back,
-            MEDIA_TYPE_ENUM.Box_Bottom,
-            MEDIA_TYPE_ENUM.Box_Inlay,
-            MEDIA_TYPE_ENUM.Box_Side,
-            MEDIA_TYPE_ENUM.Box_Top,
-            MEDIA_TYPE_ENUM.Info,
-            MEDIA_TYPE_ENUM.Manual,
-            MEDIA_TYPE_ENUM.Media,
-            MEDIA_TYPE_ENUM.Media_Back,
-            MEDIA_TYPE_ENUM.Media_Label,
-            MEDIA_TYPE_ENUM.Media_Top,
-            MEDIA_TYPE_ENUM.Other,
-            MEDIA_TYPE_ENUM.Other_Map,
-            MEDIA_TYPE_ENUM.Snap,
-            MEDIA_TYPE_ENUM.Soundtrack,
-            MEDIA_TYPE_ENUM.Thumb,
-            MEDIA_TYPE_ENUM.Title,
-            MEDIA_TYPE_ENUM.Video
-        };
+        public static readonly IReadOnlySet20<MEDIA_TYPE_ENUM> ScoringMediaMasterSet =
+            new ReadOnlySet20<MEDIA_TYPE_ENUM>(new HashSet<MEDIA_TYPE_ENUM>
+                {
+                    MEDIA_TYPE_ENUM.Advert,
+                    MEDIA_TYPE_ENUM.Box,
+                    MEDIA_TYPE_ENUM.Box_Back,
+                    MEDIA_TYPE_ENUM.Box_Bottom,
+                    MEDIA_TYPE_ENUM.Box_Inlay,
+                    MEDIA_TYPE_ENUM.Box_Side,
+                    MEDIA_TYPE_ENUM.Box_Top,
+                    MEDIA_TYPE_ENUM.Info,
+                    MEDIA_TYPE_ENUM.Manual,
+                    MEDIA_TYPE_ENUM.Media,
+                    MEDIA_TYPE_ENUM.Media_Back,
+                    MEDIA_TYPE_ENUM.Media_Label,
+                    MEDIA_TYPE_ENUM.Media_Top,
+                    MEDIA_TYPE_ENUM.Other,
+                    MEDIA_TYPE_ENUM.Other_Map,
+                    MEDIA_TYPE_ENUM.Snap,
+                    MEDIA_TYPE_ENUM.Soundtrack,
+                    MEDIA_TYPE_ENUM.Thumb,
+                    MEDIA_TYPE_ENUM.Title,
+                    MEDIA_TYPE_ENUM.Video
+                });
 
         public static bool IsMameOrMameSoftlist(DAT_GROUP_ENUM datGroupEnum)
         {
@@ -165,7 +165,5 @@ namespace com.RADIO.Datinate.RMVC.Shared
             if ((uint)decimals > 28u) decimals = 28;
             return nbr.ToString("N" + decimals);
         }
-
-
     }
 }

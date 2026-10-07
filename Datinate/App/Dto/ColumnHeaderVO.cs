@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace datinate.app
 {
     public class ColumnHeaderVO 
     {

@@ -62,7 +62,7 @@ namespace datinate.app
                 ScrollbarManager2.AttachVertical(mediaContainer);
 #pragma warning restore CS0162 // Unreachable code detected
             }
-            DatinateHelper.SetTitleMedia(titleUI);
+            UIHelper.SetTitleMedia(titleUI);
             dragDropOverlay = EnsureDragDropOverlay();
 
             Disposed += Media2View_Disposed;

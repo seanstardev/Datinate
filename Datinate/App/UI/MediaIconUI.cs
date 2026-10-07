@@ -161,6 +161,6 @@ namespace datinate.app
         }
 
         private static Bitmap? GetMediaIconBmp(MEDIA_TYPE_ENUM mediaTypeEnum)
-            => DatinateHelper.GetMediaIconBmp(mediaTypeEnum);
+            => UIHelper.GetMediaIconBmp(mediaTypeEnum);
     }
 }

@@ -117,9 +117,9 @@ namespace datinate.app
                 if (SelectedEntity != null)
                 {
                     if (isFromAuto)
-                        DatinateHelper.SetTitleQueued(titleUI);
+                        UIHelper.SetTitleQueued(titleUI);
                     else
-                        DatinateHelper.SetTitleCurated(titleUI);
+                        UIHelper.SetTitleCurated(titleUI);
 
                     titleUI.Visible = true;
                 }

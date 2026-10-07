@@ -195,11 +195,11 @@ namespace datinate.app
             }
 
             if (isCurated)
-                DatinateHelper.SetTitleCurated(titleUI);
+                UIHelper.SetTitleCurated(titleUI);
             else if (title.ToLower() == "queued")
-                DatinateHelper.SetTitleQueued(titleUI);
+                UIHelper.SetTitleQueued(titleUI);
             else
-                DatinateHelper.SetTitleAutomated(titleUI);
+                UIHelper.SetTitleAutomated(titleUI);
         }
 
         public void ActivateDatGrouperUI(
