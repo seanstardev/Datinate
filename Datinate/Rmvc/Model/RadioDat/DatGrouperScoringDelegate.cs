@@ -192,23 +192,31 @@ namespace com.RADIO.Datinate.RMVC
             }
             return list;
         }
-        private static DatGrouperScoringItem? BuildMediaItem(DatGrouperProjectDTO project, IReadOnlyList<string> sourceIds, MEDIA_TYPE_ENUM mediaEnum)
+        private static DatGrouperScoringItem? BuildMediaItem(
+            DatGrouperProjectDTO project,
+            IReadOnlyList<string> sourceIds,
+            MEDIA_TYPE_ENUM mediaEnum)
         {
             var icon1 = UIHelper.GetMediaIconBmp(mediaEnum);
 
             if (icon1 == null) return null;
 
-            return new DatGrouperScoringItem(mediaEnum, sourceIds, icon1, null);
+            return new DatGrouperScoringItem(
+                mediaEnum, sourceIds, mediaEnum, null);
         }
 
-        private static DatGrouperScoringItem? BuildResourceItem(DatGrouperProjectDTO project, IReadOnlyList<string> sourceIds, MEDIA_TYPE_ENUM mediaEnum)
+        private static DatGrouperScoringItem? BuildResourceItem(
+            DatGrouperProjectDTO project,
+            IReadOnlyList<string> sourceIds,
+            MEDIA_TYPE_ENUM mediaEnum)
         {
             var icon1 = UIHelper.GetMediaIconBmp(MEDIA_TYPE_ENUM.Info);
             var icon2 = UIHelper.GetMediaIconBmp(mediaEnum);
-            
+
             if (icon1 == null || icon2 == null) return null;
 
-            return new DatGrouperScoringItem(mediaEnum, sourceIds, icon1, icon2);
+            return new DatGrouperScoringItem(
+                mediaEnum, sourceIds, MEDIA_TYPE_ENUM.Info, mediaEnum);
         }
     }
 }

@@ -114,21 +114,24 @@ namespace datinate.app
         }
 
         public void HighlightDats(
-            DatGrouperProjectEntry[] includeDatHeadlines, 
-            DatGrouperProjectEntry[] ignoreDatHeadlines) 
+            DatGrouperProjectEntry[] includeDatHeadlines,
+            DatGrouperProjectEntry[] ignoreDatHeadlines)
         {
             Ui(() =>
             {
                 UnhighlightDats();
 
                 HighlightDats(
-                    includeDatHeadlines
-                    , DatFilterHelper.GetExpressionColour(DatFilterHelper.EXPRESSION_ACTION_ENUM.INCLUDE)
-                );
+                    includeDatHeadlines,
+                    Color.FromArgb(
+                        DatFilterHelper.GetExpressionColourArgb(
+                            DatFilterHelper.EXPRESSION_ACTION_ENUM.INCLUDE)));
+
                 HighlightDats(
-                    ignoreDatHeadlines
-                    , DatFilterHelper.GetExpressionColour(DatFilterHelper.EXPRESSION_ACTION_ENUM.EXCLUDE_CONDITIONAL)
-                );
+                    ignoreDatHeadlines,
+                    Color.FromArgb(
+                        DatFilterHelper.GetExpressionColourArgb(
+                            DatFilterHelper.EXPRESSION_ACTION_ENUM.EXCLUDE_CONDITIONAL)));
             });
         }
 

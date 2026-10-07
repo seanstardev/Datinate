@@ -299,8 +299,8 @@ namespace datinate.app
                 GetIgnoreDats(),
                 GetAuxIncludeEntries(),
                 projectComment ?? string.Empty,
-                currentProject?.ExcludedDescriptorCodes ?? new HashSet<string>(),
-                currentProject?.ScoringMediaTypes ?? new HashSet<string>(),
+                currentProject?.ExcludedDescriptorCodes ?? ReadOnlySet20.Empty<string>(),
+                currentProject?.ScoringMediaTypes ?? ReadOnlySet20.Empty<string>(),
                 currentProject?.ExportSoftwareOptionsDTO ?? ExportSoftwareOptionsDTO.CreateDefault(),
                 currentProject?.MediaExports ?? new List<DatGrouperMediaExportEntryDTO>());
 

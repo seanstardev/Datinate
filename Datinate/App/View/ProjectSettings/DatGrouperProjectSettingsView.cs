@@ -85,7 +85,7 @@ namespace datinate.app
             ScrollBodyToTop();
         }
 
-        public void SetView(DatGrouperProjectDTO project, IReadOnlySet<DescriptorDefinitionDTO> descriptors)
+        public void SetView(DatGrouperProjectDTO project, IReadOnlySet20<DescriptorDefinitionDTO> descriptors)
         {
             if (InvokeRequired)
             {
@@ -163,7 +163,7 @@ namespace datinate.app
                 {
                     var chip = new DescriptorChipUI()
                     {
-                        TagColor = desc.Colour,
+                        TagColor = Color.FromArgb(desc.ColourArgb),
                         Description = desc.Description,
                         Code = desc.Code,
                         HideCheckbox = true
@@ -246,8 +246,8 @@ namespace datinate.app
                 [],
                 auxDTOs,
                 currentProject.Comment,
-                excludedDescriptors.ToFrozenSet(),
-                scoringMedia.ToFrozenSet(),
+                ReadOnlySet20.From(new HashSet<string>(excludedDescriptors)),
+                ReadOnlySet20.From(new HashSet<string>(scoringMedia)),
                 currentProject.ExportSoftwareOptionsDTO,
                 currentProject.MediaExports);
 

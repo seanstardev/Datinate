@@ -27,11 +27,11 @@ namespace com.RADIO.Datinate.RMVC
         public void EmptyView() 
             => view?.EmptyView();
         
-        public void ShowViewPreview(IReadOnlySet<string> searchNames)
+        public void ShowViewPreview(IReadOnlySet20<string> searchNames)
             => view?.ShowViewPreview(searchNames);
         
         public void ShowViewAssign(
-            IReadOnlySet<string> searchNames, 
+            IReadOnlySet20<string> searchNames, 
             IMediaCollection mediaCollection, 
             IReadOnlyList<string> prompts)
             => view?.ShowViewAssign(searchNames, mediaCollection, prompts);

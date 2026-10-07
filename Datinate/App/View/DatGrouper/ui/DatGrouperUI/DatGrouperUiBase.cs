@@ -1,6 +1,7 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.shared;
 using Datinate.App.View.projects.gameFamily;
+using Datinate.Shared;
 using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using System.ComponentModel;
@@ -86,7 +87,8 @@ namespace datinate.app
 
         private readonly Dictionary<IGameFamily, TreeNode> nodesDictionary = new();
         private readonly List<IGameFamily> familyOrder = new List<IGameFamily>();
-        private IReadOnlySet<IGamePart> allCuratedAutoParts = new HashSet<IGamePart>();
+        private IReadOnlySet20<IGamePart> allCuratedAutoParts = 
+            new ReadOnlySet20<IGamePart>(new HashSet<IGamePart>());
 
         private IReadOnlyDictionary<IGameFamily, IMediaCollection>? mediaCache;
 
@@ -555,10 +557,10 @@ namespace datinate.app
             DELTA_NATURE_ENUM deltaNatureEnum,
             IReadOnlyList<IGameFamily> familiesToAdd,
             IReadOnlyList<IGameFamily> familiesToRemove,
-            IReadOnlySet<IGamePart> allCuratedAutoParts,
+            IReadOnlySet20<IGamePart> allCuratedAutoParts,
             int undoCount,
             int redoCount, 
-            IReadOnlySet<IGameEntity> affectedEntities)
+            IReadOnlySet20<IGameEntity> affectedEntities)
         {
             Ui(() =>
             {
@@ -805,7 +807,7 @@ namespace datinate.app
 
         private static IReadOnlyList<TreeNode> GetMatchingNodes(
             IReadOnlyList<TreeNode> familyNodes,
-            IReadOnlySet<IGameEntity> entities)
+            IReadOnlySet20<IGameEntity> entities)
         {
             var list = new List<TreeNode>();
 
@@ -1170,7 +1172,7 @@ namespace datinate.app
 
             renderAliases = true;
 
-            allCuratedAutoParts = new HashSet<IGamePart>();
+            allCuratedAutoParts = new ReadOnlySet20<IGamePart>(new HashSet<IGamePart>());
 
             var prevSuppress = suppressOverlayEvents;
             suppressOverlayEvents = true;
@@ -1878,7 +1880,8 @@ namespace datinate.app
             var (membership, isShallow) = GetPartVisualState(gamePart);
 
             partNode.Text = TreeNodeNameUtil.GetGamePartNameRender(gamePart);
-            partNode.ForeColor = DatFilterHelper.GetExpressionColour(membership);
+            partNode.ForeColor = Color.FromArgb(
+                DatFilterHelper.GetExpressionColourArgb(membership));
 
             var partIconKey = GetPartIconKey(isShallow, membership);
             partNode.ImageKey = partNode.SelectedImageKey = partIconKey;

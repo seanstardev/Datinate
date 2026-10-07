@@ -1,9 +1,9 @@
 ﻿using app.datinate;
-using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using RadioLibCore.RadioDat;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.DatGrouperEditRequestDTO;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
+using static Datinate.Shared.DatGrouperEditRequestDTO;
 
 namespace com.RADIO.Datinate.RMVC
 {
@@ -198,7 +198,7 @@ namespace com.RADIO.Datinate.RMVC
         }
 
         public IReadOnlySet<IGameFamily> GetUpdateMediaAssociationRisks(
-    DatGrouperEditRequestDTO dto)
+            DatGrouperEditRequestDTO dto)
         {
             if (overlay == null)
             {

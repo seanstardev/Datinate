@@ -31,7 +31,7 @@ namespace datinate.shared
         }
 
         public static int GetExpressionColourArgb(
-    EXPRESSION_ACTION_ENUM expressionActionEnum)
+            EXPRESSION_ACTION_ENUM expressionActionEnum)
         {
             switch (expressionActionEnum)
             {
@@ -137,7 +137,7 @@ namespace datinate.shared
         }
 
 
-        internal static Flag[] GetFlagSets(DatGameVO[] allEntries)
+        public static Flag[] GetFlagSets(DatGameVO[] allEntries)
         {
 
             SortedDictionary<string, List<DatGameVO>> dic =

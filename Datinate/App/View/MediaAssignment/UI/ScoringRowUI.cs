@@ -21,16 +21,20 @@ namespace datinate.app
                 {
                     SuspendLayout();
 
-                    if (item.Icon2 == null)
+                    var icon1 = UIHelper.GetMediaIconBmp(item.Icon1Type);
+
+                    if (!item.Icon2Type.HasValue)
                     {
-                        mediaIcon2.Image = item.Icon1;
+                        mediaIcon2.Image = icon1;
+                        mediaIcon1.Image = null;
                         mediaIcon1.Visible = false;
                     }
                     else
                     {
                         mediaIcon1.Visible = true;
-                        mediaIcon1.Image = item.Icon1;
-                        mediaIcon2.Image = item.Icon2;
+                        mediaIcon1.Image = icon1;
+                        mediaIcon2.Image =
+                            UIHelper.GetMediaIconBmp(item.Icon2Type.Value);
                     }
 
                     mediaLabel.Text = item.MediaTypeEnum.ToString().Replace("_", ": ");

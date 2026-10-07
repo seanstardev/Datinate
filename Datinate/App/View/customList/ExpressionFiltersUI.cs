@@ -136,7 +136,9 @@ namespace Datinate.App.View.customList
                 for (int i = 0; i < expressions.Count; i++)
                 {
                     string action;
-                    var colour = DatFilterHelper.GetExpressionColour(expressions[i].GetExpressionAction());
+                    var colour = Color.FromArgb(
+                        DatFilterHelper.GetExpressionColourArgb(
+                            expressions[i].GetExpressionAction()));
 
                     if (expressions[i].ExcludeAlways())
                         action = "EXCLUDE";

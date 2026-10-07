@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Rb;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -186,7 +187,7 @@ namespace datinate.app
             }
         }
         public void SetUI(
-            IReadOnlySet<string> filterTexts, 
+            IReadOnlySet20<string> filterTexts, 
             bool readOnlyMode, 
             IMediaCollection? mediaCollection,
             IReadOnlyList<string>? searchPrompts)

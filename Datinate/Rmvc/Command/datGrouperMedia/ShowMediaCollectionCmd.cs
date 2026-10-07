@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app;
+using Datinate.Shared;
 using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using RMVC;
@@ -31,6 +32,7 @@ namespace com.RADIO.Datinate.RMVC
 
             if (filters.Any() == false || string.IsNullOrWhiteSpace(filters.First()))
                 return;
+
 
             if (sessionModel.IsInMediaReadOnlyMode)
             {

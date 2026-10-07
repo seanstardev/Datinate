@@ -87,7 +87,7 @@ namespace datinate.app
 
         }
 
-        public void SetDescriptorDefinitions(IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions)
+        public void SetDescriptorDefinitions(IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
         {
             if (IsDisposed)
                 return;
@@ -125,7 +125,7 @@ namespace datinate.app
                     var chip = new DescriptorChipUI()
                     {
                         Code = def.Code,
-                        TagColor = def.Colour,
+                        TagColor = Color.FromArgb(def.ColourArgb),
                         Description = def.Description,
                         Size = DescriptorSize
                     };

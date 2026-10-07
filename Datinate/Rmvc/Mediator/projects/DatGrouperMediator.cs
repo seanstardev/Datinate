@@ -5,6 +5,7 @@ using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
 using RMVC;
 using static app.datinate.DatGrouperEditDelta;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
@@ -62,7 +63,7 @@ namespace com.RADIO.Datinate.RMVC
             IReadOnlyList<IGameFamily> curatedFamiliesToRemove,
             int undoCount,
             int redoCount,
-            IReadOnlySet<IGameEntity> affectedEntities)
+            IReadOnlySet20<IGameEntity> affectedEntities)
         {
             view?.UpdateCuratedFamilies(
                 deltaNatureEnum,
@@ -77,10 +78,10 @@ namespace com.RADIO.Datinate.RMVC
             DELTA_NATURE_ENUM deltaNatureEnum,
             IReadOnlyList<IGameFamily> autoFamiliesToAdd,
             IReadOnlyList<IGameFamily> autoFamiliesToRemove,
-            IReadOnlySet<IGamePart> allCuratedAutoParts,
+            IReadOnlySet20<IGamePart> allCuratedAutoParts,
             int undoCount,
             int redoCount,
-            IReadOnlySet<IGameEntity> affectedEntities)
+            IReadOnlySet20<IGameEntity> affectedEntities)
         {
             view?.UpdateAutoFamilies(
                 deltaNatureEnum,

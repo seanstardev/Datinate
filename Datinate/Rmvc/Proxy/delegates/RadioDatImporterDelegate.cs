@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC;
 using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Rb;
 using RadioLibCore.RadioDat;
 using System.Xml;
@@ -313,7 +314,7 @@ namespace Datinate.Rmvc.Proxy.delegates
                 string familyNotes)
             {
                 SourceIdAssignedItemDictionary = sourceIdAssignedItemDictionary;
-                CheckedDescriptorCodes = checkedDescriptorCodes;
+                CheckedDescriptorCodes = ReadOnlySet20.From(checkedDescriptorCodes);
                 FamilyNotes = familyNotes;
             }
 
@@ -321,7 +322,7 @@ namespace Datinate.Rmvc.Proxy.delegates
 
             public bool IsEmptyForExport => false;
 
-            public IReadOnlySet<string> CheckedDescriptorCodes { get; }
+            public IReadOnlySet20<string> CheckedDescriptorCodes { get; }
 
             public string FamilyNotes { get; }
         }

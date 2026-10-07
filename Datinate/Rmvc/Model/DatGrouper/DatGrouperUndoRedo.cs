@@ -1,4 +1,6 @@
-﻿using RadioLibCore.RadioDat;
+﻿using Datinate.Shared;
+using RadioLibCore.RadioDat;
+using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace app.datinate
 {
@@ -417,7 +419,7 @@ namespace app.datinate
                 _ = curatedAffected.Add(entity);
 
             return new DatGrouperEditDelta(
-                DatGrouperEditDelta.DELTA_NATURE_ENUM.UndoRedo,
+                DELTA_NATURE_ENUM.UndoRedo,
                 curatedReplace,
                 curatedAdd,
                 curatedRemove,
@@ -426,8 +428,8 @@ namespace app.datinate
                 curatedAutoParts,
                 availableUndos,
                 availableRedos,
-                autoAffected,
-                curatedAffected)
+                ReadOnlySet20.From(autoAffected),
+                ReadOnlySet20.From(curatedAffected))
             {
                 PlanEdits = action.PlanEdits,
                 AutoVisEdits = action.AutoVisEdits,

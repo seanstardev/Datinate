@@ -484,7 +484,8 @@ namespace com.RADIO.Datinate.App.View.customList
             return searchState.Handler.Match(label);
         }
 
-        private static (string Text, Color Colour)[] BuildVirtualRows((string Text, EXPRESSION_ACTION_ENUM Action)[] rows)
+        private static (string Text, Color Colour)[] BuildVirtualRows(
+            (string Text, EXPRESSION_ACTION_ENUM Action)[] rows)
         {
             var ui = new (string Text, Color Colour)[rows.Length];
 
@@ -494,7 +495,8 @@ namespace com.RADIO.Datinate.App.View.customList
 
                 var colour = string.Equals(text, "(none)", StringComparison.Ordinal)
                     ? SystemColors.GrayText
-                    : DatFilterHelper.GetExpressionColour(rows[i].Action);
+                    : Color.FromArgb(
+                        DatFilterHelper.GetExpressionColourArgb(rows[i].Action));
 
                 ui[i] = (text, colour);
             }

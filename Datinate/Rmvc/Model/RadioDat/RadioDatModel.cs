@@ -1,5 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.app;
+using Datinate.Shared;
 using Datinate.Shared.Rb;
 using RadioLibCore.RadioDat;
 using RadioLibCore.RadioResource;
@@ -42,11 +42,11 @@ namespace com.RADIO.Datinate.RMVC
         private readonly Dictionary<string, HashSet<string>> assignedMediaEntries = new Dictionary<string, HashSet<string>>();
 
         private readonly Dictionary<string, bool> existingContentPaths = new Dictionary<string, bool>();
-        private IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions = new HashSet<DescriptorDefinitionDTO>();
-        public void SetDescriptorDefinitions(IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions)
-        {
-            this.descriptorDefinitions = descriptorDefinitions;
-        }
+        private IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions =
+            ReadOnlySet20.Empty<DescriptorDefinitionDTO>();
+        public void SetDescriptorDefinitions(IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
+            => this.descriptorDefinitions = descriptorDefinitions;
+        
 
         
         private IEnumerable<GameFamilyVO>? autoGrouperSourceCollection = null;
@@ -172,7 +172,7 @@ namespace com.RADIO.Datinate.RMVC
                 mediaCollectionsDictionary.Clear();
                 assignedMediaEntries.Clear();
                 existingContentPaths.Clear();
-                descriptorDefinitions = new HashSet<DescriptorDefinitionDTO>();
+                descriptorDefinitions = ReadOnlySet20.Empty<DescriptorDefinitionDTO>();
 
                 autoGrouperSourceCollection = null;
             }
@@ -352,8 +352,8 @@ namespace com.RADIO.Datinate.RMVC
                     if (!mediaCollectionsDictionary.TryGetValue(meta.Family, out var collection))
                         mediaCollectionsDictionary[meta.Family] = collection = 
                             new RbMediaCollection(
-                                meta.Family, 
-                                ActiveProject?.ExcludedDescriptorCodes ?? new HashSet<string>());
+                                meta.Family,
+                                ActiveProject?.ExcludedDescriptorCodes ?? ReadOnlySet20.Empty<string>());
 
                     collection.CheckedDescriptorCodes = new HashSet<string>(meta.CheckedDescriptors);
                     collection.FamilyNotes = meta.FamilyNotesText;
@@ -372,7 +372,7 @@ namespace com.RADIO.Datinate.RMVC
                     if (!mediaCollectionsDictionary.TryGetValue(assignment.Family, out var collection))
                         mediaCollectionsDictionary[assignment.Family] = collection = 
                             new RbMediaCollection(assignment.Family,
-                                ActiveProject?.ExcludedDescriptorCodes ?? new HashSet<string>());
+                                ActiveProject?.ExcludedDescriptorCodes ?? ReadOnlySet20.Empty<string>());
 
                     var contentPathExists = false;
                     if (sourceIdContentDictionary.TryGetValue(assignment.SourceId, out var col))
@@ -566,8 +566,9 @@ namespace com.RADIO.Datinate.RMVC
 
                 if (collection == null)
                     mediaCollectionsDictionary[family] = collection = 
-                        new RbMediaCollection(family,
-                                ActiveProject?.ExcludedDescriptorCodes ?? new HashSet<string>());
+                        new RbMediaCollection(
+                            family,
+                            ActiveProject?.ExcludedDescriptorCodes ?? ReadOnlySet20.Empty<string>());
 
                 return collection;
             }

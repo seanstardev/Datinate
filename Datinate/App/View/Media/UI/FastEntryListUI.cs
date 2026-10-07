@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using System.ComponentModel;
 
 namespace datinate.app
@@ -356,7 +357,7 @@ namespace datinate.app
             Invalidate();
         }
         public int SetEntryToScoreAgainst(
-            IReadOnlySet<string> textsToMatch,
+            IReadOnlySet20<string> textsToMatch,
             bool excludeAlreadyAssigned)
         {
             alphaSort = false;

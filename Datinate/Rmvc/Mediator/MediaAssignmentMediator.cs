@@ -13,10 +13,9 @@ namespace com.RADIO.Datinate.RMVC
         public MediaAssignmentMediator(Type view) : base(view)
         {
         }
-        public void SetDescriptorDefinitions(IReadOnlySet<DescriptorDefinitionDTO> descriptorDefinitions)
-        {
-            view?.SetDescriptorDefinitions(descriptorDefinitions);
-        }
+        public void SetDescriptorDefinitions(IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
+            => view?.SetDescriptorDefinitions(descriptorDefinitions);
+        
         public void SetScoring(DatGrouperScoring scoring)
         {
             view?.SetScoring(scoring);

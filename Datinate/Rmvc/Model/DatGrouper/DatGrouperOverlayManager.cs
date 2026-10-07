@@ -1,24 +1,15 @@
 ﻿using com.RADIO.Datinate.RMVC;
 using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using RadioLibCore.RadioDat;
 using System.Diagnostics;
 using static app.datinate.CurationOverlay;
-using static app.datinate.DatGrouperEditDelta;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace app.datinate
 {
     public class DatGrouperEditDelta : IDatGrouperDelta
     {
-        public enum DELTA_NATURE_ENUM
-        {
-            NOT_SET,
-            Import,
-            UndoRedo,
-            PartIncludeExclude,
-            Update,
-        }
-
         public DatGrouperEditDelta(
             DELTA_NATURE_ENUM deltaNatureEnum,
             IReadOnlyDictionary<IGameFamily, IGameFamily> replacementReferences,
@@ -26,11 +17,11 @@ namespace app.datinate
             IReadOnlyList<IGameFamily> curatedFamiliesToRemove,
             IReadOnlyList<IGameFamily> autoFamiliesToAdd,
             IReadOnlyList<IGameFamily> autoFamiliesToRemove,
-            IReadOnlySet<IGamePart> allCuratedAutoParts,
+            IReadOnlySet20<IGamePart> allCuratedAutoParts,
             int availableUndos,
             int availableRedos,
-            IReadOnlySet<IGameEntity> autoAffectedEntities,
-            IReadOnlySet<IGameEntity> curatedAffectedEntities)
+            IReadOnlySet20<IGameEntity> autoAffectedEntities,
+            IReadOnlySet20<IGameEntity> curatedAffectedEntities)
         {
             DeltaNatureEnum = deltaNatureEnum;
             ReplacementReferences = replacementReferences;
@@ -51,11 +42,11 @@ namespace app.datinate
         public IReadOnlyList<IGameFamily> CuratedFamiliesToRemove { get; }
         public IReadOnlyList<IGameFamily> AutoFamiliesToAdd { get; }
         public IReadOnlyList<IGameFamily> AutoFamiliesToRemove { get; }
-        public IReadOnlySet<IGamePart> AllCuratedAutoParts { get; }
+        public IReadOnlySet20<IGamePart> AllCuratedAutoParts { get; }
         public int AvailableUndos { get; }
         public int AvailableRedos { get; }
-        public IReadOnlySet<IGameEntity> AutoAffectedEntities { get; }
-        public IReadOnlySet<IGameEntity> CuratedAffectedEntities { get; }
+        public IReadOnlySet20<IGameEntity> AutoAffectedEntities { get; }
+        public IReadOnlySet20<IGameEntity> CuratedAffectedEntities { get; }
         internal PlanEdit[] PlanEdits { get; init; } = Array.Empty<PlanEdit>();
         internal AutoVisEdit[] AutoVisEdits { get; init; } = Array.Empty<AutoVisEdit>();
         internal PartExcludeEdit[] PartExcludeEdits { get; init; } = Array.Empty<PartExcludeEdit>();
@@ -75,7 +66,7 @@ namespace app.datinate
         private readonly Dictionary<AutoPartId, IGamePart> curatedPartCloneByPartId = new();
 
         private readonly HashSet<IGamePart> curatedAutoPartsInternal = new(ReferenceEqualityComparer.Instance);
-        private IReadOnlySet<IGamePart> curatedAutoParts => curatedAutoPartsInternal;
+        private readonly IReadOnlySet20<IGamePart> curatedAutoParts;
 
         private readonly int[] curatedPartCountByAutoFamilyIndex;
         private readonly Dictionary<AutoPartId, bool> defaultExcludeByPartId = new();
@@ -110,6 +101,9 @@ namespace app.datinate
         {
             auto = new AutoRegistry(families);
             
+            curatedAutoParts =
+                new ReadOnlySet20<IGamePart>(curatedAutoPartsInternal);
+
             curatedPartCountByAutoFamilyIndex = new int[auto.FamilyCount];
             materialiseCuratedFamilyCloneByPlanId = MaterialiseCuratedFamilyCloneByPlanId;
 
@@ -555,7 +549,7 @@ namespace app.datinate
 #endif
 
             return new DatGrouperEditDelta(
-                DatGrouperEditDelta.DELTA_NATURE_ENUM.Import,
+                DELTA_NATURE_ENUM.Import,
                 replacements,
                 curatedToAdd,
                 curatedToRemove,
@@ -564,8 +558,8 @@ namespace app.datinate
                 curatedAutoParts,
                 undosCount,
                 redosCount,
-                new HashSet<IGameEntity>(),     // Can always be empty as import changes are not animated.
-                new HashSet<IGameEntity>());    // Can always be empty as import changes are not animated.
+                ReadOnlySet20.Empty<IGameEntity>(),     // Import changes are not animated.
+                ReadOnlySet20.Empty<IGameEntity>());    // Import changes are not animated.
         }
 
         private void RestoreDefaultExclude(AutoPartId partId)
@@ -1577,7 +1571,7 @@ namespace app.datinate
             Func<bool> mutate,
             Func<PlanEdit[], AutoVisEdit[], (IReadOnlySet<IGameEntity> AutoAffectedEntities, IReadOnlySet<IGameEntity> CuratedAffectedEntities)>? buildAffectedEntities = null,
             IReadOnlyCollection<AutoPartId>? excludeTouchedPartIds = null,
-            DatGrouperEditDelta.DELTA_NATURE_ENUM deltaNature = DatGrouperEditDelta.DELTA_NATURE_ENUM.Update)
+            DELTA_NATURE_ENUM deltaNature = DELTA_NATURE_ENUM.Update)
         {
             EnsureCuratedIndex();
 
@@ -1808,8 +1802,8 @@ namespace app.datinate
                 curatedAutoParts,
                 availableUndos,
                 availableRedos,
-                autoAffectedEntities,
-                curatedAffectedEntities)
+                ReadOnlySet20.From((HashSet<IGameEntity>)autoAffectedEntities),
+                ReadOnlySet20.From((HashSet<IGameEntity>)curatedAffectedEntities))
             {
                 PlanEdits = planEdits,
                 AutoVisEdits = autoVisEdits,

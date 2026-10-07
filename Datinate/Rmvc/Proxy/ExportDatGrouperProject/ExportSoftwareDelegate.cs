@@ -1,4 +1,5 @@
 using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using RadioLibCore.RadioDat;
 using System.Text;
 using System.Xml;
@@ -22,7 +23,7 @@ namespace com.RADIO.Datinate.RMVC
             Action<int, int, string>? progressCallback = null)
         {
             string projectName = project.ProjectName;
-            IReadOnlySet<string> excludedDescriptors = project.ExcludedDescriptorCodes;
+            IReadOnlySet20<string> excludedDescriptors = project.ExcludedDescriptorCodes;
 
             bool exportAs1G1R = softwareOptions.ExportAs1G1R;
             bool skipScoringExempt = softwareOptions.SkipScoringExemptFamilies;
@@ -266,7 +267,7 @@ namespace com.RADIO.Datinate.RMVC
             bool skipScoringExempt,
             bool skipExcludedGames,
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> familyMediaDictionary,
-            IReadOnlySet<string> excludedDescriptors)
+            IReadOnlySet20<string> excludedDescriptors)
         {
             if (skipScoringExempt == false && skipExcludedGames == false)
                 return curatedFamilies;

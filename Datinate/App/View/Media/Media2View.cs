@@ -30,7 +30,7 @@ namespace datinate.app
         private bool awaitingInitialisationSets = true;
 
         private IMediaCollection? pendingMediaCollection = null;
-        private IReadOnlySet<string>? pendingSearchNames = null;
+        private IReadOnlySet20<string>? pendingSearchNames = null;
         private IReadOnlyList<string>? pendingSearchPrompts = null;
 
         private bool activelyDisplayingContent = false;
@@ -108,7 +108,7 @@ namespace datinate.app
             }
         }
         private void ShowView(
-            IReadOnlySet<string> searchNames,
+            IReadOnlySet20<string> searchNames,
             IMediaCollection? mediaCollection,
             IReadOnlyList<string>? prompts)
         {
@@ -273,12 +273,12 @@ namespace datinate.app
             }
         }
 
-        public void ShowViewAssign(IReadOnlySet<string> searchNames, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
+        public void ShowViewAssign(IReadOnlySet20<string> searchNames, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
         {
             readOnlyMode = false;
             ShowView(searchNames, mediaCollection, prompts);
         }
-        public void ShowViewPreview(IReadOnlySet<string> searchNames)
+        public void ShowViewPreview(IReadOnlySet20<string> searchNames)
         {
             this.readOnlyMode = true;
             ShowView(searchNames, null, null);

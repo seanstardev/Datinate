@@ -1,7 +1,7 @@
 ﻿using app.datinate;
-using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.Shared.DatGrouperEditRequestDTO;
+using static Datinate.Shared.DatGrouperEditRequestDTO;
 
 namespace com.RADIO.Datinate.RMVC
 {

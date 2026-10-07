@@ -4,7 +4,6 @@ using datinate.app.ui;
 using Datinate.Shared;
 using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
-using static app.datinate.DatGrouperEditDelta;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
 
 namespace datinate.app
@@ -853,13 +852,13 @@ namespace datinate.app
             IReadOnlyList<IGameFamily> curatedFamiliesToRemove,
             int undoCount,
             int redoCount,
-            IReadOnlySet<IGameEntity> affectedEntities)
+            IReadOnlySet20<IGameEntity> affectedEntities)
         {
             curatedGrouperUI.PrimaryUI.ApplyDatGrouperDelta(
                 deltaNatureEnum,
                 curatedFamiliesToAdd,
                 curatedFamiliesToRemove,
-                new HashSet<IGamePart>(),
+                new ReadOnlySet20<IGamePart>(new HashSet<IGamePart>()),
                 undoCount,
                 redoCount,
                 affectedEntities);
@@ -868,7 +867,7 @@ namespace datinate.app
                 deltaNatureEnum,
                 curatedFamiliesToAdd,
                 curatedFamiliesToRemove,
-                new HashSet<IGamePart>(),
+                new ReadOnlySet20<IGamePart>(new HashSet<IGamePart>()),
                 undoCount,
                 redoCount,
                 affectedEntities);
@@ -878,10 +877,10 @@ namespace datinate.app
             DELTA_NATURE_ENUM deltaNatureEnum,
             IReadOnlyList<IGameFamily> autoFamiliesToAdd,
             IReadOnlyList<IGameFamily> autoFamiliesToRemove,
-            IReadOnlySet<IGamePart> allCuratedAutoParts,
+            IReadOnlySet20<IGamePart> allCuratedAutoParts,
             int undoCount,
             int redoCount,
-            IReadOnlySet<IGameEntity> affectedEntities)
+            IReadOnlySet20<IGameEntity> affectedEntities)
         {
             autoGrouperUI.PrimaryUI.ApplyDatGrouperDelta(
                 deltaNatureEnum,

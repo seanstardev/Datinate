@@ -1,8 +1,9 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Util;
 using RadioLibCore.RadioDat;
-using static com.RADIO.Datinate.RMVC.Shared.DatGrouperEditRequestDTO;
 using static datinate.app.DatGrouperTreeView;
+using static Datinate.Shared.DatGrouperEditRequestDTO;
 
 namespace datinate.app
 {

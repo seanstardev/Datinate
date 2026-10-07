@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Shared;
 using RMVC;
 using System.Xml;
 using static com.RADIO.Datinate.RMVC.Shared.DatinateEnums;
@@ -379,7 +380,7 @@ namespace com.RADIO.Datinate.RMVC
 
             return list;
         }
-        private IReadOnlySet<string> GetExcludedDescriptors(XmlDocument doc)
+        private IReadOnlySet20<string> GetExcludedDescriptors(XmlDocument doc)
         {
             var descriptors = doc.SelectSingleNode("/root/settings/excluded_descriptors") as XmlElement;
 
@@ -389,9 +390,9 @@ namespace com.RADIO.Datinate.RMVC
                 .Where(s => s.Length > 0)
                 .ToHashSet();
 
-            return list;
+            return ReadOnlySet20.From(list);
         }
-        private IReadOnlySet<string> GetScoringMedia(XmlDocument doc)
+        private IReadOnlySet20<string> GetScoringMedia(XmlDocument doc)
         {
             var media = doc.SelectSingleNode("/root/settings/scoring_media") as XmlElement;
 
@@ -401,7 +402,7 @@ namespace com.RADIO.Datinate.RMVC
                 .Where(s => s.Length > 0)
                 .ToHashSet();
 
-            return list;
+            return ReadOnlySet20.From(list);
         }
         private string GetComment(XmlDocument doc) 
         {
