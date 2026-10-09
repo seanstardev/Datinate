@@ -1,5 +1,6 @@
 using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app;
+using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Rmvc;
@@ -126,110 +127,120 @@ namespace com.RADIO.Datinate.App.View.customList
 
         public void ClearAll()
         {
-            categories = Array.Empty<Flag>();
-            flagStrings = Array.Empty<string>();
-            expressions = new List<DatFilter>();
+            Ui(() =>
+            {
+                categories = Array.Empty<Flag>();
+                flagStrings = Array.Empty<string>();
+                expressions = new List<DatFilter>();
 
-            totalNumberOfFiles = 0;
+                totalNumberOfFiles = 0;
 
-            sourceDatVO = null;
+                sourceDatVO = null;
 
-            searchTextinput.Text = string.Empty;
+                searchTextinput.Text = string.Empty;
 
-            excludedCount_lbl.Text = string.Empty;
-            flagSummaryLabel.Text = string.Empty;
-            categorySummaryLabel.Text = string.Empty;
-            fileCountLabel.Text = string.Empty;
-            includeSizeLabel.Text = string.Empty;
-            excludeSizeLabel.Text = string.Empty;
+                excludedCount_lbl.Text = string.Empty;
+                flagSummaryLabel.Text = string.Empty;
+                categorySummaryLabel.Text = string.Empty;
+                fileCountLabel.Text = string.Empty;
+                includeSizeLabel.Text = string.Empty;
+                excludeSizeLabel.Text = string.Empty;
 
-            freezeExpressionsUpdateCheckbox.Checked = false;
+                freezeExpressionsUpdateCheckbox.Checked = false;
 
-            expressionFiltersUI.ClearUI();
+                expressionFiltersUI.ClearUI();
 
-            flagListView_lv.Items.Clear();
+                flagListView_lv.Items.Clear();
 
-            categoryListView_lv.Items.Clear();
-            included_lv.ClearVirtualRows();
-            excluded_lv.ClearVirtualRows();
+                categoryListView_lv.Items.Clear();
+                included_lv.ClearVirtualRows();
+                excluded_lv.ClearVirtualRows();
 
-            included_lv.ResetScrollToTopAndPaint();
-            excluded_lv.ResetScrollToTopAndPaint();
+                included_lv.ResetScrollToTopAndPaint();
+                excluded_lv.ResetScrollToTopAndPaint();
 
-            included_lv.Invalidate();
-            excluded_lv.Invalidate();
+                included_lv.Invalidate();
+                excluded_lv.Invalidate();
 
-            PerformSearchInputChanges();
+                PerformSearchInputChanges();
 
-            mainContainer.Enabled = false;
+                mainContainer.Enabled = false;
 
-            flagsCategoriesTabControl.SelectedIndex = 0;
+                flagsCategoriesTabControl.SelectedIndex = 0;
 
-            suppressFlagSelectionChanged = false;
-            flagSearchText = null;
-            lastManagedList = null;
+                suppressFlagSelectionChanged = false;
+                flagSearchText = null;
+                lastManagedList = null;
 
-            completeGameArray = Array.Empty<DatGameVO>();
-            fileFlagsCache.Clear();
-            fileSizeCache.Clear();
+                completeGameArray = Array.Empty<DatGameVO>();
+                fileFlagsCache.Clear();
+                fileSizeCache.Clear();
+            });
         }
+
         public void SetView(Flag[] flags, DatVO datVO, Flag[] categories)
         {
-            ClearAll();
-
-            sourceDatVO = datVO;
-            this.categories = categories;
-            flagStrings = flags.Select(f => f.GetName()).ToArray();
-
-            var all = new HashSet<DatGameVO>();
-
-            if (flags.Length > 0)
+            Ui(() =>
             {
-                for (int i = 0; i < flags.Length; i++)
+                ClearAll();
+
+                sourceDatVO = datVO;
+                this.categories = categories;
+                flagStrings = flags.Select(f => f.GetName()).ToArray();
+
+                var all = new HashSet<DatGameVO>();
+
+                if (flags.Length > 0)
                 {
-                    var count = flags[i].GetCount();
-                    for (int j = 0; j < count; j++)
-                        all.Add(flags[i].GetGameAt(j));
+                    for (int i = 0; i < flags.Length; i++)
+                    {
+                        var count = flags[i].GetCount();
+                        for (int j = 0; j < count; j++)
+                            all.Add(flags[i].GetGameAt(j));
+                    }
                 }
-            }
-            else
-            {
-                foreach (var entry in datVO.Entries)
-                    all.Add(entry);
-            }
+                else
+                {
+                    foreach (var entry in datVO.Entries)
+                        all.Add(entry);
+                }
 
-            var completeGameList = new List<DatGameVO>(all.Count);
-            completeGameList.AddRange(all);
+                var completeGameList = new List<DatGameVO>(all.Count);
+                completeGameList.AddRange(all);
 
-            completeGameList.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+                completeGameList.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
 
-            completeGameArray = completeGameList.ToArray();
+                completeGameArray = completeGameList.ToArray();
 
-            fileSizeCache.Clear();
+                fileSizeCache.Clear();
 
-            for (int i = 0; i < completeGameArray.Length; i++)
-                fileSizeCache[completeGameArray[i].Name] = completeGameArray[i].GetTotalSize();
+                for (int i = 0; i < completeGameArray.Length; i++)
+                    fileSizeCache[completeGameArray[i].Name] = completeGameArray[i].GetTotalSize();
 
-            totalNumberOfFiles = completeGameList.Count;
-            fileCountLabel.Text = totalNumberOfFiles.ToString();
+                totalNumberOfFiles = completeGameList.Count;
+                fileCountLabel.Text = totalNumberOfFiles.ToString();
 
-            UpdateAllListViews();
-            searchTextinput.Focus();
+                UpdateAllListViews();
+                searchTextinput.Focus();
 
-            datNameLabel.Text = datVO.DatHeaderVO.Name;
-            datTypeLabel.Text = datVO.DatHeaderVO.DatTypeEnum.ToString();
-            datPathLabel.Text = datVO.DatFullpath ?? Constants.NO_VALUE;
+                datNameLabel.Text = datVO.DatHeaderVO.Name;
+                datTypeLabel.Text = datVO.DatHeaderVO.DatTypeEnum.ToString();
+                datPathLabel.Text = datVO.DatFullpath ?? Constants.NO_VALUE;
 
-            mainContainer.Enabled = true;
+                mainContainer.Enabled = true;
+            });
         }
 
         public void ApplyExpressions(DatFilter[] filters)
         {
-            freezeExpressionsUpdateCheckbox.Checked = true;
-            expressions = filters.ToList();
-            expressionFiltersUI.SetExpressionsUI(expressions);
-            freezeExpressionsUpdateCheckbox.Checked = false;
-            UpdateAllListViews();
+            Ui(() =>
+            {
+                freezeExpressionsUpdateCheckbox.Checked = true;
+                expressions = filters.ToList();
+                expressionFiltersUI.SetExpressionsUI(expressions);
+                freezeExpressionsUpdateCheckbox.Checked = false;
+                UpdateAllListViews();
+            });
         }
 
         private bool IsValidSearch()
@@ -919,8 +930,18 @@ namespace com.RADIO.Datinate.App.View.customList
         }
 
         private void flagsCategoriesTabControl_SelectedIndexChanged(object sender, EventArgs e)
+            => clearSearchTextAndUpdate();
+
+        private void Ui(Action action)
         {
-            clearSearchTextAndUpdate();
+            if (InvokeRequired)
+            {
+                if (IsDisposed || !IsHandleCreated) return;
+                BeginInvoke(action);
+                return;
+            }
+
+            action();
         }
     }
 }

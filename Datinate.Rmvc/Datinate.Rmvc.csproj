@@ -16,5 +16,15 @@
   <ItemGroup>
     <ProjectReference Include="..\Datinate.Shared\Datinate.Shared.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="Datinate.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ModelData\**\*">
+      <LogicalName>$([System.String]::Copy('Seed/%(RecursiveDir)%(Filename)%(Extension)').Replace('\', '/'))</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

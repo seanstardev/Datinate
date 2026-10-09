@@ -1,10 +1,11 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Rmvc;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     public class ExportMediator : RMediator
     {
@@ -30,9 +31,8 @@ namespace com.RADIO.Datinate.RMVC
         }
 
         private void OnBack()
-        {
-            base.ExecuteCommand(new SetDatGrouperFormActiveCmd());
-        }
+            => base.ExecuteCommand(new SetDatGrouperFormActiveCmd());
+        
         private void OnExportProject(
             IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaOptions,
             ExportSoftwareOptionsDTO softwareOptions,

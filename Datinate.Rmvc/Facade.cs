@@ -1,8 +1,12 @@
 ﻿using com.RADIO.Datinate.RMVC;
+using Datinate.Rmvc.Command;
+using Datinate.Rmvc.Mediator;
+using Datinate.Rmvc.Model;
+using Datinate.Rmvc.Proxy;
 using Datinate.Shared.Rmvc;
 using RMVC;
 
-namespace com.RADIO.Datinate
+namespace Datinate.Rmvc
 {
     public class Facade : RFacade 
     {
@@ -114,8 +118,6 @@ namespace com.RADIO.Datinate
         }
        
         protected override RCommandBase RegisterStartupCommand()
-        {
-            return new StartupCmd();
-        }
+            => new StartupCmd();
     }
 }

@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
     public class AudioProxy : IRModel
     {
@@ -12,10 +12,10 @@ namespace com.RADIO.Datinate.RMVC
 
         private string? audioEnvironmentPath = null;
 
-        public void SetProjectRootPath(string projectRootPath)
+        public void SetProjectRootPath(string projectRootPath, Assembly appAssembly)
         {
             audioEnvironmentPath = Path.Combine(projectRootPath, "VGM");
-            EnsureAudioProjects();
+            EnsureAudioProjects(appAssembly);
         }
 
         public string AudioEnvironmentPath
@@ -26,7 +26,7 @@ namespace com.RADIO.Datinate.RMVC
                     throw new InvalidOperationException(
                         "Project root path not set. Call SetProjectRootPath() first.");
 
-                return audioEnvironmentPath;
+                return audioEnvironmentPath!;
             }
         }
 
@@ -277,11 +277,9 @@ namespace com.RADIO.Datinate.RMVC
             }
         }
 
-        private void EnsureAudioProjects()
+        private void EnsureAudioProjects(Assembly assembly)
         {
             Directory.CreateDirectory(AudioEnvironmentPath);
-
-            Assembly assembly = typeof(AudioProxy).Assembly;
 
             string[] resources = assembly
                 .GetManifestResourceNames()

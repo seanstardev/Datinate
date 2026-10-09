@@ -1,7 +1,7 @@
 ﻿using Datinate.Shared;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class FetchMediaCardContentCmd : RCommand
     {
@@ -23,9 +23,14 @@ namespace com.RADIO.Datinate.RMVC
             var source = lookupSet.RadioSource;
 
             if (Facade.Instance?.MediaMediator is { } mediaMediator &&
-                Facade.Instance?.RbAuxItemLoaderProxy is { } proxy)
+                Facade.Instance?.RbAuxItemLoaderProxy is { } loaderProxy &&
+                Facade.Instance?.ModelDataProxy is { } modelDataProxy)
             {
-                string? uri = proxy.CreateURI(lookupName, source);
+                string? uri = loaderProxy.CreateURI(
+                    lookupName, 
+                    source,
+                    modelDataProxy.R2DatResources);
+                
                 string? resourceHtml = null;
 
                 if (source.IsRadioResource && 
@@ -35,7 +40,7 @@ namespace com.RADIO.Datinate.RMVC
                     var resourceDetails = radioDatModel.GetResourceDetails(source.Id, lookupName);
 
                     if (resourceDetails?.Info != null && !string.IsNullOrWhiteSpace(source.ContentPath))
-                        resourceHtml = proxy.CreateResourceHtml(
+                        resourceHtml = loaderProxy.CreateResourceHtml(
                             resourceDetails,
                             source,
                             uri,

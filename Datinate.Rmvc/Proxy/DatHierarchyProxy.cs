@@ -4,7 +4,7 @@ using RMVC;
 using System.Diagnostics;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
     public class DatHierarchyProxy : RModel
     {

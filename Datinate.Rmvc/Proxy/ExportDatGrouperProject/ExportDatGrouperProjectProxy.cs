@@ -1,3 +1,4 @@
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
@@ -7,7 +8,7 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
-    public class ExportDatGrouperProjectProxy : RModel
+    internal class ExportDatGrouperProjectProxy : RModel
     {
         private const string M3uExportFolder = "Playlist";
 
@@ -75,7 +76,7 @@ namespace com.RADIO.Datinate.RMVC
 
             string? softwareProjectPath = GetSoftwareProjectPath(projectName);
 
-            if (string.IsNullOrWhiteSpace(softwareProjectPath))
+            if (softwareProjectPath == null || string.IsNullOrWhiteSpace(softwareProjectPath))
                 return;
 
             progressCallback?.Invoke(2, 2, "Deleting existing Software Export content");

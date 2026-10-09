@@ -3,7 +3,7 @@ using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class ShowMediaCollectionCmd : RCommand
     {

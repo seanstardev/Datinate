@@ -1,5 +1,6 @@
 ﻿using RMVC;
-namespace com.RADIO.Datinate 
+
+namespace Datinate.Rmvc
 {
     public interface IShell: IRAppShell 
     {

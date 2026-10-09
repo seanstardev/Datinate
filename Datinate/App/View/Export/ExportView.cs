@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate;
 using com.RADIO.Datinate.RMVC.Shared;
+using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Rmvc;
@@ -20,7 +21,9 @@ namespace datinate.app
         public ExportView()
         {
             InitializeComponent();
+
             Facade.RegisterActor(this);
+            
             BackColor = SystemColors.Control;
             bodyPanel.BackColor = SystemColors.Control;
 

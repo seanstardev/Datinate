@@ -1,7 +1,7 @@
 ﻿using Datinate.Shared;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     /// <summary>
     /// Show the difference DAT of the left and right Dats:

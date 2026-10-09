@@ -1,4 +1,5 @@
-﻿using Datinate.Shared.Rmvc;
+﻿using Datinate.Rmvc;
+using Datinate.Shared.Rmvc;
 
 namespace com.RADIO.Datinate.App.View.problemList
 {

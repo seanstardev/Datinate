@@ -1,9 +1,9 @@
 ﻿using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
-using static com.RADIO.Datinate.RMVC.DatHierarchyProxy;
+using static Datinate.Rmvc.Proxy.DatHierarchyProxy;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     internal class LoadDatManagerCmd : RCommandAsync
     {

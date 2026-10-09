@@ -1,8 +1,10 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Dto;
+using Datinate.Shared;
 using Datinate.Shared.Radio;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
-namespace com.RADIO.Datinate.RMVC
+
+namespace Datinate.Rmvc.Command
 {
     public class LoadAutomationEnvironmentCmd : RCommandAsync
     {
@@ -36,7 +38,8 @@ namespace com.RADIO.Datinate.RMVC
             // NOTE: We need to do this because setting Exclude on GamePartVO is fragile:
             var baseFamilies = DatinateFamilyConverter.Convert(families, out partReportsDictionary);
 
-            var flagFilterSet = Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
+            var flagFilterSet = Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup 
+                ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
 
             Facade.Instance?.DatGrouperModel?.CreateSession(baseFamilies.ToList(), flagFilterSet, softwareIdDatGroupEnumDictionary);
 

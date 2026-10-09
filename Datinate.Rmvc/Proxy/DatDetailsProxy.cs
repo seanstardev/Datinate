@@ -1,12 +1,14 @@
-﻿using Datinate.Rmvc.Proxy.delegates;
+﻿using com.RADIO.Datinate.RMVC;
+using Datinate.Rmvc.Proxy.delegates;
+using Datinate.Rmvc.Util;
 using Datinate.Shared.Dat;
 using RMVC;
 using System.Diagnostics;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
-    public class DatDetailsProxy : RModel
+    internal class DatDetailsProxy : RModel
     {
         private readonly Dictionary<string, DatVO> datFullpathDatCache = new Dictionary<string, DatVO>();
 

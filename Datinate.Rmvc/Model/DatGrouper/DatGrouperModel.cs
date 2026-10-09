@@ -1,4 +1,5 @@
 ﻿using app.datinate;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
@@ -6,9 +7,9 @@ using RMVC;
 using static Datinate.Shared.DatGrouper.DatGrouperEditRequestDTO;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Model
 {
-    public class DatGrouperModel : RModel
+    internal class DatGrouperModel : RModel
     {
         public IReadOnlyList<IGameFamily> CuratedFamilies
             => overlay?.GetCuratedFamiliesAlphaSorted() ?? Array.Empty<IGameFamily>();

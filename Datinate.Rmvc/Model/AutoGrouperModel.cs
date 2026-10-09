@@ -1,4 +1,6 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Util;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Radio;
 using RMVC;
@@ -6,9 +8,9 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Model
 {
-    public class AutoGrouperModel : RModel
+    internal class AutoGrouperModel : RModel
     {
         private static readonly Regex RoundBracketValue = new(@"\(\s*([^)]*?)\s*\)", RegexOptions.Compiled);
 

@@ -1,9 +1,7 @@
-﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.RMVC;
-using Datinate.App;
+﻿using Datinate.App;
+using Datinate.Rmvc;
 using Datinate.Shared;
 using System.Runtime.InteropServices;
-using static Datinate.Shared.DatinateEnums;
 
 namespace datinate.app
 {
@@ -434,10 +432,10 @@ namespace datinate.app
             return result == DialogResult.OK;
         }
 
-        public void SetMainFormsSizeBarBackColor(Color colour)
+        public void SetMainFormsSizeBarBackColorArgb(int colour)
         {
             Ui(() => { 
-                sizeBar.BackColor = colour;
+                sizeBar.BackColor = Color.FromArgb(colour);
             });
         }
 

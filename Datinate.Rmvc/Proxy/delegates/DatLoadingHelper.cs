@@ -1,9 +1,9 @@
 ﻿using Datinate.Rmvc;
 using System.Security.Cryptography;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Util
 {
-    public sealed class RawFileData
+    internal sealed class RawFileData
     {
         public string RawText { get; }
         public string? Sha1 { get; }
@@ -15,7 +15,7 @@ namespace com.RADIO.Datinate.RMVC
         }
     }
 
-    public static class DatLoadingHelper
+    internal static class DatLoadingHelper
     {
         private const int BufferSize = 128 * 1024;
 

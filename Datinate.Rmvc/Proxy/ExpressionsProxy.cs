@@ -2,9 +2,8 @@
 using RMVC;
 using System.Xml;
 using static Datinate.Shared.DatFilterHelper;
-using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
     public class ExpressionsProxy : RModel 
     {

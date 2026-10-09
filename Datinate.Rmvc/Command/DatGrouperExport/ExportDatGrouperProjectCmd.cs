@@ -1,4 +1,5 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Dto;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
@@ -6,9 +7,9 @@ using RMVC;
 using static Datinate.Shared.DatinateEnums;
 using LookupKey = System.ValueTuple<string, string, string, string, string>;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
-    public class ExportDatGrouperProjectCmd : RCommandAsync
+    internal class ExportDatGrouperProjectCmd : RCommandAsync
     {
         private readonly IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaPriorities;
         private readonly ExportSoftwareOptionsDTO softwareOptions;

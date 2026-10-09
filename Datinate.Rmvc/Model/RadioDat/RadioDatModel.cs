@@ -1,4 +1,7 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Util;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
@@ -7,9 +10,9 @@ using System.Collections;
 using System.Diagnostics;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Model
 {
-    public class RadioDatModel : RModel
+    internal class RadioDatModel : RModel
     {
         public DatGrouperProjectDTO? ActiveProject { get; private set; } = null;
 

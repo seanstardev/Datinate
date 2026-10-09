@@ -4,7 +4,7 @@ using RMVC;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
     public class GlobalSettingsProxy : RModel
     {

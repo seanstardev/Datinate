@@ -1,7 +1,9 @@
-﻿using Datinate.Shared.Dat;
+﻿using Datinate.Rmvc.Model;
+using Datinate.Rmvc.Proxy;
+using Datinate.Shared.Dat;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class SaveCuratedCmd : RCommandAsync 
     {

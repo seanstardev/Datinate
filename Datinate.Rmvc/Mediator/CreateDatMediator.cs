@@ -1,8 +1,9 @@
-﻿using Datinate.Shared.Dat;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared.Dat;
 using Datinate.Shared.Rmvc;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     internal class CreateDatMediator : RMediator 
     {
@@ -33,9 +34,9 @@ namespace com.RADIO.Datinate.RMVC
         }
 
         private void OnCreateDatClick(DatVO datVO, string fileFullpath, bool useMachineTags) 
-        {
-            base.ExecuteCommand(
-                    new CreateNewDatCmd(datVO, fileFullpath, useMachineTags));
-        }
+            => base.ExecuteCommand(new CreateNewDatCmd(
+                datVO, 
+                fileFullpath, 
+                useMachineTags));
     }
 }

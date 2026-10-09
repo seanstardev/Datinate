@@ -1,7 +1,7 @@
 ﻿using Datinate.Shared.Rmvc;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     public class ProgressMediator : RMediator
     {

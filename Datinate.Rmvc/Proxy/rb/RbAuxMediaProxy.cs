@@ -178,7 +178,6 @@ namespace com.RADIO.Datinate.RMVC
                 nameDatEntryNameDic.Add(rawRomName, normalisedRomName);
         }
 
-
         private static Dictionary<string, string> BuildMameDictionary(string mameHashPath, DatSubsetFilter? datSubsetFilter)
         {
             var dic = new Dictionary<string, string>();

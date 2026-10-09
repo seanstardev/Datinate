@@ -1,13 +1,14 @@
-﻿using Datinate.Rmvc.Proxy.delegates;
+﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Proxy.delegates;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Radio;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
-    public class CuratedDatProxy : RModel
+    internal class CuratedDatProxy : RModel
     {
         private string? projectsPath = null;
         private string ProjectsPath

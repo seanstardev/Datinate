@@ -1,36 +1,38 @@
-﻿using Datinate.Rmvc.Proxy.delegates;
+﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Proxy.delegates;
+using Datinate.Rmvc.Util;
 using Datinate.Shared;
 using RMVC;
 using System.Reflection;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
-    public class ModelDataProxy : RModel
+    internal class ModelDataProxy : RModel
     {
         public IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> FlagFilterSetByGroup { get; private set; }
-        public IReadOnlyList<R2DatResourceDTO> R2DatResources { get; private set; } = Array.Empty<R2DatResourceDTO>();
+        public IReadOnlyList<R2DatResourceDTO> R2DatResources { get; private set; } 
+            = Array.Empty<R2DatResourceDTO>();
         private const string embeddedPrefix = "Seed/Default/";
 
         private const string R2DatResourceFilename = "R2DatResource.xml";
         private const string R2DatResourceEmbeddedFilename = @"Config/R2DatResource.xml";
-        private readonly Assembly assembly;
+        private Assembly? assembly;
         
 
         private string? projectsPath;
 
         public ModelDataProxy()
         {
-            assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-
             FlagFilterSetByGroup = new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
         }
 
 
-        public void SetProjectRootPath(string projectRootPath)
+        public void SetProjectRootPath(string projectRootPath, Assembly appAssembly)
         {
-            this.projectsPath = projectRootPath;
-            
+            assembly = appAssembly;
+            projectsPath = projectRootPath;
+
             Directory.CreateDirectory(Path.Combine(projectRootPath, "Flag"));
 
             EnsureExportedMissingFiles(DatinateHelper.IsDebugBuild);

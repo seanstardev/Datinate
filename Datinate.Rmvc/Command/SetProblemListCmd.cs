@@ -1,7 +1,8 @@
-﻿using RMVC;
+﻿using Datinate.Rmvc.Mediator;
+using RMVC;
 using System.Diagnostics;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     internal class SetProblemListCmd : RCommand
     {

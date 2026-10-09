@@ -1,4 +1,5 @@
 ﻿using com.RADIO.Datinate;
+using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
@@ -30,6 +31,7 @@ namespace datinate.app
             InitializeComponent();
 
             Facade.RegisterActor(this);
+
             listView.AddColumns(
                 new ColumnHeaderVO.NameEnum[] {
                     ColumnHeaderVO.NameEnum.Folder

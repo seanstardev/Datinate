@@ -2,7 +2,7 @@
 using RMVC;
 using System.Diagnostics;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class ShowRbPartGroupingReportsCmd : RCommand
     {

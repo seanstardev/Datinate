@@ -1,3 +1,5 @@
+using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Util;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
@@ -8,7 +10,7 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC
 {
-    public class ExportSoftwareDelegate
+    internal class ExportSoftwareDelegate
     {
         public void Export(
             IReadOnlyList<IGameFamily> curatedFamilies,

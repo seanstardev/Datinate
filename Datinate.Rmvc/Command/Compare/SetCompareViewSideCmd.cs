@@ -1,8 +1,10 @@
-﻿using Datinate.Shared.Dat;
+﻿using Datinate.Rmvc.Mediator;
+using Datinate.Rmvc.Model;
+using Datinate.Shared.Dat;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     internal class SetCompareViewSideCmd:RCommand 
     {

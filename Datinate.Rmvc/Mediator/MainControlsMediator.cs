@@ -4,7 +4,7 @@ using Datinate.Shared.Rmvc;
 using RMVC;
 using static Datinate.Shared.UnitFormatHelper;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     internal class MainControlsMediator : RMediator
     {

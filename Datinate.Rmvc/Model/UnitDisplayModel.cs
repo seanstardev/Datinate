@@ -1,11 +1,10 @@
 ﻿using Datinate.Shared;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Model
 {
     internal class UnitDisplayModel : RModel 
     {
-
         protected UnitFormatHelper.Unit unit = UnitFormatHelper.Unit.B;
 
         protected bool showUnitInCells = false;

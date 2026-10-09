@@ -1,9 +1,10 @@
-﻿using Datinate.Shared.Dat;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared.Dat;
 using RMVC;
 using System.Diagnostics;
 using System.Xml;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
     internal class CreateDatProxy : RModel 
     {
@@ -96,9 +97,8 @@ namespace com.RADIO.Datinate.RMVC
             doc.Save(outStream);
             outStream.Close();
 
-            base.ExecuteCommand(
-                    new ShowMessageCmd("The DAT file has been created.\r" + fileFullpath, ShowMessageCmd.MessageTitleEnum.Ok
-                    ));
+            base.ExecuteCommand(new ShowMessageCmd(
+                "The DAT file has been created.\r" + fileFullpath, ShowMessageCmd.MessageTitleEnum.Ok));
         }
 
         bool getNotEmpty(string str) 

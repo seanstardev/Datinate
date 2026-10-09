@@ -1,4 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC;
+using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Util;
 using Datinate.Shared;
 using Datinate.Shared.Radio;
 using System.Xml;
@@ -13,7 +15,7 @@ namespace Datinate.Rmvc.Proxy.delegates
         private readonly IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSetByGroup;
         private readonly IReadOnlyDictionary<string, ISourceDefinition> sourceIdContentDictionary;
 
-        public RadioDatImporterDelegate(
+        internal RadioDatImporterDelegate(
             string radioDatXmlFullpath,
             IReadOnlySet20<string> descriptorDefinitions,
             IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSetByGroup,

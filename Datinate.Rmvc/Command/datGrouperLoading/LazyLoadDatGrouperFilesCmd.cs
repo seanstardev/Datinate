@@ -3,7 +3,7 @@ using Datinate.Shared.Dat;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class LazyLoadDatGrouperFilesCmd : RCommandAsync
     {

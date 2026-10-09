@@ -1,10 +1,11 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Rmvc;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     internal class CustomListMediator : RMediator
     {

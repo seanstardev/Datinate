@@ -1,11 +1,12 @@
 ﻿using Datinate.Rmvc.Command;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 using System.Diagnostics;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     internal class StartDatGrouperCmd : RCommandAsync 
     {

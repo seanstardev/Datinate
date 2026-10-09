@@ -1,11 +1,12 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Rmvc;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     internal class DatSummaryMediator : RMediator 
     {
@@ -33,20 +34,15 @@ namespace com.RADIO.Datinate.RMVC
             view?.PopulateTable(datSummaries, unit, showUnitInCell);
         }
 
-        public void ClearView() {
-            view?.ClearView();
-        }
+        public void ClearView()
+            => view?.ClearView();
 
         private void OnDatSummarySelected(DatSummaryVO summary) 
-        {
-            base.ExecuteCommand(new LoadDatDetailsCmd(summary.DatFullpath));
-        }
-
+            => base.ExecuteCommand(new LoadDatDetailsCmd(summary.DatFullpath));
+        
         private void OnHomeEvt()
-        {
-            base.ExecuteCommand(new SwitchDatViewCmd(DAT_SCREEN_ENUM.Landing));
-        }
-
+            => base.ExecuteCommand(new SwitchDatViewCmd(DAT_SCREEN_ENUM.Landing));
+        
         protected override void Initialsed()
         {
             if (view != null)

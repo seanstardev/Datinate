@@ -1,7 +1,7 @@
 ﻿using Datinate.Shared;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class UpdateMediaCollectionItemCmd : RCommand
     {

@@ -1,5 +1,5 @@
 ﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.RMVC;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
@@ -7,7 +7,7 @@ using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class BuildSmartSoftwareDatsCmd : RCommandAsync
+    internal class BuildSmartSoftwareDatsCmd : RCommandAsync
     {
         public IReadOnlyList<DatAdvanced>? DatAdvancedCollection;
         private readonly DatGrouperProjectDTO projectVO;

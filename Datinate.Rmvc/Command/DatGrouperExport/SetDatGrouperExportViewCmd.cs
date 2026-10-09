@@ -4,7 +4,7 @@ using RMVC;
 using System.Text;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class SetDatGrouperExportViewCmd : RCommandAsync
     {

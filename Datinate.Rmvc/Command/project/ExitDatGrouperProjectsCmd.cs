@@ -1,7 +1,7 @@
 ﻿using Datinate.Rmvc.Command;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class ExitDatGrouperProjectsCmd : RCommandAsync
     {

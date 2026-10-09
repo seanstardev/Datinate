@@ -1,7 +1,7 @@
 ﻿using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Model
 {
     public class DatGrouperSessionModel : RModel
     {

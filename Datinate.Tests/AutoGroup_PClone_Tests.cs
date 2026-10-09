@@ -1,8 +1,9 @@
-﻿using com.RADIO.Datinate.RMVC;
-using datinate.shared;
-using Datinate.Shared;
+﻿using Datinate.Shared;
+using Datinate.Rmvc.Model;
+using Datinate.Rmvc.Dto;
 using System.Diagnostics;
 using static Datinate.Shared.DatinateEnums;
+
 namespace Datinate.Tests
 {
     public class AutoGroup_PClone_Tests

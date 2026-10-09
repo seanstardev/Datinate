@@ -4,9 +4,9 @@ using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Util
 {
-    public static class DatGrouperMediaExportDelegate
+    internal static class DatGrouperMediaExportDelegate
     {
         private const bool CountOnlyAssignedEntries = true;
 

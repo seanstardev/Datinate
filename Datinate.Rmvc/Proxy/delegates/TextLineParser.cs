@@ -1,6 +1,6 @@
-﻿namespace com.RADIO.Datinate.RMVC
+﻿namespace Datinate.Rmvc.Util
 {
-    public static class TextLineParser
+    internal static class TextLineParser
     {
         public static IReadOnlyCollection<string> Parse(string content)
         {

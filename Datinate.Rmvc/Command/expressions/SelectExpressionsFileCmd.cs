@@ -1,7 +1,7 @@
 ﻿using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     internal class SelectExpressionsFileCmd :RCommandAsync
     {
@@ -23,16 +23,16 @@ namespace com.RADIO.Datinate.RMVC
             var expressionsFullpath = await shell.ShowLoadExpressionsDialog(
                 expressionsProxy.ExpressionsPath);
 
-            if (string.IsNullOrWhiteSpace(expressionsFullpath))
+            if (expressionsFullpath == null || string.IsNullOrWhiteSpace(expressionsFullpath))
                 return;
 
             var filters =
-                expressionsProxy.FetchExpressions(expressionsFullpath!);
+                expressionsProxy.FetchExpressions(expressionsFullpath);
 
             if (expressionsFileTargetEnum == EXPRESSIONS_FILE_TARGET_ENUM.CUSTOM_LIST)
                 base.ExecuteCommand(new ApplyExpressionsFileCmd(filters));
             else
-                base.ExecuteCommand(new SetProjectLoaderDatExpressionsCmd(expressionsFullpath!));
+                base.ExecuteCommand(new SetProjectLoaderDatExpressionsCmd(expressionsFullpath));
         }
     }
 }

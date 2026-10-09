@@ -1,8 +1,9 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared;
 using Datinate.Shared.Rmvc;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     public class Media2Mediator : RMediator
     {

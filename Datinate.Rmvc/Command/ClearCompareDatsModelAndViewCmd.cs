@@ -1,6 +1,7 @@
-﻿using RMVC;
+﻿using Datinate.Rmvc.Model;
+using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     internal class ClearCompareDatsModelAndViewCmd : RCommand 
     {

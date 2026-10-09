@@ -23,26 +23,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Rmvc\ModelData\Default\**\*" />
-    <EmbeddedResource Include="Rmvc\ModelData\Default\**\*">
-      <LogicalName>Seed/Default/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Rmvc\ModelData\VGM\**\*" />
-    <EmbeddedResource Include="Rmvc\ModelData\VGM\**\*">
-      <LogicalName>Seed/VGM/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3712-prerelease" />
     <PackageReference Include="seanstardev.RMVC" Version="1.1.0" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Datinate.Rmvc\Datinate.Rmvc.csproj" />
     <ProjectReference Include="..\Datinate.Shared\Datinate.Shared.csproj" />
   </ItemGroup>
 

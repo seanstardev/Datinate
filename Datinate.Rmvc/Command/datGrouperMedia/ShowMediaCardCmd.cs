@@ -1,7 +1,7 @@
 ﻿using Datinate.Shared;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
     public class ShowMediaCardCmd : RCommand
     {
@@ -37,9 +37,12 @@ namespace com.RADIO.Datinate.RMVC
             string? url = null;
             string? resourceHtml = null;
 
-            if (!string.IsNullOrWhiteSpace(lookup))
+            if (lookup != null && !string.IsNullOrWhiteSpace(lookup))
             {
-                url = mediaProxy.CreateURI(lookup, source);
+                url = mediaProxy.CreateURI(
+                    lookup, 
+                    source,
+                    Facade.Instance?.ModelDataProxy?.R2DatResources ?? new List<R2DatResourceDTO>());
             }
 
             if (url == null) return;

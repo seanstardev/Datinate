@@ -5,14 +5,12 @@ namespace com.RADIO.Datinate.RMVC
 {
     public class RbAuxItemLoaderProxy : RModel
     {
-        public string? CreateURI(string lookupName, RadioSourceDTO source)
+        public string? CreateURI(
+            string lookupName, 
+            RadioSourceDTO source,
+            IReadOnlyList<R2DatResourceDTO> r2DatResources)
         {
-            var resources = Facade.Instance?.ModelDataProxy?.R2DatResources;
-            
-            if (resources == null)
-                return null;
-
-            var uri = DatinateMediaResolver.CreateURI(lookupName, source, resources);
+            var uri = DatinateMediaResolver.CreateURI(lookupName, source, r2DatResources);
             return uri;
         }
 

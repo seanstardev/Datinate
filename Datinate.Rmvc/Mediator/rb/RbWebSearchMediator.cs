@@ -1,8 +1,9 @@
-﻿using Datinate.Shared.Rmvc;
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared.Rmvc;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Mediator
 {
     public class RbWebSearchMediator : RMediator
     {

@@ -1,11 +1,11 @@
-﻿using Datinate.Shared;
+﻿using Datinate.Rmvc.Model;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
-
     /**
      * Take the local left and right dats in the comparison view and compare them:
      */

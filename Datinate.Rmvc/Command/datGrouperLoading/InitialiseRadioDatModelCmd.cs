@@ -1,10 +1,13 @@
-﻿using Datinate.Shared.DatGrouper;
+﻿using com.RADIO.Datinate.RMVC;
+using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Model;
+using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
-    public class InitialiseRadioDatModelCmd : RCommand 
+    internal class InitialiseRadioDatModelCmd : RCommand 
     {
         private readonly DatGrouperProjectDTO projectVO;
         private readonly AutoGrouperTraceStore? autoGroupTraceStore;

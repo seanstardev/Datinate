@@ -2,7 +2,7 @@
 using Datinate.Shared.DatGrouper;
 using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Model
 {
     internal class ActiveDatsModel : RModel
     {

@@ -1,5 +1,6 @@
 ﻿using com.RADIO.Datinate.RMVC.Shared;
 using datinate.app;
+using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Rmvc;
@@ -32,13 +33,12 @@ namespace com.RADIO.Datinate.App.View.compare
             UIHelper.PopSplitter(splitContainer2);
 
             UIHelper.PopButton(compareBtn);
+
             Facade.RegisterActor(this);
         }
         protected void HandleDisposing()
-        {
-            Facade.UnregisterActor(this);
-        }
-
+            => Facade.UnregisterActor(this);
+        
         public void ClearView() 
         {
             leftUI.ClearUI();

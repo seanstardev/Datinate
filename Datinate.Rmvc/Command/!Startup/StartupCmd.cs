@@ -1,27 +1,39 @@
 ﻿using RMVC;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Command
 {
-    public class StartupCmd : RCommand 
+    public class StartupCmd : RCommand
     {
-        protected override void Run() 
-        {
-            var projectRootPath = Facade.Instance?.GlobalSettingsProxy?.ProjectRoot ?? null;
+        protected override void Run()
+        {   
 
-            if (projectRootPath != null)
-            {
-                Facade.Instance?.DatDbProxy?.SetProjectRootPath(projectRootPath);
+            var facade = Facade.Instance;
+            var projectRootPath = facade?.GlobalSettingsProxy?.ProjectRoot;
 
-                Facade.Instance?.ModelDataProxy?.SetProjectRootPath(projectRootPath);
+            if (facade == null || projectRootPath == null)
+                return;
 
-                Facade.Instance?.ExpressionsProxy?.SetProjectRootPath(projectRootPath);
-                Facade.Instance?.ProjectProxy?.SetProjectRootPath(projectRootPath);
-                Facade.Instance?.CuratedDatProxy?.SetProjectRootPath(projectRootPath);
-                Facade.Instance?.ExportDatGrouperProjectProxy?.SetProjectRootPath(projectRootPath);
-                Facade.Instance?.AudioProxy?.SetProjectRootPath(projectRootPath);
 
-                Facade.Instance?.GlobalSettingsProxy?.Startup();
-            }
+            // Bundled seed resources are embedded in Datinate.Rmvc.
+            var assembly = typeof(Facade).Assembly;
+
+
+            facade.DatDbProxy?.SetProjectRootPath(projectRootPath);
+
+            facade.ModelDataProxy?.SetProjectRootPath(
+                projectRootPath,
+                assembly);
+
+            facade.ExpressionsProxy?.SetProjectRootPath(projectRootPath);
+            facade.ProjectProxy?.SetProjectRootPath(projectRootPath);
+            facade.CuratedDatProxy?.SetProjectRootPath(projectRootPath);
+            facade.ExportDatGrouperProjectProxy?.SetProjectRootPath(projectRootPath);
+
+            facade.AudioProxy?.SetProjectRootPath(
+                projectRootPath,
+                assembly);
+
+            facade.GlobalSettingsProxy?.Startup();
         }
     }
 }
