@@ -1,5 +1,6 @@
 ﻿using datinate.app;
 using Datinate.Properties;
+using Datinate.Shared;
 using static Datinate.Shared.DatinateEnums;
 
 namespace com.RADIO.Datinate.RMVC.Shared
@@ -44,59 +45,31 @@ namespace com.RADIO.Datinate.RMVC.Shared
 
         public static Bitmap? GetMediaIconBmp(MEDIA_TYPE_ENUM mediaTypeEnum)
         {
-            return mediaTypeEnum switch
+            var iconType = DatinateHelper.GetSupportedMediaIconType(mediaTypeEnum);
+
+            if (!iconType.HasValue)
+                return null;
+
+            // Shared selects the icon type; WinForms supplies the corresponding asset.
+            return iconType.Value switch
             {
-                MEDIA_TYPE_ENUM.NOT_SET => null,
                 MEDIA_TYPE_ENUM.Advert => Resources.media_icons_Advert,
-
-                //MEDIA_TYPE_ENUM.Artwork or
-                //MEDIA_TYPE_ENUM.Samples => Resources.media_icons_Support,
-
-                MEDIA_TYPE_ENUM.Box or
-                MEDIA_TYPE_ENUM.Box_Back or
-                MEDIA_TYPE_ENUM.Box_Bottom or
-                MEDIA_TYPE_ENUM.Box_Inlay or
-                MEDIA_TYPE_ENUM.Box_Side or
-                MEDIA_TYPE_ENUM.Box_Top => Resources.media_icons_Box,
-
-                //MEDIA_TYPE_ENUM.Cabinet or
-                //MEDIA_TYPE_ENUM.Control_Panel or
-                //MEDIA_TYPE_ENUM.Flyer or
-                //MEDIA_TYPE_ENUM.Marquee or
-                //MEDIA_TYPE_ENUM.Pcb => Resources.media_icons_Box,
-
+                MEDIA_TYPE_ENUM.Box => Resources.media_icons_Box,
                 MEDIA_TYPE_ENUM.Info => Resources.media_icons_Web_info,
                 MEDIA_TYPE_ENUM.Info_About => Resources.media_icons_Web_Info_description,
                 MEDIA_TYPE_ENUM.Info_Credits => Resources.media_icons_Web_Info_credits,
                 MEDIA_TYPE_ENUM.Info_Releases => Resources.media_icons_Web_Info_releases,
                 MEDIA_TYPE_ENUM.Thumb => Resources.media_icons_Icon,
-
-                MEDIA_TYPE_ENUM.Manual or
-                MEDIA_TYPE_ENUM.Manual_Front or
-                MEDIA_TYPE_ENUM.Manual_Back => Resources.media_icons_Manual,
-
-                MEDIA_TYPE_ENUM.Media or
-                MEDIA_TYPE_ENUM.Media_Back or
-                MEDIA_TYPE_ENUM.Media_Label or
-                MEDIA_TYPE_ENUM.Media_Top => Resources.media_icons_Media_cartridge_2,
-
-                MEDIA_TYPE_ENUM.Other or
-                //ALL_TYPES_ENUM.Other_Advertisement or
-                MEDIA_TYPE_ENUM.Other_Hardware or
-                MEDIA_TYPE_ENUM.Other_Overlay or
-                MEDIA_TYPE_ENUM.Other_Reference_Card => Resources.media_icons_Other,
-
+                MEDIA_TYPE_ENUM.Manual => Resources.media_icons_Manual,
+                MEDIA_TYPE_ENUM.Media => Resources.media_icons_Media_cartridge_2,
+                MEDIA_TYPE_ENUM.Other => Resources.media_icons_Other,
                 MEDIA_TYPE_ENUM.Other_Map => Resources.media_icons_Map,
-
-                //ALL_TYPES_ENUM.Screen or
-                MEDIA_TYPE_ENUM.Snap or
-                MEDIA_TYPE_ENUM.Title => Resources.media_icons_Snap,
-
+                MEDIA_TYPE_ENUM.Snap => Resources.media_icons_Snap,
                 MEDIA_TYPE_ENUM.Soundtrack => Resources.media_icons_Soundtrack,
-
                 MEDIA_TYPE_ENUM.Video => Resources.media_icons_Video,
 
-                _ => null
+                _ => throw new InvalidOperationException(
+                    "No WinForms asset mapping for icon type: " + iconType.Value)
             };
         }
 

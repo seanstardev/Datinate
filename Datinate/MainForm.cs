@@ -1,8 +1,9 @@
 ﻿using com.RADIO.Datinate;
-using com.RADIO.Datinate.RMVC.Shared;
+using com.RADIO.Datinate.RMVC;
 using Datinate.App;
 using Datinate.Shared;
 using System.Runtime.InteropServices;
+using static Datinate.Shared.DatinateEnums;
 
 namespace datinate.app
 {
@@ -296,6 +297,43 @@ namespace datinate.app
                 else
                     Show();
             });
+        }// TODO: Is this needed?
+        public void ApplicationDoEventsHack()
+            => Application.DoEvents();
+
+        public Task<string?> ShowSaveExpressionsDialog(string path)
+        {
+            return ShowUiDialogAsync<string?>(() =>
+            {
+                using var dialog = new SaveFileDialog
+                {
+                    Filter = "XML Files (*.xml)|*.xml",
+                    Title = "Select Expressions XML",
+                    InitialDirectory = path
+                };
+
+                return dialog.ShowDialog(this) == DialogResult.OK
+                    ? dialog.FileName
+                    : null;
+            });
+        }
+
+        public Task<string?> ShowLoadExpressionsDialog(string path)
+        {
+            return ShowUiDialogAsync<string?>(() =>
+            {
+                using var dialog = new OpenFileDialog
+                {
+                    Filter = "XML Files (*.xml)|*.xml",
+                    Multiselect = false,
+                    Title = "Select Expressions XML",
+                    InitialDirectory = path
+                };
+
+                return dialog.ShowDialog(this) == DialogResult.OK
+                    ? dialog.FileName
+                    : null;
+            });
         }
 
         public Task<bool> ShowMessageBox(
@@ -303,39 +341,64 @@ namespace datinate.app
             string message,
             bool isYesNo = false)
         {
-            if (Environment.CurrentManagedThreadId == uiThreadId)
-            {
-                return Task.FromResult(
-                    ShowMessageBoxInternal(
-                        title,
-                        message,
-                        isYesNo));
-            }
+            return ShowUiDialogAsync(
+                () => ShowMessageBoxInternal(title, message, isYesNo));
+        }
 
-            var tcs = new TaskCompletionSource<bool>(
+        private Task<T> ShowUiDialogAsync<T>(Func<T> showDialog)
+        {
+            var tcs = new TaskCompletionSource<T>(
                 TaskCreationOptions.RunContinuationsAsynchronously);
 
-            Ui(() =>
+            void ShowOnUiThread()
             {
                 try
                 {
-                    bool result =
-                        ShowMessageBoxInternal(
-                            title,
-                            message,
-                            isYesNo);
+                    if (IsDisposed || Disposing)
+                        throw new ObjectDisposedException(nameof(MainForm));
 
-                    tcs.TrySetResult(result);
+                    tcs.TrySetResult(showDialog());
                 }
                 catch (Exception ex)
                 {
                     tcs.TrySetException(ex);
                 }
-            });
+            }
+
+            try
+            {
+                if (Environment.CurrentManagedThreadId == uiThreadId)
+                {
+                    ShowOnUiThread();
+                }
+                else if (IsDisposed || Disposing)
+                {
+                    tcs.TrySetException(
+                        new ObjectDisposedException(nameof(MainForm)));
+                }
+                else if (IsHandleCreated)
+                {
+                    BeginInvoke((Action)ShowOnUiThread);
+                }
+                else if (uiContext != null)
+                {
+                    uiContext.Post(_ => ShowOnUiThread(), null);
+                }
+                else
+                {
+                    tcs.TrySetException(
+                        new InvalidOperationException(
+                            "The UI is not ready to show a dialog."));
+                }
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
 
             return tcs.Task;
         }
-
+        
         private bool ShowMessageBoxInternal(
             string title,
             string message,
@@ -379,10 +442,8 @@ namespace datinate.app
         }
 
         public void HandleCompareFormClose()
-        {
-            BringToFront();
-        }
-
+            => BringToFront();
+        
         private void HandleProjectsFormCloseRequest()
         {
 

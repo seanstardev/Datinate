@@ -1,11 +1,4 @@
-﻿using com.RADIO.Datinate.App.View.compare;
-using com.RADIO.Datinate.App.View.createDat;
-using com.RADIO.Datinate.App.View.customList;
-using com.RADIO.Datinate.App.View.datDetails.addToProject;
-using com.RADIO.Datinate.App.View.problemList;
-using com.RADIO.Datinate.App.View.projects.datPathsUpdate;
-using datinate.app;
-using RMVC;
+﻿using RMVC;
 
 namespace com.RADIO.Datinate 
 {

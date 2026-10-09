@@ -1,0 +1,244 @@
+﻿using app.datinate;
+using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
+using Datinate.Shared.Radio;
+using RMVC;
+using static Datinate.Shared.DatGrouper.DatGrouperEditRequestDTO;
+using static Datinate.Shared.DatinateEnums;
+
+namespace com.RADIO.Datinate.RMVC
+{
+    public class DatGrouperModel : RModel
+    {
+        public IReadOnlyList<IGameFamily> CuratedFamilies
+            => overlay?.GetCuratedFamiliesAlphaSorted() ?? Array.Empty<IGameFamily>();
+
+        private CurationOverlay? overlay;
+
+        public void CreateSession(
+            IReadOnlyList<IGameFamily> families,
+            IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSet,
+            IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary)
+        {
+            overlay = new CurationOverlay(
+                families, flagFilterSet, softwareIdDatGroupEnumDictionary);
+        }
+
+        public bool WouldUndoLoseMediaAssociations()
+            => overlay?.WouldUndoLoseMediaAssociations() ?? false;
+
+        public bool WouldRedoLoseMediaAssociations()
+            => overlay?.WouldRedoLoseMediaAssociations() ?? false;
+
+        public DatGrouperEditDelta? ApplyUndo()
+            => overlay?.ApplyUndo();
+
+        public DatGrouperEditDelta? ApplyRedo()
+            => overlay?.ApplyRedo();
+
+        public DatGrouperEditDelta? PerformUpdate(DatGrouperEditRequestDTO dto)
+        {
+            if (overlay == null || dto.EditActionEnum == EDIT_ACTION_ENUM.NOT_SET)
+                return null;
+
+            DatGrouperEditDelta? delta = null;
+
+            switch (dto.EditActionEnum)
+            {
+                // Reset
+                case EDIT_ACTION_ENUM.FamilyReset:
+                    if (dto.SourceFamily != null)
+                        delta = overlay.TryResetFamily(dto.SourceFamily);
+                    break;
+
+                case EDIT_ACTION_ENUM.GameReset:
+                    if (dto.SourceGame != null)
+                        delta = overlay.TryResetGame(dto.SourceGame);
+                    break;
+
+                case EDIT_ACTION_ENUM.PartReset:
+                    if (dto.SourcePart != null)
+                        delta = overlay.TryResetPart(dto.SourcePart);
+                    break;
+
+                // Family
+                case EDIT_ACTION_ENUM.FamilyAdd:
+                    if (dto.SourceFamily != null)
+                        delta = overlay.TryAddFamily(dto.SourceFamily);
+                    break;
+
+                case EDIT_ACTION_ENUM.FamilyMergeAsMain:
+                    if (dto.SourceFamily != null && dto.TargetFamily != null)
+                        delta = overlay.TryMoveAndMergeFamily(
+                            dto.SourceFamily,
+                            dto.TargetFamily,
+                            true);
+                    break;
+
+                case EDIT_ACTION_ENUM.FamilyMergeAsSub:
+                    if (dto.SourceFamily != null && dto.TargetFamily != null)
+                        delta = overlay.TryMoveAndMergeFamily(
+                            dto.SourceFamily,
+                            dto.TargetFamily,
+                            false);
+                    break;
+
+                // Game
+                case EDIT_ACTION_ENUM.GameMoveAfter:
+                    if (dto.SourceGame != null && dto.TargetGame != null)
+                        delta = overlay.TryAddOrMoveGameAfter(
+                            dto.SourceGame,
+                            dto.TargetGame);
+                    break;
+
+                case EDIT_ACTION_ENUM.GameMoveBefore:
+                    if (dto.SourceGame != null && dto.TargetGame != null)
+                        delta = overlay.TryAddOrMoveGameBefore(
+                            dto.SourceGame,
+                            dto.TargetGame);
+                    break;
+
+                case EDIT_ACTION_ENUM.GameMoveToBottom:
+                    if (dto.SourceGame != null)
+                        delta = overlay.TryMoveGameToTopOrBottom(
+                            dto.SourceGame,
+                            false);
+                    break;
+
+                case EDIT_ACTION_ENUM.GameMoveToTop:
+                    if (dto.SourceGame != null)
+                        delta = overlay.TryMoveGameToTopOrBottom(
+                            dto.SourceGame,
+                            true);
+                    break;
+
+                case EDIT_ACTION_ENUM.GameAddAsNewFamily:
+                    if (dto.SourceGame != null)
+                        delta = overlay.TryAddGameAsNewFamily(
+                            dto.SourceGame);
+                    break;
+
+                // Part
+                case EDIT_ACTION_ENUM.PartMoveAfter:
+                    if (dto.SourcePart != null && dto.TargetPart != null)
+                        delta = overlay.TryAddOrMovePartAfter(
+                            dto.SourcePart,
+                            dto.TargetPart);
+                    break;
+
+                case EDIT_ACTION_ENUM.PartMoveBefore:
+                    if (dto.SourcePart != null && dto.TargetPart != null)
+                        delta = overlay.TryAddOrMovePartBefore(
+                            dto.SourcePart,
+                            dto.TargetPart);
+                    break;
+
+                // Part Include / Exclude
+                case EDIT_ACTION_ENUM.PartSetAsInclude:
+                    if (dto.SourcePart != null)
+                        delta = overlay.SetCuratedPartAsInclude(
+                            dto.SourcePart);
+                    break;
+
+                case EDIT_ACTION_ENUM.PartSetAsExclude:
+                    if (dto.SourcePart != null)
+                        delta = overlay.SetCuratedPartAsExclude(
+                            dto.SourcePart);
+                    break;
+            }
+
+            return delta;
+        }
+
+        public DatGrouperEditDelta? ImportCurated(
+            IEnumerable<IGameFamily> importedFamilies,
+            out Dictionary<string, IGamePart?> errorReport)
+        {
+            if (overlay == null)
+            {
+                errorReport = new Dictionary<string, IGamePart?>();
+                return null;
+            }
+
+            return overlay.ImportCurated(
+                importedFamilies,
+                out errorReport);
+        }
+
+        public bool WouldPerformUpdateLoseMediaAssociations(
+            DatGrouperEditRequestDTO dto)
+        {
+            if (overlay == null)
+                return false;
+
+            switch (dto.EditActionEnum)
+            {
+                case EDIT_ACTION_ENUM.FamilyReset:
+                    return dto.SourceFamily != null &&
+                           overlay.WouldResetFamilyLoseMediaAssociations(
+                               dto.SourceFamily);
+
+                case EDIT_ACTION_ENUM.GameReset:
+                    return dto.SourceGame != null &&
+                           overlay.WouldResetGameLoseMediaAssociations(
+                               dto.SourceGame);
+
+                case EDIT_ACTION_ENUM.PartReset:
+                    return dto.SourcePart != null &&
+                           overlay.WouldResetPartLoseMediaAssociations(
+                               dto.SourcePart);
+
+                default:
+                    return false;
+            }
+        }
+
+        public void Teardown()
+        {
+            overlay = null;
+        }
+
+        public IReadOnlySet20<IGameFamily> GetUpdateMediaAssociationRisks(
+            DatGrouperEditRequestDTO dto)
+        {
+            if (overlay == null)
+                return ReadOnlySet20.Empty<IGameFamily>();
+
+            switch (dto.EditActionEnum)
+            {
+                case EDIT_ACTION_ENUM.FamilyReset:
+                    return dto.SourceFamily != null
+                        ? overlay.GetResetFamilyMediaAssociationRisks(
+                            dto.SourceFamily)
+                        : ReadOnlySet20.Empty<IGameFamily>();
+
+                case EDIT_ACTION_ENUM.GameReset:
+                    return dto.SourceGame != null
+                        ? overlay.GetResetGameMediaAssociationRisks(
+                            dto.SourceGame)
+                        : ReadOnlySet20.Empty<IGameFamily>();
+
+                case EDIT_ACTION_ENUM.PartReset:
+                    return dto.SourcePart != null
+                        ? overlay.GetResetPartMediaAssociationRisks(
+                            dto.SourcePart)
+                        : ReadOnlySet20.Empty<IGameFamily>();
+
+                default:
+                    return ReadOnlySet20.Empty<IGameFamily>();
+            }
+        }
+
+        public IReadOnlySet20<IGameFamily> GetUndoMediaAssociationRisks()
+        {
+            return overlay?.GetUndoMediaAssociationRisks()
+                   ?? ReadOnlySet20.Empty<IGameFamily>();
+        }
+
+        public IReadOnlySet20<IGameFamily> GetRedoMediaAssociationRisks()
+        {
+            return overlay?.GetRedoMediaAssociationRisks()
+                   ?? ReadOnlySet20.Empty<IGameFamily>();
+        }
+    }
+}

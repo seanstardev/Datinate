@@ -1,0 +1,93 @@
+﻿using Datinate.Rmvc.Command;
+using Datinate.Shared;
+using Datinate.Shared.DatGrouper;
+using RMVC;
+using System.Diagnostics;
+using static Datinate.Shared.DatinateEnums;
+
+namespace com.RADIO.Datinate.RMVC
+{
+    internal class StartDatGrouperCmd : RCommandAsync 
+    {
+        private readonly DatGrouperProjectDTO projectVO;
+
+        public StartDatGrouperCmd(DatGrouperProjectDTO projectVO) 
+        {
+            this.projectVO = projectVO;
+        }
+
+        protected override async Task RunAsync()
+        {
+            base.ExecuteCommand(new ClearDatGrouperSessionCmd());
+
+            var pathsCheckCmd = new CheckDatGrouperProjectValidCmd(projectVO);
+            base.ExecuteCommand(pathsCheckCmd);
+
+            // TODO: At least debug print this:
+            if (pathsCheckCmd.AllDatAndExpressionFilesExist == false)
+                return;
+
+            Debug.WriteLine($"[TIMING] Start: AutoGrouper.");
+
+            var stopwatch = Stopwatch.StartNew();
+
+            var autoGroupModel = Facade.Instance?.AutoGrouperModel;
+            var appDataProxy = Facade.Instance?.ModelDataProxy;
+            
+            if (autoGroupModel == null || appDataProxy == null) 
+                return;
+
+            base.ExecuteCommand(new ShowProgressCmd("Loading Project DATs.", 1, 4));
+
+            var cmd = new BuildSmartSoftwareDatsCmd(projectVO);
+            await base.ExecuteCommandAsync(cmd);
+
+            var datAdvancedSoftwareCollection = cmd.DatAdvancedCollection;
+
+            if (datAdvancedSoftwareCollection == null) throw new Exception();
+
+            var keys = new HashSet<string>(StringComparer.Ordinal);
+
+            base.ExecuteCommand(new ShowProgressCmd("Running DAT Grouper.", 2, 4));
+
+            var families = autoGroupModel.Build(
+                new AutoGrouperOptions(),
+                appDataProxy.FlagFilterSetByGroup,
+                datAdvancedSoftwareCollection,
+                Array.Empty<DatAdvanced>());
+
+            if (Facade.Instance?.DatGrouperSessionModel is { } sessionModel)
+            {
+                sessionModel.PartsTotal = DatinateFamilyHelper.GetTotalParts(families);
+
+                if (Facade.Instance?.DatGrouperControlsMediator is { } controlsMediator)
+                    controlsMediator.SetCompletionStats(0, sessionModel.PartsTotal);
+            }
+        
+            base.ExecuteCommand(new ShowProgressCmd("Rendering Results.", 3, 4));
+
+            base.ExecuteCommand(
+                new InitialiseRadioDatModelCmd(
+                    projectVO, 
+                    autoGroupModel.AutoGroupTraceStore,
+                    families));
+
+            stopwatch.Stop();
+            Debug.WriteLine($"[TIMING] End: AutoGrouper. Time: {stopwatch.Elapsed}");
+
+            // NOTE: RadioDatModel's SourceIdContentDictionary is not available at this stage, but DatGrouperModel
+            // needs to know Software source ID to build filters for Curated imports later on. This is a small downside of media lazy loading.
+            Dictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary = new Dictionary<string, DAT_GROUP_ENUM>();
+            foreach (var dat in datAdvancedSoftwareCollection)
+                softwareIdDatGroupEnumDictionary[dat.Key] = dat.DatGroupEnum;
+
+            await base.ExecuteCommandAsync(new LoadAutomationEnvironmentCmd(projectVO.ProjectName, families, softwareIdDatGroupEnumDictionary));
+
+            base.ExecuteCommand(
+                new SetWebSearchTermsCmd(null, projectVO.ProjectName));
+
+            Facade.Instance?.Shell?.ShowDatGrouperWindowView();
+            Facade.Instance?.Shell?.SetProjectsFormTitle(projectVO.ProjectName);
+        }
+    }
+}

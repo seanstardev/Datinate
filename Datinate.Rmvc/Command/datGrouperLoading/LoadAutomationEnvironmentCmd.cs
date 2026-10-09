@@ -1,0 +1,49 @@
+﻿using Datinate.Shared;
+using Datinate.Shared.Radio;
+using RMVC;
+using static Datinate.Shared.DatinateEnums;
+namespace com.RADIO.Datinate.RMVC
+{
+    public class LoadAutomationEnvironmentCmd : RCommandAsync
+    {
+        private readonly string projectName;
+        private readonly IEnumerable<GameFamilyVO> families;
+        private readonly IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary;
+
+        public LoadAutomationEnvironmentCmd(
+            string projectName, 
+            IEnumerable<GameFamilyVO> families,
+            IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary)
+        {
+            this.projectName = projectName;
+            this.families = families;
+            this.softwareIdDatGroupEnumDictionary = softwareIdDatGroupEnumDictionary;
+        }
+
+        protected override async Task RunAsync()
+        {
+            var cmd = new LoadDatGrouperContentPathsCmd(false);
+            
+            await base.ExecuteCommandAsync(cmd);
+
+            if (cmd.AutoLoadSuccessful && Facade.Instance?.DatGrouperSessionModel != null)
+                Facade.Instance.DatGrouperSessionModel.ContentPathsResolved = true;
+
+            base.ExecuteCommand(new ShowProgressCmd("Rendering Automated Set", 4, 5));
+
+            Dictionary<string, CurationPartReport> partReportsDictionary; 
+
+            // NOTE: We need to do this because setting Exclude on GamePartVO is fragile:
+            var baseFamilies = DatinateFamilyConverter.Convert(families, out partReportsDictionary);
+
+            var flagFilterSet = Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
+
+            Facade.Instance?.DatGrouperModel?.CreateSession(baseFamilies.ToList(), flagFilterSet, softwareIdDatGroupEnumDictionary);
+
+            // NOTE: We MUST pass in this dictionary or we will see no shallow copy icons or include / exclude variants:
+            Facade.Instance?.DatGrouperMediator?.SetAutoView(baseFamilies.ToArray(), projectName, partReportsDictionary);
+
+            Facade.Instance?.DatGrouperMediator?.SetCuratedView(Array.Empty<IGameFamily>(), projectName);
+        }
+    }
+}

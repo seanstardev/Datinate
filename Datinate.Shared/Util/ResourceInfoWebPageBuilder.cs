@@ -1,11 +1,9 @@
-using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared;
 using Datinate.Shared.Radio;
 using System.Globalization;
 using System.Net;
 using System.Text;
 
-namespace datinate.app
+namespace Datinate.Shared
 {
     public static class ResourceInfoWebPageBuilder
     {
@@ -60,6 +58,10 @@ namespace datinate.app
         //private const string Panel2Hex = "#34291D";
         //private const string TextHex = "#FFF7EC";
         //private const string MutedHex = "#C8B79E";
+
+        private static readonly bool IsWindows =
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Windows);
 
         public static string BuildDocumentHtml(
             InfoVO? info,
@@ -912,8 +914,10 @@ namespace datinate.app
             public List<OtherMediaGroupVm> OtherMediaGroups { get; set; } = new();
             public string Url { get; set; } = "";
 
-            public IReadOnlyList<StandaloneMediaAssetVm> VideoAssets { get; init; } = Array.Empty<StandaloneMediaAssetVm>();
-            public IReadOnlyList<StandaloneMediaAssetVm> ManualAssets { get; init; } = Array.Empty<StandaloneMediaAssetVm>();
+            public IReadOnlyList<StandaloneMediaAssetVm> VideoAssets { get; set; } 
+                = Array.Empty<StandaloneMediaAssetVm>();
+            public IReadOnlyList<StandaloneMediaAssetVm> ManualAssets { get; set; } 
+                = Array.Empty<StandaloneMediaAssetVm>();
         }
         private static List<StandaloneMediaAssetVm> BuildStandaloneMediaAssets(
             IReadOnlyList<RootAssetFile> rootAssets,
@@ -1550,7 +1554,7 @@ namespace datinate.app
 
                 tokens.Add(remaining.Substring(1, closeIndex - 1).Trim());
 
-                string afterToken = remaining[(closeIndex + 1)..];
+                string afterToken = remaining.Substring(closeIndex + 1);
 
                 if (tokens.Count == 1)
                     hasImmediateSecondBracketToken = afterToken.StartsWith("[", StringComparison.Ordinal);
@@ -2019,29 +2023,29 @@ namespace datinate.app
 
         private sealed class KvVm
         {
-            public string Name { get; init; } = "";
-            public string Value { get; init; } = "";
+            public string Name { get; set; } = "";
+            public string Value { get; set; } = "";
         }
 
         private sealed class ReleaseVm
         {
-            public string Name { get; init; } = "";
-            public string Region { get; init; } = "";
-            public string DateRaw { get; init; } = "";
-            public string Rating { get; init; } = "";
-            public string Publisher { get; init; } = "";
-            public string Players { get; init; } = "";
-            public string Distributor { get; init; } = "";
-            public string Comment { get; init; } = "";
-            public string Medium { get; init; } = "";
-            public string Type { get; init; } = "";
-            public string AssetKey { get; init; } = "";
-            public string ProductId { get; init; } = "";
-            public string DistributionOrBarcode { get; init; } = "";
-            public string MameName { get; init; } = "";
+            public string Name { get; set; } = "";
+            public string Region { get; set; } = "";
+            public string DateRaw { get; set; } = "";
+            public string Rating { get; set; } = "";
+            public string Publisher { get; set; } = "";
+            public string Players { get; set; } = "";
+            public string Distributor { get; set; } = "";
+            public string Comment { get; set; } = "";
+            public string Medium { get; set; } = "";
+            public string Type { get; set; } = "";
+            public string AssetKey { get; set; } = "";
+            public string ProductId { get; set; } = "";
+            public string DistributionOrBarcode { get; set; } = "";
+            public string MameName { get; set; } = "";
             public List<KvVm> InputAttributes { get; } = new List<KvVm>();
             public List<KvVm> EmulationStatuses { get; } = new List<KvVm>();
-            public DateTime? SortDate { get; init; }
+            public DateTime? SortDate { get; set; }
 
             public bool IsEmpty =>
                 string.IsNullOrWhiteSpace(Name) &&
@@ -2103,8 +2107,8 @@ namespace datinate.app
         }
         private sealed class MiscVm
         {
-            public string Name { get; init; } = "";
-            public string Value { get; init; } = "";
+            public string Name { get; set; } = "";
+            public string Value { get; set; } = "";
 
             public bool IsEmpty =>
                 string.IsNullOrWhiteSpace(Name) &&
@@ -2125,10 +2129,10 @@ namespace datinate.app
 
         private sealed class CreditVm
         {
-            public string Category { get; init; } = "";
-            public string Role { get; init; } = "";
-            public string Name { get; init; } = "";
-            public string UrlPart { get; init; } = "";
+            public string Category { get; set; } = "";
+            public string Role { get; set; } = "";
+            public string Name { get; set; } = "";
+            public string UrlPart { get; set; } = "";
 
             public bool IsEmpty =>
                 string.IsNullOrWhiteSpace(Name) &&
@@ -2152,21 +2156,21 @@ namespace datinate.app
 
         private sealed class CreditRoleVm
         {
-            public string Role { get; init; } = "";
-            public List<CreditVm> Credits { get; init; } = new List<CreditVm>();
+            public string Role { get; set; } = "";
+            public List<CreditVm> Credits { get; set; } = new List<CreditVm>();
         }
 
         private sealed class CreditCategoryVm
         {
-            public string Category { get; init; } = "";
-            public List<CreditRoleVm> Roles { get; init; } = new List<CreditRoleVm>();
+            public string Category { get; set; } = "";
+            public List<CreditRoleVm> Roles { get; set; } = new List<CreditRoleVm>();
         }
 
         private sealed class CompilationVm
         {
-            public string Name { get; init; } = "";
-            public string System { get; init; } = "";
-            public string UrlPart { get; init; } = "";
+            public string Name { get; set; } = "";
+            public string System { get; set; } = "";
+            public string UrlPart { get; set; } = "";
 
             public bool IsEmpty =>
                 string.IsNullOrWhiteSpace(Name) &&
@@ -2205,7 +2209,7 @@ namespace datinate.app
             {
                 string fullPath = Path.GetFullPath(filePath);
 
-                if (fullPath.Length < LegacyWindowsMaxPathLength)
+                if (!IsWindows || fullPath.Length < LegacyWindowsMaxPathLength)
                     return new Uri(fullPath).AbsoluteUri;
 
                 string tempFolder = Path.Combine(
@@ -2239,16 +2243,21 @@ namespace datinate.app
 
             BrowserAssetTempPage = Path.Combine(
                 BrowserAssetTempRoot,
-                Guid.NewGuid().ToString("N")[..6]);
+                Guid.NewGuid().ToString("N").Substring(0, 6));
 
             Directory.CreateDirectory(BrowserAssetTempPage);
             BrowserAssetTempIndex = 0;
         }
 
-        private static string ToExtendedPath(string path) =>
-            path.StartsWith(@"\\", StringComparison.Ordinal)
-                ? @"\\?\UNC\" + path[2..]
+        private static string ToExtendedPath(string path)
+        {
+            if (!IsWindows || path.StartsWith(@"\\?\", StringComparison.Ordinal))
+                return path;
+
+            return path.StartsWith(@"\\", StringComparison.Ordinal)
+                ? @"\\?\UNC\" + path.Substring(2)
                 : @"\\?\" + path;
+        }
         private static string GetLightboxScaleAttribute(int scalePercent)
         {
             int safePercent = Math.Max(1, scalePercent);
@@ -2308,7 +2317,7 @@ namespace datinate.app
             string raw = FirstNonEmpty(hex, "").Trim();
 
             if (raw.StartsWith("#", StringComparison.Ordinal))
-                raw = raw[1..];
+                raw = raw.Substring(1);
 
             if (raw.Length == 3)
                 raw = string.Concat(raw.Select(c => new string(c, 2)));
@@ -2324,7 +2333,7 @@ namespace datinate.app
 
         private static string MixHex(string baseHex, string mixHex, double mixAmount)
         {
-            mixAmount = Math.Clamp(mixAmount, 0d, 1d);
+            mixAmount = Clamp01(mixAmount);
 
             var (baseRed, baseGreen, baseBlue) = ParseHexColor(baseHex);
             var (mixRed, mixGreen, mixBlue) = ParseHexColor(mixHex);
@@ -2344,7 +2353,7 @@ namespace datinate.app
 
         private static string ToRgbaCss(string hex, double alpha)
         {
-            alpha = Math.Clamp(alpha, 0d, 1d);
+            alpha = Clamp01(alpha);
 
             var (red, green, blue) = ParseHexColor(hex);
 
@@ -2355,6 +2364,17 @@ namespace datinate.app
                 green,
                 blue,
                 alpha);
+        }
+
+        private static double Clamp01(double value)
+        {
+            if (value < 0d)
+                return 0d;
+
+            if (value > 1d)
+                return 1d;
+
+            return value;
         }
 
         private static string LayoutCss => @"

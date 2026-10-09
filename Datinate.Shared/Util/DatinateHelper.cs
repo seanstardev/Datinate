@@ -5,8 +5,54 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Shared
 {
-    public static class DatinateHelper 
+    public static class DatinateHelper
     {
+        // Maps supported media types to their canonical icon type.
+        // Null means the media type is unsupported by the existing mapping.
+        public static MEDIA_TYPE_ENUM? GetSupportedMediaIconType(MEDIA_TYPE_ENUM mediaTypeEnum)
+        {
+            return mediaTypeEnum switch
+            {
+                MEDIA_TYPE_ENUM.Advert => MEDIA_TYPE_ENUM.Advert,
+
+                MEDIA_TYPE_ENUM.Box or
+                MEDIA_TYPE_ENUM.Box_Back or
+                MEDIA_TYPE_ENUM.Box_Bottom or
+                MEDIA_TYPE_ENUM.Box_Inlay or
+                MEDIA_TYPE_ENUM.Box_Side or
+                MEDIA_TYPE_ENUM.Box_Top => MEDIA_TYPE_ENUM.Box,
+
+                MEDIA_TYPE_ENUM.Info => MEDIA_TYPE_ENUM.Info,
+                MEDIA_TYPE_ENUM.Info_About => MEDIA_TYPE_ENUM.Info_About,
+                MEDIA_TYPE_ENUM.Info_Credits => MEDIA_TYPE_ENUM.Info_Credits,
+                MEDIA_TYPE_ENUM.Info_Releases => MEDIA_TYPE_ENUM.Info_Releases,
+                MEDIA_TYPE_ENUM.Thumb => MEDIA_TYPE_ENUM.Thumb,
+
+                MEDIA_TYPE_ENUM.Manual or
+                MEDIA_TYPE_ENUM.Manual_Front or
+                MEDIA_TYPE_ENUM.Manual_Back => MEDIA_TYPE_ENUM.Manual,
+
+                MEDIA_TYPE_ENUM.Media or
+                MEDIA_TYPE_ENUM.Media_Back or
+                MEDIA_TYPE_ENUM.Media_Label or
+                MEDIA_TYPE_ENUM.Media_Top => MEDIA_TYPE_ENUM.Media,
+
+                MEDIA_TYPE_ENUM.Other or
+                MEDIA_TYPE_ENUM.Other_Hardware or
+                MEDIA_TYPE_ENUM.Other_Overlay or
+                MEDIA_TYPE_ENUM.Other_Reference_Card => MEDIA_TYPE_ENUM.Other,
+
+                MEDIA_TYPE_ENUM.Other_Map => MEDIA_TYPE_ENUM.Other_Map,
+
+                MEDIA_TYPE_ENUM.Snap or
+                MEDIA_TYPE_ENUM.Title => MEDIA_TYPE_ENUM.Snap,
+
+                MEDIA_TYPE_ENUM.Soundtrack => MEDIA_TYPE_ENUM.Soundtrack,
+                MEDIA_TYPE_ENUM.Video => MEDIA_TYPE_ENUM.Video,
+
+                _ => null
+            };
+        }
         public static readonly IReadOnlySet20<MEDIA_TYPE_ENUM> ScoringMediaMasterSet =
             new ReadOnlySet20<MEDIA_TYPE_ENUM>(new HashSet<MEDIA_TYPE_ENUM>
                 {
