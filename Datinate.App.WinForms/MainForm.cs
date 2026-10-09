@@ -1,0 +1,800 @@
+﻿using Datinate.Rmvc;
+using Datinate.Shared;
+using System.Runtime.InteropServices;
+
+namespace Datinate.App.WinForms
+{
+    public partial class MainForm : Form, IShell
+    {
+        private CustomListForm CustomListForm;
+        private ProblemListForm ProblemListForm;
+        private CompareForm CompareForm;
+        private CreateDatForm CreateDatForm;
+        private ProjectsForm ProjectsForm;
+        private DatPathsUpdateForm DatPathsUpdateForm;
+        private AddToProjectForm AddToProjectForm;
+        private ProgressForm ProgressForm;
+
+        private List<Form>? progressDisabledForms;
+
+        private readonly int uiThreadId;
+        private readonly SynchronizationContext? uiContext;
+        private static readonly IntPtr HWND_TOP = IntPtr.Zero;
+
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWindowPos(
+            IntPtr hWnd,
+            IntPtr hWndInsertAfter,
+            int X,
+            int Y,
+            int cx,
+            int cy,
+            uint uFlags);
+
+        public MainForm()
+        {
+            uiThreadId = Environment.CurrentManagedThreadId;
+            uiContext = System.Threading.SynchronizationContext.Current;
+
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (args.Length > 1)
+            {
+                DatGrouperModeStartupProjectName = args[1];
+            }
+
+            Facade.Create(typeof(Facade), this);
+
+            base.Text = Constants.APP_NAME + " " + Constants.APP_VERSION;
+
+            CustomListForm = new CustomListForm();
+            CustomListForm.formClosingEvent += OnCustomFormClose;
+
+            ProblemListForm = new ProblemListForm();
+
+            CompareForm = new CompareForm();
+            CompareForm.formClosingEvt += HandleCompareFormClose;
+
+            CreateDatForm = new CreateDatForm();
+
+            ProjectsForm = new ProjectsForm();
+            ProjectsForm.FormCloseRequest += HandleProjectsFormCloseRequest;
+
+            DatPathsUpdateForm = new DatPathsUpdateForm();
+
+            AddToProjectForm = new AddToProjectForm();
+
+            ProgressForm = new ProgressForm();
+            WireProgressForm();
+
+            InitializeComponent();
+
+            sizeBar.BackColor = Color.Black;
+            sizeBar.Visible = false;
+
+            SetStyle(
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw,
+                true);
+
+            UpdateStyles();
+            CenterToScreen();
+        }
+
+        public void ExitApplication()
+        {
+            StartAppExit();
+            Ui(() =>
+            {
+                Application.Exit();
+            });
+        }
+
+        public void StartResizeMonitor()
+        {
+            WindowSizePresetBar.EnableOverlays = true;
+            Ui(() => {
+                sizeBar.Visible = true;
+            });
+        }
+
+        public void ShowProgressForm(bool doShow) => SetProgressFormVisible(doShow);
+
+        public void SetAddToProjectFormVisible(bool doShow)
+        {
+            Ui(() =>
+            {
+                SetCenteredModalFormVisible(AddToProjectForm, doShow);
+            });
+        }
+
+        public void SetDatPathsUpdateFormVisible(bool doShow)
+        {
+            Ui(() =>
+            {
+                SetCenteredModalFormVisible(DatPathsUpdateForm, doShow);
+            });
+        }
+        private void SetCenteredModalFormVisible(Form form, bool doShow)
+        {
+            if (form.IsDisposed)
+                return;
+
+            if (doShow)
+            {
+                if (form.Visible)
+                {
+                    form.BringToFront();
+                    form.Activate();
+                    return;
+                }
+
+                if (form.WindowState == FormWindowState.Minimized)
+                    form.WindowState = FormWindowState.Normal;
+
+                var owner = GetCenteredModalDialogOwner(form);
+
+                form.StartPosition = FormStartPosition.Manual;
+                form.ShowInTaskbar = false;
+
+                if (owner != null)
+                {
+                    PositionFormInScreen(form, owner);
+                    form.ShowDialog(owner);
+                }
+                return;
+            }
+
+            if (form.Visible)
+            {
+                form.Hide();
+                BringToFront();
+            }
+        }
+
+        private Form? GetCenteredModalDialogOwner(Form dialog)
+        {
+            if (IsValidCenteredModalDialogOwner(ProjectsForm, dialog))
+                return ProjectsForm;
+
+            if (IsValidCenteredModalDialogOwner(this, dialog))
+                return this;
+
+            for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
+            {
+                Form? form = Application.OpenForms[i];
+
+                if (IsValidCenteredModalDialogOwner(form, dialog))
+                    return form;
+            }
+
+            return this;
+        }
+
+        private static bool IsValidCenteredModalDialogOwner(Form? form, Form dialog)
+        {
+            if (form == null)
+                return false;
+
+            if (form == dialog)
+                return false;
+
+            if (form.IsDisposed)
+                return false;
+
+            if (!form.Visible)
+                return false;
+
+            if (!form.Enabled)
+                return false;
+
+            if (!form.IsHandleCreated)
+                return false;
+
+            return true;
+        }
+
+        private static void PositionFormInScreen(Form form, Form owner)
+        {
+            var screen = owner.IsHandleCreated
+                ? Screen.FromControl(owner)
+                : Screen.FromPoint(Cursor.Position);
+
+            Rectangle area = screen.WorkingArea;
+
+            form.Location = new Point(
+                area.Left + (area.Width - form.Width) / 2,
+                area.Top + (area.Height - form.Height) / 2);
+        }
+
+        public void SetCompareFormVisible(bool doShow)
+        {
+            if (doShow)
+                CompareForm.ShowAndBringToFront();
+            else if (CompareForm.Visible)
+            {
+                CompareForm.Hide();
+                BringToFront();
+            }
+        }
+
+        public void SetCustomFormVisible(bool doShow)
+        {
+            if (doShow)
+            {
+                CustomListForm.Show();
+                CustomListForm.BringToFront();
+            }
+            else if (CustomListForm.Visible)
+            {
+                CustomListForm.Hide();
+                BringToFront();
+            }
+        }
+
+        public void SetCreateDatFormVisible(bool doShow)
+        {
+            if (doShow)
+                CreateDatForm.ShowAndBringToFront();
+            else if (CreateDatForm.Visible)
+            {
+                CreateDatForm.Hide();
+            }
+        }
+
+        public void SetProblemListFormVisible(bool doShow)
+        {
+            Ui(() =>
+            {
+                if (doShow)
+                    ProblemListForm.ShowAndBringToFront();
+                else
+                    ProblemListForm.Hide();
+            });
+        }
+
+        public void ShowProjectsView()
+        {
+            ProjectsForm.ProjectsView.ShowProjectsView();
+        }
+
+        public void ShowDatGrouperWindowView()
+        {
+            ProjectsForm.ProjectsView.ShowCurationView();
+        }
+
+        public void ShowExportView()
+        {
+            ProjectsForm.ProjectsView.ShowExportView();
+        }
+        public bool CurrentProjectsPageIsProjectLoaderPage
+            => ProjectsForm.ProjectsView.CurrentProjectsPageIsProjectLoaderPage;
+
+        public string? DatGrouperModeStartupProjectName { get; } = null;
+
+        public void SetAppEnabled(bool doEnable)
+        {
+        }
+        public void SetMainFormVisible(bool visible)
+        {
+            Ui(() =>
+            {
+                if (visible == false)
+                    Hide();
+                else
+                    Show();
+            });
+        }// TODO: Is this needed?
+        public void ApplicationDoEventsHack()
+            => Application.DoEvents();
+
+        public Task<string?> ShowSaveExpressionsDialog(string path)
+        {
+            return ShowUiDialogAsync<string?>(() =>
+            {
+                using var dialog = new SaveFileDialog
+                {
+                    Filter = "XML Files (*.xml)|*.xml",
+                    Title = "Select Expressions XML",
+                    InitialDirectory = path
+                };
+
+                return dialog.ShowDialog(this) == DialogResult.OK
+                    ? dialog.FileName
+                    : null;
+            });
+        }
+
+        public Task<string?> ShowLoadExpressionsDialog(string path)
+        {
+            return ShowUiDialogAsync<string?>(() =>
+            {
+                using var dialog = new OpenFileDialog
+                {
+                    Filter = "XML Files (*.xml)|*.xml",
+                    Multiselect = false,
+                    Title = "Select Expressions XML",
+                    InitialDirectory = path
+                };
+
+                return dialog.ShowDialog(this) == DialogResult.OK
+                    ? dialog.FileName
+                    : null;
+            });
+        }
+
+        public Task<bool> ShowMessageBox(
+            string title,
+            string message,
+            bool isYesNo = false)
+        {
+            return ShowUiDialogAsync(
+                () => ShowMessageBoxInternal(title, message, isYesNo));
+        }
+
+        private Task<T> ShowUiDialogAsync<T>(Func<T> showDialog)
+        {
+            var tcs = new TaskCompletionSource<T>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+
+            void ShowOnUiThread()
+            {
+                try
+                {
+                    if (IsDisposed || Disposing)
+                        throw new ObjectDisposedException(nameof(MainForm));
+
+                    tcs.TrySetResult(showDialog());
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+            }
+
+            try
+            {
+                if (Environment.CurrentManagedThreadId == uiThreadId)
+                {
+                    ShowOnUiThread();
+                }
+                else if (IsDisposed || Disposing)
+                {
+                    tcs.TrySetException(
+                        new ObjectDisposedException(nameof(MainForm)));
+                }
+                else if (IsHandleCreated)
+                {
+                    BeginInvoke((Action)ShowOnUiThread);
+                }
+                else if (uiContext != null)
+                {
+                    uiContext.Post(_ => ShowOnUiThread(), null);
+                }
+                else
+                {
+                    tcs.TrySetException(
+                        new InvalidOperationException(
+                            "The UI is not ready to show a dialog."));
+                }
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+
+            return tcs.Task;
+        }
+        
+        private bool ShowMessageBoxInternal(
+            string title,
+            string message,
+            bool isYesNo)
+        {
+            MessageBoxButtons messageBoxButtons =
+                isYesNo
+                    ? MessageBoxButtons.OKCancel
+                    : MessageBoxButtons.OK;
+
+            MessageBoxIcon messageBoxIcon =
+                MessageBoxIcon.Information;
+
+            Form? owner = Form.ActiveForm;
+
+            if (owner == null && Application.OpenForms.Count > 0)
+                owner = Application.OpenForms[0];
+
+            var result =
+                owner != null
+                    ? MessageBox.Show(
+                        owner,
+                        message,
+                        title,
+                        messageBoxButtons,
+                        messageBoxIcon)
+                    : MessageBox.Show(
+                        message,
+                        title,
+                        messageBoxButtons,
+                        messageBoxIcon);
+
+            return result == DialogResult.OK;
+        }
+
+        public void SetMainFormsSizeBarBackColorArgb(int colour)
+        {
+            Ui(() => { 
+                sizeBar.BackColor = Color.FromArgb(colour);
+            });
+        }
+
+        public void HandleCompareFormClose()
+            => BringToFront();
+        
+        private void HandleProjectsFormCloseRequest()
+        {
+
+            if (string.IsNullOrWhiteSpace(DatGrouperModeStartupProjectName) == false)
+            {
+                
+                StartAppExit();
+                Application.Exit();
+            }
+            else
+            {
+                BringToFront();
+                mainView.HandleProjectsFormHidden();
+            }
+        }
+
+        public void SetProjectsFormVisible(bool doShow)
+        {
+            if (doShow)
+                ProjectsForm.ShowProjectsFormAndBringToFront();
+            else
+            {
+                Ui(() => {
+                    ProjectsForm.Hide();
+                });
+            }
+
+
+        }
+
+        public void SetProjectsFormTitle(string title)
+        {
+            ProjectsForm.SetProjectTitle(title);
+        }
+        public void SetProgressFormVisible(bool doShow)
+        {
+            Ui(() =>
+            {
+                if (doShow)
+                {
+                    EnsureProgressFormInstance();
+
+                    Form? owner = GetProgressOwner();
+
+                    if (!ProgressForm.Visible)
+                    {
+                        ShowProgressFormInternal(owner);
+                        DisableAllOtherFormsForProgress();
+                        BringProgressFormAboveDatinateWindows();
+                    }
+                    else
+                    {
+                        PositionProgressForm(owner);
+                        DisableAllOtherFormsForProgress();
+                        BringProgressFormAboveDatinateWindows();
+                    }
+
+                    return;
+                }
+
+                if (!ProgressForm.IsDisposed && ProgressForm.Visible)
+                    ProgressForm.Hide();
+
+                RestoreFormsAfterProgress();
+            });
+        }
+
+        private void EnsureProgressFormInstance()
+        {
+            if (!ProgressForm.IsDisposed)
+                return;
+
+            ProgressForm = new ProgressForm();
+            WireProgressForm();
+        }
+
+        private void ShowProgressFormInternal(Form? owner)
+        {
+            if (owner != null)
+            {
+                ProgressForm.StartPosition = FormStartPosition.Manual;
+                PositionProgressForm(owner);
+                ProgressForm.Show(owner);
+            }
+            else
+            {
+                ProgressForm.StartPosition = FormStartPosition.Manual;
+                PositionProgressForm(null);
+                ProgressForm.Show();
+            }
+
+            BringProgressFormAboveDatinateWindows();
+        }
+
+        private void PositionProgressForm(Form? preferredAnchor)
+        {
+            Form? anchor = GetProgressAnchor(preferredAnchor);
+
+            if (anchor != null)
+            {
+                Rectangle b = anchor.Bounds;
+                ProgressForm.Location = new Point(
+                    b.Left + (b.Width - ProgressForm.Width) / 2,
+                    b.Top + (b.Height - ProgressForm.Height) / 2);
+                return;
+            }
+
+            Rectangle area = Screen.FromPoint(Cursor.Position).WorkingArea;
+            ProgressForm.Location = new Point(
+                area.Left + (area.Width - ProgressForm.Width) / 2,
+                area.Top + (area.Height - ProgressForm.Height) / 2);
+        }
+
+        private Form? GetProgressAnchor(Form? preferredAnchor)
+        {
+            if (IsValidProgressAnchor(preferredAnchor))
+                return preferredAnchor;
+
+            if (IsValidProgressAnchor(ProgressForm.Owner))
+                return ProgressForm.Owner;
+
+            if (IsValidProgressAnchor(this))
+                return this;
+
+            return null;
+        }
+
+        private Form? GetProgressOwner()
+        {
+            if (TryGetForegroundDatinateForm(out Form? foregroundForm) && IsValidProgressOwner(foregroundForm))
+                return foregroundForm;
+
+            Form? active = Form.ActiveForm;
+            if (IsValidProgressOwner(active))
+                return active;
+
+            if (IsValidProgressOwner(this))
+                return this;
+
+            for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
+            {
+                Form? form = Application.OpenForms[i];
+                if (IsValidProgressOwner(form))
+                    return form;
+            }
+
+            return null;
+        }
+
+        private bool TryGetForegroundDatinateForm(out Form? form)
+        {
+            IntPtr hwnd = GetForegroundWindow();
+
+            if (hwnd != IntPtr.Zero)
+            {
+                foreach (Form openForm in Application.OpenForms)
+                {
+                    if (openForm == ProgressForm)
+                        continue;
+
+                    if (openForm.IsDisposed || !openForm.IsHandleCreated)
+                        continue;
+
+                    if (openForm.Handle == hwnd)
+                    {
+                        form = openForm;
+                        return true;
+                    }
+                }
+            }
+
+            form = null;
+            return false;
+        }
+
+        private bool IsValidProgressOwner(Form? form)
+        {
+            if (!IsValidProgressAnchor(form))
+                return false;
+
+            if (!form!.Enabled)
+                return false;
+
+            return true;
+        }
+
+        private bool IsValidProgressAnchor(Form? form)
+        {
+            if (form == null)
+                return false;
+
+            if (form == ProgressForm)
+                return false;
+
+            if (form.IsDisposed)
+                return false;
+
+            if (!form.Visible)
+                return false;
+
+            if (!form.IsHandleCreated)
+                return false;
+
+            return true;
+        }
+
+        private void BringProgressFormAboveDatinateWindows()
+        {
+            if (ProgressForm.IsDisposed || !ProgressForm.Visible || !ProgressForm.IsHandleCreated)
+                return;
+
+            ProgressForm.BringToFront();
+
+            if (TryGetForegroundDatinateForm(out _))
+            {
+                SetWindowPos(
+                    ProgressForm.Handle,
+                    HWND_TOP,
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
+        }
+
+        private void DisableAllOtherFormsForProgress()
+        {
+            progressDisabledForms ??= new List<Form>();
+
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form == ProgressForm)
+                    continue;
+
+                if (!form.Visible)
+                    continue;
+
+                if (!form.Enabled)
+                    continue;
+
+                if (!progressDisabledForms.Contains(form))
+                    progressDisabledForms.Add(form);
+
+                form.Enabled = false;
+            }
+        }
+
+        private void RestoreFormsAfterProgress()
+        {
+            if (progressDisabledForms == null)
+                return;
+
+            foreach (Form form in progressDisabledForms)
+            {
+                if (!form.IsDisposed)
+                    form.Enabled = true;
+            }
+
+            progressDisabledForms = null;
+        }
+
+        private void WireProgressForm()
+        {
+            ProgressForm.ShowInTaskbar = false;
+            ProgressForm.TopMost = false;
+
+            ProgressForm.VisibleChanged += (_, __) =>
+            {
+                if (ProgressForm.Visible)
+                    BringProgressFormAboveDatinateWindows();
+                else
+                    RestoreFormsAfterProgress();
+            };
+
+            ProgressForm.FormClosed += (_, __) =>
+            {
+                RestoreFormsAfterProgress();
+            };
+        }
+
+        private void OnCustomFormClose(object? sender, EventArgs e)
+        {
+            SetCustomFormVisible(false);
+        }
+
+        private void Ui(Action action)
+        {
+            if (Environment.CurrentManagedThreadId == uiThreadId)
+            {
+                action();
+                return;
+            }
+
+            if (IsDisposed)
+                return;
+
+            if (IsHandleCreated)
+            {
+                BeginInvoke(action);
+                return;
+            }
+
+            if (uiContext != null)
+            {
+                uiContext.Post(_ =>
+                {
+                    if (!IsDisposed)
+                        action();
+                }, null);
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            StartAppExit();
+        }
+
+        private bool appExitStarted;
+
+        private void StartAppExit()
+        {
+            if (appExitStarted)
+                return;
+
+            appExitStarted = true;
+
+            AddToProjectForm.AppClosing = true;
+            CompareForm.AppClosing = true;
+            CreateDatForm.AppClosing = true;
+            CustomListForm.AppClosing = true;
+            DatPathsUpdateForm.AppClosing = true;
+            ProblemListForm.AppClosing = true;
+            ProgressForm.AppClosing = true;
+            ProjectsForm.AppClosing = true;
+
+            Ui(() =>
+            {
+                AddToProjectForm.Close();
+                CompareForm.Close();
+                CreateDatForm.Close();
+                CustomListForm.Close();
+                DatPathsUpdateForm.Close();
+                ProblemListForm.Close();
+                ProgressForm.Close();
+                ProjectsForm.Close();
+
+                sizeBar.Dispose();
+            });
+        }
+
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            StartAppExit();
+        }
+    }
+}

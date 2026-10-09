@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Datinate.App.WinForms/Datinate.App.WinForms.csproj" />
+  <Project Path="Datinate.Rmvc/Datinate.Rmvc.csproj" />
+  <Project Path="Datinate.Shared/Datinate.Shared.csproj" />
+  <Project Path="Datinate.Tests/Datinate.Tests.csproj" />
+</Solution>
