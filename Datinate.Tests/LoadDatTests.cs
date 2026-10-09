@@ -1,4 +1,4 @@
-﻿using Datinate.Rmvc.Proxy.delegates;
+﻿using Datinate.Rmvc.Delegate.DatDetails;
 using Datinate.Shared.Dat;
 
 namespace Datinate.Tests
@@ -78,7 +78,7 @@ namespace Datinate.Tests
             var path = TestDataHelper.GetTestDataPath(datFullpath);
             var text = File.ReadAllText(path);
 
-            var dat = DatSoftHelper.GetDat(path, text);
+            var dat = DatSoftListDelegate.GetDat(path, text);
             return dat;
         }
     }

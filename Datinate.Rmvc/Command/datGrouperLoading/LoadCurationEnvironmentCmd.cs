@@ -1,4 +1,4 @@
-﻿using app.datinate;
+﻿using Datinate.Rmvc.Dto;
 using Datinate.Shared.Radio;
 using RMVC;
 
@@ -89,9 +89,8 @@ namespace Datinate.Rmvc.Command
             {
                 string? errorReportHtml = Facade.Instance?.MainWebMediator?.RenderCuratedImportErrorsReport(importErrorReport);
 
-                if (string.IsNullOrWhiteSpace(errorReportHtml) == false)
+                if (errorReportHtml != null && string.IsNullOrWhiteSpace(errorReportHtml) == false)
                     Facade.Instance?.MainWebMediator?.LoadPageContent(errorReportHtml);
-                
             }
 
             return;

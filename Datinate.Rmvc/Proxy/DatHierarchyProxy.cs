@@ -19,9 +19,6 @@ namespace Datinate.Rmvc.Proxy
             Error_Access
         };
 
-        public Task<DatFetchResult> FetchDatsAsync(DatRootDTO datRootVO)
-            => FetchDatsAsync(datRootVO, null);
-
         public async Task<DatFetchResult> FetchDatsAsync(
             DatRootDTO datRootVO, 
             Action<string, int, int>? progress)

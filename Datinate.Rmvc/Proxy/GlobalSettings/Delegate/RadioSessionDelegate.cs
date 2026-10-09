@@ -1,0 +1,74 @@
+﻿namespace Datinate.Rmvc.Delegate.GlobalSettings
+{
+    public class RadioSessionDelegate
+    {
+        public string ProjectPath { get; private set; }
+
+        private const string sessionFileName = "session";
+        private const string fallbackSessionFileFullpath = @"C:/RADIO/session";
+
+        private string radioRootWorkingPath;
+
+        public RadioSessionDelegate(string projectName)
+        {
+            if (string.IsNullOrWhiteSpace(projectName))
+                throw new ArgumentException($"{nameof(RadioSessionDelegate)} requires a valid {nameof(projectName)}.", nameof(projectName));
+
+            var resolved = ResolveRadioRootWorkingPath();
+
+            radioRootWorkingPath = resolved.Path;
+
+            Directory.CreateDirectory(radioRootWorkingPath);
+
+            ProjectPath = resolved.FromSessionFile
+                ? Path.Combine(radioRootWorkingPath, projectName)
+                : radioRootWorkingPath;
+
+            Directory.CreateDirectory(ProjectPath);
+        }
+
+        private static (string Path, bool FromSessionFile) ResolveRadioRootWorkingPath()
+        {
+            string exeFolder = GetExeFolder();
+            string exeSessionFileFullpath = Path.Combine(exeFolder, sessionFileName);
+
+            string? configuredPath = ReadSessionPathOrNull(exeSessionFileFullpath);
+
+            if (configuredPath != null && !string.IsNullOrWhiteSpace(configuredPath))
+                return (configuredPath, true);
+
+            configuredPath = ReadSessionPathOrNull(fallbackSessionFileFullpath);
+
+            if (configuredPath != null && !string.IsNullOrWhiteSpace(configuredPath))
+                return (configuredPath, true);
+
+            return (exeFolder, false);
+        }
+
+        private static string GetExeFolder()
+        {
+            // Application base folder used to locate the session file.
+            return AppContext.BaseDirectory;
+        }
+
+        private static string? ReadSessionPathOrNull(string sessionFileFullpath)
+        {
+            try
+            {
+                if (!File.Exists(sessionFileFullpath))
+                    return null;
+
+                string path = File.ReadAllText(sessionFileFullpath).Trim();
+
+                if (string.IsNullOrWhiteSpace(path))
+                    return null;
+
+                return path;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+}

@@ -1,3 +1,4 @@
+using Datinate.Rmvc.Delegate.ExportDatGrouperProject;
 using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
@@ -6,7 +7,7 @@ using Datinate.Shared.Radio;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC
+namespace Datinate.Rmvc.Proxy
 {
     internal class ExportDatGrouperProjectProxy : RModel
     {
