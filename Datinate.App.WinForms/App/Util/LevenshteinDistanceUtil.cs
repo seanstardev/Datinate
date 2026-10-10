@@ -1,4 +1,4 @@
-﻿namespace Datinate.App.Util
+﻿namespace Datinate.App.WinForms.View.Util
 {
     public static class LevenshteinDistanceUtil
     {

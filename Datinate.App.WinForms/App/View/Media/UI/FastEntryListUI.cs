@@ -1,8 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared;
+﻿using Datinate.Shared;
 using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     public sealed partial class FastEntryListUI : ListView
     {
@@ -148,7 +147,7 @@ namespace datinate.app
 
         public FastEntryListUI()
         {
-            View = View.Details;
+            View = System.Windows.Forms.View.Details;
             VirtualMode = true;
             FullRowSelect = true;
             MultiSelect = false;

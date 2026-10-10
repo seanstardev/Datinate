@@ -1,6 +1,5 @@
-﻿namespace datinate.app
+﻿namespace Datinate.App.WinForms.View.UI.ProjectLoader
 {
-
     public sealed class PanelMoveOverlayForm : Form
     {
         private const int WM_NCHITTEST = 0x0084;

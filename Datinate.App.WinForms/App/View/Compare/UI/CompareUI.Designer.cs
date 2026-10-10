@@ -35,8 +35,8 @@
             nameLabel = new Label();
             panel2 = new Panel();
             romListSummary = new Label();
-            gameList = new datinate.app.CustomDetailsListView();
-            summaryList = new datinate.app.CustomDetailsListView();
+            gameList = new CustomDetailsListView();
+            summaryList = new CustomDetailsListView();
             panel9 = new Panel();
             customiseDatBtn = new Button();
             createDatBtn = new Button();
@@ -252,8 +252,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
-        private datinate.app.CustomDetailsListView gameList;
-        private datinate.app.CustomDetailsListView summaryList;
+        private CustomDetailsListView gameList;
+        private CustomDetailsListView summaryList;
         private System.Windows.Forms.Panel panel9;
         private System.Windows.Forms.Label nameLabel;
         private System.Windows.Forms.Label romSummaryLabel;

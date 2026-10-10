@@ -1,10 +1,11 @@
-﻿using Datinate.Shared;
+﻿using Datinate.App.WinForms.View.Util;
+using Datinate.Shared;
 using Datinate.Shared.Radio;
 using System.Drawing.Drawing2D;
 using System.Runtime.CompilerServices;
-using static datinate.app.DatGrouperTreeView;
+using static Datinate.App.WinForms.View.UI.DatGrouper.DatGrouperTreeView;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public static class TreeRenderUtil
     {

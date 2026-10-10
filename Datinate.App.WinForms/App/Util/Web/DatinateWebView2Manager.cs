@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Timer = System.Windows.Forms.Timer;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     internal static class DatinateWebView2Manager
     {

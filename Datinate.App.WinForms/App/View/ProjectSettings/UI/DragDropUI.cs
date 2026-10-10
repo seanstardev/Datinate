@@ -1,9 +1,10 @@
-﻿using System.ComponentModel;
+﻿using Datinate.App.WinForms.View.UI;
+using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using Timer = System.Windows.Forms.Timer;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     public partial class DragDropUI : UserControl
     {

@@ -3,7 +3,7 @@ using Microsoft.Web.WebView2.WinForms;
 using System.Net;
 using System.Text;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     public static class WebHelper
     {

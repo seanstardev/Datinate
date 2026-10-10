@@ -1,9 +1,9 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using System.Drawing.Drawing2D;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.MediaAssignment
 {
     public partial class ScoringRowUI : UserControl
     {

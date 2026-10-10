@@ -1,12 +1,12 @@
-﻿using System.ComponentModel;
-using datinate.app;
+﻿using Datinate.App.WinForms.View.UI.AddToProject;
 using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Rmvc;
+using System.ComponentModel;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.App.View.datDetails.addToProject
+namespace Datinate.App.WinForms.View
 {
     public partial class AddToProjectView : UserControl, IAddToProjectView
     {

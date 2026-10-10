@@ -1,6 +1,7 @@
-﻿using System.ComponentModel;
+﻿using Datinate.App.WinForms.View.Util;
+using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     internal sealed class CenteredFlowLayoutPanel : FlowLayoutPanel
     {

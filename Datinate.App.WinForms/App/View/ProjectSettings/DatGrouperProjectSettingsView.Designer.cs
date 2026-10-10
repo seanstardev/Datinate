@@ -1,6 +1,4 @@
-using datinate.app;
-using System.Drawing;
-using System.Windows.Forms;
+using Datinate.App.WinForms.View.UI.ProjectSettings;
 
 namespace Datinate.App.WinForms.View
 {

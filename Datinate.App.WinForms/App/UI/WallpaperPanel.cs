@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public class WallpaperPanel : Panel
     {

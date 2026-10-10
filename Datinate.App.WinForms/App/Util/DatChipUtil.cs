@@ -1,9 +1,10 @@
-﻿using Datinate.Shared;
+﻿using Datinate.App.WinForms.View.UI;
+using Datinate.Shared;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     public static class DatChipUtil
     {

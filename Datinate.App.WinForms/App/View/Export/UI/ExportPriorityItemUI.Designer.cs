@@ -1,4 +1,6 @@
-﻿namespace datinate.app
+﻿using Datinate.App.WinForms.View.UI;
+
+namespace Datinate.App.WinForms.View.UI.Export
 {
     partial class ExportPriorityItemUI
     {

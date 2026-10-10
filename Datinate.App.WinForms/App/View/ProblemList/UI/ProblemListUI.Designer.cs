@@ -1,5 +1,7 @@
-﻿namespace datinate.app {
-    partial class ProblemListUI {
+﻿namespace Datinate.App.WinForms.View.UI.ProblemList
+{
+    partial class ProblemListUI 
+    {
         /// <summary> 
         /// Required designer variable.
         /// </summary>

@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     [DefaultEvent(nameof(Click))]
     [DefaultProperty(nameof(Text))]

@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     public sealed partial class ContentPathRow
     {

@@ -1,9 +1,9 @@
-﻿using Datinate.App.View.projects.gameFamily;
+﻿using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.Radio;
 using System.Drawing.Drawing2D;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     internal static class TreeRenderTrailingIconUtil
     {

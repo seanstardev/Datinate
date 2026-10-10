@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using Timer = System.Windows.Forms.Timer;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     internal static class DatGrouperUiAnimationHelper
     {

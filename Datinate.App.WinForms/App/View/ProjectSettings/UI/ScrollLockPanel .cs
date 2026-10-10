@@ -1,6 +1,6 @@
 ﻿using Timer = System.Windows.Forms.Timer;
 
-namespace datinate.app.ui
+namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     public sealed class ScrollLockPanel : Panel
     {

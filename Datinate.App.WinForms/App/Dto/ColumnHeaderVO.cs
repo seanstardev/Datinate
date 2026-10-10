@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Dto
 {
     public class ColumnHeaderVO 
     {

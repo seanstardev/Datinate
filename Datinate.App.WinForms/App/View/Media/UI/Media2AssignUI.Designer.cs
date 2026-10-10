@@ -1,6 +1,7 @@
 ﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.UI;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     partial class Media2AssignUI
     {
@@ -168,7 +169,7 @@ namespace datinate.app
             entryListUI.Size = new Size(272, 198);
             entryListUI.TabIndex = 0;
             entryListUI.UseCompatibleStateImageBehavior = false;
-            entryListUI.View = View.Details;
+            entryListUI.View = System.Windows.Forms.View.Details;
             entryListUI.VirtualMode = true;
             // 
             // mediaNameTextBox

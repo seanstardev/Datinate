@@ -1,10 +1,10 @@
 ﻿using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
-using static datinate.app.DatGrouperTreeView;
+using static Datinate.App.WinForms.View.UI.DatGrouper.DatGrouperTreeView;
 using static Datinate.Shared.DatGrouper.DatGrouperEditRequestDTO;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public class CuratedUI : DatGrouperUiBase
     {

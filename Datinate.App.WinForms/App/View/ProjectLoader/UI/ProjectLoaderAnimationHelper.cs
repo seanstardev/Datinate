@@ -2,7 +2,7 @@
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectLoader
 {
     public static class ProjectLoaderAnimationHelper
     {

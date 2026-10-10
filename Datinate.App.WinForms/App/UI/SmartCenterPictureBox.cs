@@ -1,6 +1,6 @@
 ﻿using System.Drawing.Drawing2D;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public sealed class SmartCenterPictureBox : PictureBox
     {

@@ -1,4 +1,4 @@
-﻿using datinate.app;
+﻿using Datinate.App.WinForms.View.Dto;
 using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Dat;

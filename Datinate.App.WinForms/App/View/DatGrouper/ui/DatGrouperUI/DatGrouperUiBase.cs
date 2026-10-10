@@ -1,13 +1,15 @@
-﻿using Datinate.App.View.projects.gameFamily;
+﻿using Datinate.App.WinForms.View.Dto;
+using Datinate.App.WinForms.View.UI.DatGrouperControls;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using System.ComponentModel;
 using System.Diagnostics;
-using static datinate.app.DatGrouperTreeView;
+using static Datinate.App.WinForms.View.UI.DatGrouper.DatGrouperTreeView;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public partial class DatGrouperUiBase : UserControl
     {

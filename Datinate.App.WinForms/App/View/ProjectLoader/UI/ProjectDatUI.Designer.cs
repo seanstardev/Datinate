@@ -1,9 +1,8 @@
 ﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.UI;
 using System.ComponentModel;
-using System.Drawing;
-using System.Windows.Forms;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectLoader
 {
     partial class ProjectDatUI
     {

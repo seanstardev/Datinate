@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     internal sealed class Media2AssignHoverManager : IDisposable
     {

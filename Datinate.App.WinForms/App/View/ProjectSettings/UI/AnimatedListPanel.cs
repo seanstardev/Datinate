@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Timer = System.Windows.Forms.Timer;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     public partial class AnimatedListPanel : UserControl
     {

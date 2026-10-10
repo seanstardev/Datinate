@@ -1,9 +1,9 @@
-﻿using datinate.app;
-using Datinate.App.WinForms.Properties;
+﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.UI;
 using Datinate.Shared;
 using static Datinate.Shared.DatinateEnums;
 
-namespace com.RADIO.Datinate.RMVC.Shared
+namespace Datinate.App.WinForms.View.Util
 {
     public static class UIHelper 
     {

@@ -1,4 +1,6 @@
-﻿namespace datinate.app
+﻿using Datinate.App.WinForms.View.UI.DatGrouper;
+
+namespace Datinate.App.WinForms.View.UI.DatGrouperControls
 {
     public interface IDatGrouperNodePreview
     {

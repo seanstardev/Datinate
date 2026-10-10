@@ -3,7 +3,7 @@ using Microsoft.Web.WebView2.WinForms;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     public static class DatinatePerformanceUtil
     {

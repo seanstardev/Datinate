@@ -1,10 +1,11 @@
-﻿using Microsoft.Web.WebView2.Core;
+﻿using Datinate.App.WinForms.View.Util;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public sealed class DragDropPreviewForm : Form
     {

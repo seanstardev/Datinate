@@ -1,7 +1,8 @@
-﻿using System.ComponentModel;
+﻿using Datinate.App.WinForms.View.Util;
+using System.ComponentModel;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.AddToProject
 {
     public sealed class DatGroupChipButton : Control
     {

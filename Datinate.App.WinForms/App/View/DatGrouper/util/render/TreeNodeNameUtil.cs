@@ -2,7 +2,7 @@
 using Datinate.Shared.Radio;
 using System.Text;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public static class TreeNodeNameUtil
     {

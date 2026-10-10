@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Windows.Forms.VisualStyles;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public sealed class DescriptorChipUI : Control
     {

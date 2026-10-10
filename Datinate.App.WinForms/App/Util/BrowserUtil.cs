@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     public static class BrowserUtil
     {

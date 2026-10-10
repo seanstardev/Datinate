@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public class HighQualityPictureBox : PictureBox
     {

@@ -1,6 +1,7 @@
-﻿using static Datinate.Shared.DatinateEnums;
+﻿using Datinate.App.WinForms.View.UI;
+using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     partial class Media2AssignControlsUI
     {

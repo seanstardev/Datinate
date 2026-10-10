@@ -29,7 +29,7 @@ namespace Datinate.App.WinForms
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DatPathsUpdateForm));
-            DatPathsUpdateView = new DatPathsUpdateView();
+            DatPathsUpdateView = new ProjectPathsUpdateView();
             SuspendLayout();
             // 
             // DatPathsUpdateView
@@ -61,6 +61,6 @@ namespace Datinate.App.WinForms
 
         #endregion
 
-        public DatPathsUpdateView DatPathsUpdateView;
+        public ProjectPathsUpdateView DatPathsUpdateView;
     }
 }

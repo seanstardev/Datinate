@@ -1,4 +1,6 @@
-﻿namespace Datinate.App.WinForms
+﻿using Datinate.App.WinForms.View;
+
+namespace Datinate.App.WinForms
 {
     partial class AddToProjectForm 
     {
@@ -27,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddToProjectForm));
-            AddToProjectView = new com.RADIO.Datinate.App.View.datDetails.addToProject.AddToProjectView();
+            AddToProjectView = new AddToProjectView();
             SuspendLayout();
             // 
             // AddToProjectView
@@ -58,6 +60,6 @@
 
         #endregion
 
-        public com.RADIO.Datinate.App.View.datDetails.addToProject.AddToProjectView AddToProjectView;
+        public AddToProjectView AddToProjectView;
     }
 }

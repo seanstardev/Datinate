@@ -2,7 +2,7 @@ using System.Reflection;
 using Timer = System.Windows.Forms.Timer;
 using System.Runtime.InteropServices;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     public static class ScrollbarManager2
     {

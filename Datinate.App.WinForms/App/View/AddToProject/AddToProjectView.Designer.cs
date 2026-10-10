@@ -1,4 +1,4 @@
-﻿namespace com.RADIO.Datinate.App.View.datDetails.addToProject
+﻿namespace Datinate.App.WinForms.View
 {
     partial class AddToProjectView
     {

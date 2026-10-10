@@ -1,5 +1,5 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.App.WinForms.Properties;
+﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectLoader
 {
     public partial class ProjectDatUI : UserControl
     {

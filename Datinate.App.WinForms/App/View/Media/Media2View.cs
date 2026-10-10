@@ -1,6 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.app;
-using Datinate.App.WinForms.Properties;
+﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.Dto;
+using Datinate.App.WinForms.View.UI;
+using Datinate.App.WinForms.View.UI.Media;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Rmvc;

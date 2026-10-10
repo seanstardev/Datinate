@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     internal sealed class DatGrouperTreeViewScrollManager : IDisposable
     {

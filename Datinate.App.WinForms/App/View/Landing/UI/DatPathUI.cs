@@ -1,4 +1,4 @@
-﻿namespace com.RADIO.Datinate.view.datPaths.ui
+﻿namespace Datinate.App.WinForms.View.UI.Landing
 {
     public partial class DatPathUI : UserControl
     {

@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     public sealed class AssignmentBanner : PictureBox
     {

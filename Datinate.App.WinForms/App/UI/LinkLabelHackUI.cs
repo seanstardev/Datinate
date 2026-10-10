@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Datinate.App.UI
+namespace Datinate.App.WinForms.View.UI
 {
     internal class LinkLabelHackUI : LinkLabel
     {

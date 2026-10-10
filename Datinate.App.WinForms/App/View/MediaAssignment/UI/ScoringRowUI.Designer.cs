@@ -1,6 +1,7 @@
 ﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.UI;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.MediaAssignment
 {
     partial class ScoringRowUI
     {

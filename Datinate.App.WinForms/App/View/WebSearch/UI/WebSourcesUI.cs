@@ -1,7 +1,7 @@
 ﻿using System.Drawing.Imaging;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.WebSearch
 {
     public partial class WebSourcesUI : UserControl
     {

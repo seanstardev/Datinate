@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Drawing2D;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     [DesignerCategory("Code")]
     [ToolboxItem(true)]

@@ -1,10 +1,10 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using System.Diagnostics;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public partial class AutomatedWrapperUI : UserControl
     {

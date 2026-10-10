@@ -1,6 +1,5 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using datinate.app;
-using datinate.shared;
+﻿using Datinate.App.WinForms.View.Dto;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using System.Diagnostics;

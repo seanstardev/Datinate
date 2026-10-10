@@ -1,11 +1,11 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using System.ComponentModel;
 using System.Text;
-using static datinate.app.FastEntryListUI;
+using static Datinate.App.WinForms.View.UI.Media.FastEntryListUI;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     public partial class Media2AssignUI : UserControl
     {

@@ -1,9 +1,9 @@
 ﻿using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using static datinate.app.TreeRenderUtil;
+using static Datinate.App.WinForms.View.UI.DatGrouper.TreeRenderUtil;
 
-namespace Datinate.App.View.projects.gameFamily
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public sealed class DatGrouperIconUtil
     {

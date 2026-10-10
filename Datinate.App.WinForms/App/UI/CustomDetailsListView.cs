@@ -1,7 +1,8 @@
-﻿using System.ComponentModel;
+﻿using Datinate.App.WinForms.View.Dto;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public class CustomDetailsListView : ListView
     {
@@ -57,7 +58,7 @@ namespace datinate.app
 
         public CustomDetailsListView()
         {
-            View = View.Details;
+            View = System.Windows.Forms.View.Details;
         }
 
         public void AddColumns(ColumnHeaderVO.NameEnum[] columns)

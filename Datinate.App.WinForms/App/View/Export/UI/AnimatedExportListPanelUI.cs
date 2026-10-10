@@ -1,8 +1,7 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.Shared;
+﻿using Datinate.Shared;
 using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Export
 {
     public class AnimatedExportListPanelUI : Panel
     {

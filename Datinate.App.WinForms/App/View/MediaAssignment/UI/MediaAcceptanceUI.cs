@@ -2,7 +2,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.MediaAssignment
 {
     public sealed class MediaAcceptanceUI : Control
     {

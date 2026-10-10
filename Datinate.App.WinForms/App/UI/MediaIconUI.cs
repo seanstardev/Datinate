@@ -1,14 +1,15 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
-using Datinate.App.WinForms.Properties;
+﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.Util;
 using System.ComponentModel;
 using System.Drawing.Imaging;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI
 {
     public partial class MediaIconUI : HighQualityPictureBox
     {
-        private static readonly Dictionary<string, Bitmap> ImageCache = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, Bitmap> ImageCache 
+            = new(StringComparer.OrdinalIgnoreCase);
 
         private string? imageKey;
 

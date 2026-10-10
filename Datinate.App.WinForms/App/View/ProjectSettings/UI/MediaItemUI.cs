@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     public partial class MediaItemUI : UserControl
     {

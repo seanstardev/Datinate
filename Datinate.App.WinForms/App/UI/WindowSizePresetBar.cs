@@ -4,7 +4,7 @@ using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace Datinate.App.WinForms
+namespace Datinate.App.WinForms.View.UI
 {
     public class WindowSizePresetBar : Control
     {

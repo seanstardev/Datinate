@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace datinate.app.ui
+namespace Datinate.App.WinForms.View.UI
 {
     public static class ControlManagementUtil
     {

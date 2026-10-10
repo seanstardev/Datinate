@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     public sealed partial class ContentPathRow : UserControl
     {

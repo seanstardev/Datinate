@@ -1,7 +1,8 @@
-﻿using com.RADIO.Datinate.RMVC.Shared;
+﻿using Datinate.App.WinForms.View.UI;
+using Datinate.App.WinForms.View.Util;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     public partial class Media2AssignControlsUI : UserControl
     {

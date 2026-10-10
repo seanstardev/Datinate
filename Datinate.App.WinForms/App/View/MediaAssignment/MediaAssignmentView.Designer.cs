@@ -1,4 +1,5 @@
-using datinate.app;
+using Datinate.App.WinForms.View.UI;
+using Datinate.App.WinForms.View.UI.MediaAssignment;
 
 namespace Datinate.App.WinForms.View
 {
@@ -32,7 +33,7 @@ namespace Datinate.App.WinForms.View
         private void InitializeComponent()
         {
             mediaSelectedContainer = new Panel();
-            linkLabelHackui1 = new Datinate.App.UI.LinkLabelHackUI();
+            linkLabelHackui1 = new LinkLabelHackUI();
             REAL_browserBtn = new Panel();
             cornerBottomRight = new PictureBox();
             cornerBottomLeft = new PictureBox();
@@ -77,7 +78,7 @@ namespace Datinate.App.WinForms.View
             filler3 = new Panel();
             filler4 = new Panel();
             NotesPanel = new Panel();
-            browserBtn = new Datinate.App.UI.LinkLabelHackUI();
+            browserBtn = new LinkLabelHackUI();
             pictureBox2 = new PictureBox();
             pictureBox1 = new PictureBox();
             familyNotesTxt = new TextBox();
@@ -918,7 +919,7 @@ namespace Datinate.App.WinForms.View
         private Panel NotesPanel;
         private TextBox familyNotesTxt;
         private Panel filler4;
-        private Datinate.App.UI.LinkLabelHackUI browserBtn;
+        private LinkLabelHackUI browserBtn;
         private DescriptorChipUI descriptorChipui1;
         private PictureBox pictureBox2;
         private PictureBox pictureBox1;
@@ -938,7 +939,7 @@ namespace Datinate.App.WinForms.View
         private Panel scoringPercentPanel;
         private Panel scoringCountPanel;
         private FlowLayoutPanel scoringRightContainer;
-        private Datinate.App.UI.LinkLabelHackUI linkLabelHackui1;
+        private LinkLabelHackUI linkLabelHackui1;
         private Panel REAL_browserBtn;
         private PictureBox completePic;
         private Label scoringPercentLabel;

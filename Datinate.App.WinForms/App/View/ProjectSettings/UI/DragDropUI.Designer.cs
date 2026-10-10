@@ -1,4 +1,4 @@
-﻿namespace datinate.app
+﻿namespace Datinate.App.WinForms.View.UI.ProjectSettings
 {
     partial class DragDropUI
     {

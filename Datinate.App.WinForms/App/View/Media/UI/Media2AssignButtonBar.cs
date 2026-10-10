@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using static Datinate.Shared.DatinateEnums;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     public sealed class Media2AssignButtonBar : UserControl
     {

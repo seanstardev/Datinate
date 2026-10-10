@@ -1,5 +1,5 @@
-﻿using datinate.app;
-using Datinate.App.WinForms.View;
+﻿using Datinate.App.WinForms.View;
+using Datinate.App.WinForms.View.UI.ProblemList;
 
 namespace Datinate.App.WinForms
 {

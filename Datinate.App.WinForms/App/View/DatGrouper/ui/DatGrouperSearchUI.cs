@@ -1,8 +1,9 @@
-﻿using Datinate.Shared;
+﻿using Datinate.App.WinForms.View.UI;
+using Datinate.Shared;
 using Datinate.Shared.Radio;
 using System.ComponentModel;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public partial class DatGrouperSearchUI : UserControl
     {

@@ -1,8 +1,10 @@
 ﻿using Datinate.App.WinForms.Properties;
+using Datinate.App.WinForms.View.Data;
+using Datinate.App.WinForms.View.Util;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.Media
 {
     public partial class MiniWebUI : UserControl
     {

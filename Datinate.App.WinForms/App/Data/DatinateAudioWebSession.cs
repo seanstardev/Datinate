@@ -1,9 +1,10 @@
-﻿using Microsoft.Web.WebView2.Core;
+﻿using Datinate.App.WinForms.View.Util;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Data
 {
     internal enum DatinateAudioWebLoadStatus
     {

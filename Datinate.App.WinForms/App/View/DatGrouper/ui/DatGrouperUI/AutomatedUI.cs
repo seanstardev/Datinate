@@ -3,7 +3,7 @@ using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using static Datinate.Shared.DatGrouper.DatGrouperEditRequestDTO;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public class AutomatedUI : DatGrouperUiBase
     {

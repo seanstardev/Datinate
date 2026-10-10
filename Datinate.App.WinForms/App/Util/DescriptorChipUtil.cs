@@ -1,7 +1,8 @@
-﻿using Datinate.Shared;
+﻿using Datinate.App.WinForms.View.UI;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.Util
 {
     public static class DescriptorChipUtil
     {

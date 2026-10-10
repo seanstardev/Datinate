@@ -1,6 +1,6 @@
 ﻿using Datinate.App.WinForms.Properties;
 
-namespace datinate.app
+namespace Datinate.App.WinForms.View.UI.MediaAssignment
 {
     partial class ScoringUI
     {

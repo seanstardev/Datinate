@@ -1,12 +1,10 @@
-﻿using datinate.app;
-using Datinate.App.WinForms.View;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using Timer = System.Windows.Forms.Timer;
 
-namespace app.datinate
+namespace Datinate.App.WinForms.View.UI.ProjectLoader
 {
     public sealed class FlowReorderDragManager
     {

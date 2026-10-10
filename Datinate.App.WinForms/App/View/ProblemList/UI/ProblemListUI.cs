@@ -1,4 +1,5 @@
-﻿namespace datinate.app {
+﻿namespace Datinate.App.WinForms.View.UI.ProblemList
+{
 
     public partial class ProblemListUI : UserControl 
     {

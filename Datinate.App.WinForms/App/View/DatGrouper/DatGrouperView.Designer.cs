@@ -1,4 +1,5 @@
-﻿using datinate.app;
+﻿using Datinate.App.WinForms.View.UI;
+using Datinate.App.WinForms.View.UI.DatGrouper;
 
 namespace Datinate.App.WinForms.View
 {
@@ -61,7 +62,7 @@ namespace Datinate.App.WinForms.View
             exportBtn = new Button();
             datChipContainer = new FlowLayoutPanel();
             summaryLabel = new Label();
-            verticalLineui1 = new MRB.View.UI.VerticalLineUI();
+            verticalLineui1 = new VerticalLineUI();
             progressBar = new SegmentedProgressBarUI();
             panel2 = new Panel();
             panel4 = new Panel();
@@ -588,7 +589,7 @@ namespace Datinate.App.WinForms.View
         private TableLayoutPanel webMainPanel;
         private DatGrouperControlsView controlsView;
         private Panel controlsPanel;
-        private MRB.View.UI.VerticalLineUI verticalLineui1;
+        private VerticalLineUI verticalLineui1;
         private Button curateBtn;
         private Button backBtn;
         private Label summaryLabel;
