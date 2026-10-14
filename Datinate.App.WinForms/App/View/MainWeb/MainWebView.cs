@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.Properties;
+﻿using Datinate.App.Core.Web;
+using Datinate.App.WinForms.Properties;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
@@ -48,7 +49,7 @@ namespace Datinate.App.WinForms.View
             BrowserUi(async () =>
             {
                 if (browser.CoreWebView2 == null)
-                    await WebHelper.EnsureCoreAsync(browser);
+                    await WebView2Helper.EnsureCoreAsync(browser);
 
                 if (browser.CoreWebView2 != null)
                 {
@@ -160,7 +161,7 @@ namespace Datinate.App.WinForms.View
             BrowserUi(async () =>
             {
                 if (browser.CoreWebView2 == null)
-                    await WebHelper.EnsureCoreAsync(browser);
+                    await WebView2Helper.EnsureCoreAsync(browser);
 
                 try
                 {
@@ -184,7 +185,7 @@ namespace Datinate.App.WinForms.View
             BrowserUi(async () =>
             {
                 if (browser.CoreWebView2 == null)
-                    await WebHelper.EnsureCoreAsync(browser);
+                    await WebView2Helper.EnsureCoreAsync(browser);
 
                 var core = browser.CoreWebView2;
                 if (core == null)
@@ -212,7 +213,7 @@ namespace Datinate.App.WinForms.View
                     try
                     {
                         if (browser.CoreWebView2 == null)
-                            await WebHelper.EnsureCoreAsync(browser);
+                            await WebView2Helper.EnsureCoreAsync(browser);
                     }
                     catch (Exception) { return; }
 
@@ -231,7 +232,7 @@ namespace Datinate.App.WinForms.View
                     rawHtmlContentActive = false;
                     ApplyOverlayState();
 
-                    try { browser.CoreWebView2.NavigateToString(WebHelper.LoadingHtmlBlack); }
+                    try { browser.CoreWebView2.NavigateToString(MediaWebHelper.LoadingHtmlBlack); }
                     catch (Exception) { }
                 });
             });
@@ -329,7 +330,7 @@ namespace Datinate.App.WinForms.View
                     if (browser.CoreWebView2 == null)
                         return;
 
-                    browser.CoreWebView2.NavigateToString(WebHelper.LoadingHtmlBlack);
+                    browser.CoreWebView2.NavigateToString(MediaWebHelper.LoadingHtmlBlack);
                 });
             });
         }

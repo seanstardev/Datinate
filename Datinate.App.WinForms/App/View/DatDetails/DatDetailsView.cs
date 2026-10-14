@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Dto;
+﻿using Datinate.App.Core.RomSummary;
+using Datinate.App.WinForms.View.Dto;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
@@ -23,7 +24,7 @@ namespace Datinate.App.WinForms.View
         UnitFormatHelper.Unit unit;
         bool showUnitInCells;
         DatGameVO? currentGameVO;
-        protected RomSummaryManager? romSummaryManager;
+        protected RomSummaryBuilder? romSummaryBuilder;
 
         public DatDetailsView()
         {
@@ -133,10 +134,10 @@ namespace Datinate.App.WinForms.View
                 this.showUnitInCells = showUnitInCells;
 
                 // NOTE: Update our list views:
-                romSummaryManager = SetGameList(filter);
+                romSummaryBuilder = SetGameList(filter);
 
-                if (romSummaryManager != null)
-                    SetRomSummaryList(romSummaryManager);
+                if (romSummaryBuilder != null)
+                    SetRomSummaryList(romSummaryBuilder);
 
                 UpdateUnits(unit, showUnitInCells);
 
@@ -155,11 +156,11 @@ namespace Datinate.App.WinForms.View
          * To save repeating ourselves, we also return a ROM summary 
          * ready for setting the next list:
          */
-        protected RomSummaryManager? SetGameList(string? filter)
+        protected RomSummaryBuilder? SetGameList(string? filter)
         {
             if (datVO == null) return null;
 
-            romSummaryManager = new RomSummaryManager();
+            romSummaryBuilder = new RomSummaryBuilder();
 
             List<string> roms = new List<string>();
 
@@ -189,7 +190,7 @@ namespace Datinate.App.WinForms.View
                     roms.Add(game.Roms[j].Sha1);
                 }
 
-                romSummaryManager.manageRoms(game);
+                romSummaryBuilder.AddGame(game);
             } // end for i
 
             Debug.Print("************************************************************");
@@ -197,16 +198,16 @@ namespace Datinate.App.WinForms.View
             Debug.Print("Unique ROMs: " + roms.Distinct().Count());
             Debug.Print("************************************************************");
 
-            return romSummaryManager;
+            return romSummaryBuilder;
         }
 
-        protected void SetRomSummaryList(RomSummaryManager romSummaryManager)
+        protected void SetRomSummaryList(RomSummaryBuilder romSummaryBuilder)
         {
             bool autoResize = (romSummaryList.Items.Count == 0);
             romSummaryList.Items.Clear();
             romSummaryList.Refresh();
 
-            RomExt[] romExts = romSummaryManager.getSummaries();
+            RomExtensionSummary[] romExts = romSummaryBuilder.GetSummaries();
 
             if (datVO == null) return;
 
@@ -216,17 +217,17 @@ namespace Datinate.App.WinForms.View
 
             for (int i = 0; i < romExts.Length; i++)
             {
-                RomExt romExt = romExts[i];
+                RomExtensionSummary romExt = romExts[i];
 
-                readableSize = UnitFormatHelper.Convert(romExt.getTotalSize(), unit, showUnitInCells);
+                readableSize = UnitFormatHelper.Convert(romExt.TotalSize, unit, showUnitInCells);
 
                 romSummaryList.AddRow(
                     new RowVO[] {
-                        new RowVO(ColumnHeaderVO.NameEnum.Ext, romExt.getExtension())
-                        , new RowVO(ColumnHeaderVO.NameEnum.ROMs, romExt.getRomOccurances().ToString())
+                        new RowVO(ColumnHeaderVO.NameEnum.Ext, romExt.Extension)
+                        , new RowVO(ColumnHeaderVO.NameEnum.ROMs, romExt.RomCount.ToString())
                         , new RowVO(ColumnHeaderVO.NameEnum.Size, readableSize)
-                        , new RowVO(ColumnHeaderVO.NameEnum.Size_PC, romExt.getPercentage(datSize).ToString("0.00") + " %")
-                        , new RowVO(ColumnHeaderVO.NameEnum.Entries, romExt.getGameOccurances().ToString())
+                        , new RowVO(ColumnHeaderVO.NameEnum.Size_PC, romExt.GetSizePercentage(datSize).ToString("0.00") + " %")
+                        , new RowVO(ColumnHeaderVO.NameEnum.Entries, romExt.GameCount.ToString())
                     }
                     , romExt);
             }
@@ -322,8 +323,8 @@ namespace Datinate.App.WinForms.View
 
                 UpdateListView(gameList);
 
-                if (romSummaryManager != null)
-                    SetRomSummaryList(romSummaryManager);
+                if (romSummaryBuilder != null)
+                    SetRomSummaryList(romSummaryBuilder);
 
                 UpdateListView(romSummaryList);
 

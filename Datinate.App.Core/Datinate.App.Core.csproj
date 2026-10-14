@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	<LangVersion>10.0</LangVersion>
+	<ImplicitUsings>false</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Datinate.Shared\Datinate.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="RomSummary\" />
+  </ItemGroup>
+
+</Project>

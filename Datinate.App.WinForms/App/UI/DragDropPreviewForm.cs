@@ -529,7 +529,7 @@ namespace Datinate.App.WinForms.View.UI
             if (wv.IsDisposed || !wv.IsHandleCreated)
                 return null;
 
-            var core = await WebHelper.EnsureCoreAsync(wv);
+            var core = await WebView2Helper.EnsureCoreAsync(wv);
 
             if (core == null)return null;
 

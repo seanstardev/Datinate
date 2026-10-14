@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Dto;
+﻿using Datinate.App.Core.RomSummary;
+using Datinate.App.WinForms.View.Dto;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
@@ -72,7 +73,7 @@ namespace Datinate.App.WinForms.View.UI.Compare
             
             SetNameLabel();
             
-            RomSummaryManager manager = SetRomList(null);
+            RomSummaryBuilder manager = SetRomList(null);
             SetRomSummaryList(manager);
 
             UpdateUnits(unit, showUnitInCells);
@@ -115,8 +116,8 @@ namespace Datinate.App.WinForms.View.UI.Compare
 
                     if (item.Tag is IByteReporter byteReporter)
                         totalSize = byteReporter.GetTotalSize();
-                    else if (item.Tag is RomExt romExt)
-                        totalSize = romExt.getTotalSize();
+                    else if (item.Tag is RomExtensionSummary romExt)
+                        totalSize = romExt.TotalSize;
 
                     if (totalSize == null)
                         continue;
@@ -132,11 +133,11 @@ namespace Datinate.App.WinForms.View.UI.Compare
                 listView.EndUpdate();
             }
         }
-        protected RomSummaryManager SetRomList(string filter) 
+        protected RomSummaryBuilder SetRomList(string filter) 
         {
             // NOTE: datVO.datSummaryVO may be NULL.
 
-            RomSummaryManager romSummaryManager = new RomSummaryManager();
+            RomSummaryBuilder romSummaryBuilder = new RomSummaryBuilder();
 
             ulong totalSize = 0;
 
@@ -165,7 +166,7 @@ namespace Datinate.App.WinForms.View.UI.Compare
                         , game);
 
 
-                    romSummaryManager.manageRoms(game);
+                    romSummaryBuilder.AddGame(game);
                 }
             }
 
@@ -177,28 +178,28 @@ namespace Datinate.App.WinForms.View.UI.Compare
             
             romListSummary.Text = "Entries: " + games + " │ ROMs: " + roms + " │ Size: " + sizeStr + "";
             
-            return romSummaryManager;
+            return romSummaryBuilder;
         }
 
-        protected void SetRomSummaryList(RomSummaryManager romSummaryManager) 
+        protected void SetRomSummaryList(RomSummaryBuilder romSummaryBuilder) 
         {
             bool autoResize = (summaryList.Items.Count == 0);
             summaryList.Items.Clear();
             summaryList.Refresh();
 
-            RomExt [] romExts = romSummaryManager.getSummaries();
+            RomExtensionSummary [] romExts = romSummaryBuilder.GetSummaries();
 
             ulong datSize = datVO?.SizeTotal ?? 0;
 
             for (int i = 0; i < romExts.Length; i++) {
-                RomExt romExt = romExts[i];
+                RomExtensionSummary romExt = romExts[i];
                 summaryList.AddRow(
                     new RowVO[] {
-                        new RowVO(ColumnHeaderVO.NameEnum.Ext, romExt.getExtension())
-                        , new RowVO(ColumnHeaderVO.NameEnum.ROMs, romExt.getRomOccurances().ToString())
-                        , new RowVO(ColumnHeaderVO.NameEnum.Size, romExt.getTotalSize().ToString())
-                        , new RowVO(ColumnHeaderVO.NameEnum.Size_PC, romExt.getPercentage(datSize).ToString("0.00") + " %")
-                        , new RowVO(ColumnHeaderVO.NameEnum.Entries, romExt.getGameOccurances().ToString())
+                        new RowVO(ColumnHeaderVO.NameEnum.Ext, romExt.Extension)
+                        , new RowVO(ColumnHeaderVO.NameEnum.ROMs, romExt.RomCount.ToString())
+                        , new RowVO(ColumnHeaderVO.NameEnum.Size, romExt.TotalSize.ToString())
+                        , new RowVO(ColumnHeaderVO.NameEnum.Size_PC, romExt.GetSizePercentage(datSize).ToString("0.00") + " %")
+                        , new RowVO(ColumnHeaderVO.NameEnum.Entries, romExt.GameCount.ToString())
                     }
                     , romExt);
             } // end for i

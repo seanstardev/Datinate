@@ -437,7 +437,7 @@ namespace Datinate.App.WinForms.View.Data
 
         private async Task<CoreWebView2?> EnsureCoreAsync()
         {
-            CoreWebView2? ensured = await WebHelper.EnsureCoreAsync(webView);
+            CoreWebView2? ensured = await WebView2Helper.EnsureCoreAsync(webView);
             if (ensured == null)
                 return null;
 
@@ -752,7 +752,7 @@ namespace Datinate.App.WinForms.View.Data
                     DefaultBackgroundColor = Color.Black
                 };
 
-                WebHelper.ApplyCreationProperties(webView);
+                WebView2Helper.ApplyCreationProperties(webView);
                 hostForm.Controls.Add(webView);
                 hostForm.Show();
             }
@@ -776,7 +776,7 @@ namespace Datinate.App.WinForms.View.Data
 
                 try
                 {
-                    currentCore = await WebHelper.EnsureCoreAsync(webView);
+                    currentCore = await WebView2Helper.EnsureCoreAsync(webView);
                 }
                 catch (Exception ex)
                 {

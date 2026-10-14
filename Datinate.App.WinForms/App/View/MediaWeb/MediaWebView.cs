@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Data;
+﻿using Datinate.App.Core.Web;
+using Datinate.App.WinForms.View.Data;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
@@ -45,7 +46,7 @@ namespace Datinate.App.WinForms.View
 
             BrowserUi(async () =>
             {
-                _ = await WebHelper.EnsureCoreAsync(browser);
+                _ = await WebView2Helper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
             });
@@ -105,18 +106,18 @@ namespace Datinate.App.WinForms.View
                 if (token != loadToken)
                     return;
 
-                var core = await WebHelper.EnsureCoreAsync(browser);
+                var core = await WebView2Helper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
 
                 try
                 {
                     Uri tempUri =
-                        await WebHelper.CreateTempHtmlAsync(html);
+                        await MediaWebHelper.CreateTempHtmlAsync(html);
 
                     if (token != loadToken)
                     {
-                        WebHelper.DeleteFile(tempUri.LocalPath);
+                        DeleteFile(tempUri.LocalPath);
                         return;
                     }
 
@@ -125,7 +126,7 @@ namespace Datinate.App.WinForms.View
 
                     core.Navigate(tempUri.AbsoluteUri);
 
-                    WebHelper.DeleteFile(oldPath);
+                    DeleteFile(oldPath);
                 }
                 catch (Exception) { }
             });
@@ -139,7 +140,7 @@ namespace Datinate.App.WinForms.View
                 return;
             }
 
-            if (!WebHelper.TryGetSupportedUri(url, out var uri))
+            if (!MediaWebHelper.TryGetSupportedUri(url, out var uri))
             {
                 ShowUnavailableContent(
                     "Content Cannot be Previewed",
@@ -149,11 +150,11 @@ namespace Datinate.App.WinForms.View
             }
 
             int token = unchecked(++loadToken);
-            string extension = WebHelper.GetExtensionNoQuery(uri);
+            string extension = MediaWebHelper.GetExtensionNoQuery(uri);
 
-            if (WebHelper.IsImageExtension(extension) ||
-                WebHelper.IsVideoExtension(extension) ||
-                WebHelper.LooksLikeHtmlOrDocument(extension))
+            if (MediaExtensionHelper.IsImageExtension(extension) ||
+                MediaExtensionHelper.IsVideoExtension(extension) ||
+                MediaExtensionHelper.LooksLikeHtmlOrDocument(extension))
             {
                 LoadWebUri(uri, token);
                 return;
@@ -204,7 +205,7 @@ namespace Datinate.App.WinForms.View
                 if (token != loadToken)
                     return;
 
-                var core = await WebHelper.EnsureCoreAsync(browser);
+                var core = await WebView2Helper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
 
@@ -250,7 +251,7 @@ namespace Datinate.App.WinForms.View
                 if (token != loadToken)
                     return;
 
-                var core = await WebHelper.EnsureCoreAsync(browser);
+                var core = await WebView2Helper.EnsureCoreAsync(browser);
 
                 ConfigureCore();
 
@@ -284,7 +285,7 @@ namespace Datinate.App.WinForms.View
             Uri? source =
                 audioSession?.IsPlayerActive == true
                     ? audioSession.CurrentSource
-                    : WebHelper.TryGetSource(browser);
+                    : WebView2Helper.TryGetSource(browser);
 
             if (source == null)
                 return;
@@ -314,7 +315,7 @@ namespace Datinate.App.WinForms.View
                     if (token != loadToken)
                         return;
 
-                    var core = await WebHelper.EnsureCoreAsync(browser);
+                    var core = await WebView2Helper.EnsureCoreAsync(browser);
 
                     LoadBlankHtml();
                 });
@@ -325,13 +326,13 @@ namespace Datinate.App.WinForms.View
         {
             Ui(() =>
             {
-                WebHelper.NavigateToBlankPage(
+                WebView2Helper.NavigateToBlankPage(
                     browser.CoreWebView2);
             });
         }
         private void ShowUnavailableContent(string title, string body)
         {
-            var html = WebHelper.CreateContentUnavailableHtml(title, body);
+            var html = MediaWebHelper.CreateContentUnavailableHtml(title, body);
             LoadPageContent(html);
         }
         protected void HandleDisposing()
@@ -378,7 +379,7 @@ namespace Datinate.App.WinForms.View
                 dragDropOverlay = null;
             }
 
-            WebHelper.DeleteFile(lastTempHtmlPath);
+            DeleteFile(lastTempHtmlPath);
             lastTempHtmlPath = null;
         }
         
@@ -386,7 +387,7 @@ namespace Datinate.App.WinForms.View
         {
             Ui(() =>
             {
-                Uri? src = WebHelper.TryGetSource(browser);
+                Uri? src = WebView2Helper.TryGetSource(browser);
                 UpdateBlankOverlayForSource(src);
             });
         }
@@ -399,7 +400,7 @@ namespace Datinate.App.WinForms.View
                 return;
             }
 
-            if (WebHelper.IsAboutBlank(src))
+            if (MediaWebHelper.IsAboutBlank(src))
             {
                 ApplyOverlayState();
                 return;
@@ -581,7 +582,7 @@ namespace Datinate.App.WinForms.View
             object? sender,
             CoreWebView2DownloadStartingEventArgs e)
         {
-            WebHelper.CancelDownload(e);
+            WebView2Helper.CancelDownload(e);
 
             ShowUnavailableContent(
                 "Content Cannot be Previewed",
@@ -595,18 +596,18 @@ namespace Datinate.App.WinForms.View
             if (sender is not CoreWebView2 core)
                 return;
 
-            Uri? source = WebHelper.TryGetSource(browser);
+            Uri? source = WebView2Helper.TryGetSource(browser);
             if (source == null)
                 return;
 
-            string extension = WebHelper.GetExtensionNoQuery(source);
+            string extension = MediaWebHelper.GetExtensionNoQuery(source);
 
-            if (WebHelper.IsVideoExtension(extension) == false)
+            if (MediaExtensionHelper.IsVideoExtension(extension) == false)
                 return;
 
             try
             {
-                await WebHelper.EnableVideoLoopAsync(core);
+                await WebView2Helper.EnableVideoLoopAsync(core);
 
                 // Override ConfigureCore() for audio player:
                 core.Settings.AreDefaultContextMenusEnabled = false;
@@ -657,10 +658,21 @@ namespace Datinate.App.WinForms.View
                 e.Effect = DragDropEffects.None;
         }
 
-        private void Ui(Action action)
+        private static void DeleteFile(string? path)
         {
-            uiDispatcher.Run(action);
+            if (string.IsNullOrWhiteSpace(path)) return;
+
+            try
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+            catch { }
         }
+
+
+        private void Ui(Action action)
+            => uiDispatcher.Run(action);
 
         protected override void OnVisibleChanged(EventArgs e)
         {

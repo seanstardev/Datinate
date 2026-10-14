@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Util;
+﻿using Datinate.App.Core.RomSummary;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
@@ -18,7 +19,7 @@ namespace Datinate.App.WinForms.View
         private DatVO? vo;
         private string? fileFolderPath = null;
 
-        private RomSummaryManager? romSummaryManager;
+        private RomSummaryBuilder? romSummaryBuilder;
 
         public CreateDatView() 
         {
@@ -53,23 +54,23 @@ namespace Datinate.App.WinForms.View
             versionTextBox.Text = vo.DatHeaderVO.Version;
             commentTextBox.Text = vo.DatHeaderVO.Comment;
 
-            romSummaryManager = new RomSummaryManager();
+            romSummaryBuilder = new RomSummaryBuilder();
 
             foreach (var gameVO in vo.Entries)
             {
-                romSummaryManager.manageRoms(gameVO);
+                romSummaryBuilder.AddGame(gameVO);
             }
 
 
-            RomExt[] roms = romSummaryManager.getSummaries();
+            RomExtensionSummary[] roms = romSummaryBuilder.GetSummaries();
 
             ListViewItem item;
             for (int i = 0; i < roms.Length; i++) {
 
-                if (roms[i].getExtension().Equals(Constants.NO_VALUE))
+                if (roms[i].Extension.Equals(Constants.NO_VALUE))
                     continue;
 
-                item = new ListViewItem("." + roms[i].getExtension());
+                item = new ListViewItem("." + roms[i].Extension);
                 item.Checked = true;
                 combo_extensions.Items.Add(item);
 
@@ -99,7 +100,7 @@ namespace Datinate.App.WinForms.View
             combo_extensions.Enabled = false;
             combo_extensions.Items.Clear();
 
-            romSummaryManager = null;
+            romSummaryBuilder = null;
         }
 
         private DatVO? GetDatVO() {
