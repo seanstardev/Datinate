@@ -12,6 +12,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class ProjectLoaderView : UserControl, IProjectLoaderView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action? ViewInitialisedEvt;
         public event Action<string?, string?, string?>? SaveGlobalDatPathsEvt;
 
@@ -26,10 +28,10 @@ namespace Datinate.App.WinForms.View
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool IsProjectLoaded =>
+        public bool IsProjectLoaded => uiDispatcher.Read(() =>
             !isCreatingNewProject &&
             currentProject != null &&
-            !string.IsNullOrWhiteSpace(currentProject.ProjectName);
+            !string.IsNullOrWhiteSpace(currentProject.ProjectName));
 
         private ProjectDatUI? lastClickedrojectDatUI = null;
         private SortedDictionary<string, DatGrouperProjectDTO> projectModel = new SortedDictionary<string, DatGrouperProjectDTO>();
@@ -55,6 +57,7 @@ namespace Datinate.App.WinForms.View
 
         public ProjectLoaderView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             EnableDoubleBuffer(gamesIncludeContainer);
@@ -65,7 +68,7 @@ namespace Datinate.App.WinForms.View
 
             SetViewAsStandard();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IProjectLoaderView>(this);
 
             UIHelper.PopButton(saveProjectBtn);
             UIHelper.PopButton(runDatGrouperBtn);
@@ -96,6 +99,9 @@ namespace Datinate.App.WinForms.View
 
         public DatGrouperProjectEntry[] GetAllDatHeadlines()
         {
+            if (!uiDispatcher.CheckAccess)
+                return uiDispatcher.Read(GetAllDatHeadlines);
+
             List<DatGrouperProjectEntry> list = new List<DatGrouperProjectEntry>();
 
             list.AddRange(GetSoftwareIncludeDats());
@@ -136,6 +142,12 @@ namespace Datinate.App.WinForms.View
             DAT_GROUP_TARGET_ENUM datGroupTargetEnum,
             bool forceAddAsFirst)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => AddDat(datHeadline, datGroupTargetEnum, forceAddAsFirst));
+                return;
+            }
+
             FlowLayoutPanel? container = GetContainer(datGroupTargetEnum);
             if (container == null)
                 return;
@@ -193,10 +205,16 @@ namespace Datinate.App.WinForms.View
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IProjectLoaderView>(this);
         }
         private void TryApplyPendingSetView()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(TryApplyPendingSetView);
+                return;
+            }
+
             if (IsDisposed || Disposing)
                 return;
 
@@ -749,14 +767,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void ShowError(string msg)

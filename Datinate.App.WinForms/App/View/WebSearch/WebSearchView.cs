@@ -7,11 +7,14 @@ namespace Datinate.App.WinForms.View
 {
     public partial class WebSearchView : UserControl, IRbWebSearchView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<string>? LoadUrlEvt;
         public WebSearchView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IRbWebSearchView>(this);
 
             webSourcesUI.SetSourceSelected(WEB_SOURCE_ENUM.Google);
             webSourcesUI.SourceSelectedEvt += OnSourceSelected;
@@ -37,6 +40,12 @@ namespace Datinate.App.WinForms.View
         }
         public void SearchCurrent()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SearchCurrent());
+                return;
+            }
+
             Search();
         }
         public void ClearView()
@@ -88,14 +97,7 @@ namespace Datinate.App.WinForms.View
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
         private static string NormaliseSytemName(string systemName)
         {
@@ -107,7 +109,7 @@ namespace Datinate.App.WinForms.View
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IRbWebSearchView>(this);
         }
         private string BuildChatGptQuestion()
         {

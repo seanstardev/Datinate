@@ -11,6 +11,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class DatDetailsView : UserControl, IDatDetailsView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<DatVO>? CustomiseClickEvt;
         public event Action? CompareLeftEvt;
         public event Action? CompareRightEvt;
@@ -25,6 +27,7 @@ namespace Datinate.App.WinForms.View
 
         public DatDetailsView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             gameList.AddColumns(
@@ -57,7 +60,7 @@ namespace Datinate.App.WinForms.View
             filterUI.clearEvt += new EventHandler(OnClearFilter);
             ClearView();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IDatDetailsView>(this);
         }
         public void SetView(
             DatVO datVO
@@ -84,7 +87,7 @@ namespace Datinate.App.WinForms.View
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IDatDetailsView>(this);
         }
 
         private void OnFilter(object? sender, EventArgs e)
@@ -437,14 +440,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
     }
 }

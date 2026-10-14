@@ -6,82 +6,67 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    internal class CompareMediator : RMediator 
+    internal class CompareMediator : RMediator<ICompareView>
     {
-        public CompareMediator(Type actor) : base(actor)
+        protected override void Initialised()
         {
-        }
-
-        private ICompareView? view => (ICompareView?)base.viewBase;
-
-        protected override void Initialsed()
-        {
-            if (view != null)
+            if (actor != null)
             {
-                view.CustomiseClickEvt += OnCustomiseClick;
-                view.CompareClickEvt += OnCompareClick;
-                view.FormClosingEvt += OnFormClosing;
-                view.CreateDatClickEvt += OnCreateDatClick;
+                actor.CustomiseClickEvt += OnCustomiseClick;
+                actor.CompareClickEvt += OnCompareClick;
+                actor.FormClosingEvt += OnFormClosing;
+                actor.CreateDatClickEvt += OnCreateDatClick;
             }
         }
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.CustomiseClickEvt -= OnCustomiseClick;
-                view.CompareClickEvt -= OnCompareClick;
-                view.FormClosingEvt -= OnFormClosing;
-                view.CreateDatClickEvt -= OnCreateDatClick;
+                actor.CustomiseClickEvt -= OnCustomiseClick;
+                actor.CompareClickEvt -= OnCompareClick;
+                actor.FormClosingEvt -= OnFormClosing;
+                actor.CreateDatClickEvt -= OnCreateDatClick;
             }
         }
         public void ClearView() 
-        {
-            view?.ClearView();
-        }
+            => actor?.ClearView();
 
         public void SetLeft(DatVO datVO)
         {
-            view?.SetLeft(datVO);
-            base.ExecuteCommand(new SetCompareViewVisibleCmd(true));
+            actor?.SetLeft(datVO);
+            base.Execute(new SetCompareViewVisibleCmd(true));
         }
 
         public void SetRight(DatVO datVO)
         {
-            view?.SetRight(datVO);
-            base.ExecuteCommand(new SetCompareViewVisibleCmd(true));
+            actor?.SetRight(datVO);
+            base.Execute(new SetCompareViewVisibleCmd(true));
         }
 
         public void UpdateUnitsView(UnitFormatHelper.Unit unit, bool showUnitInCells)
-        {
-            view?.UpdateUnits(unit, showUnitInCells);
-        }
-
+            => actor?.UpdateUnits(unit, showUnitInCells);
+        
         public void SetComparisonResult(DatComparisonVO vo)
         {
-            view?.SetLeft(vo.leftDatVO);
-            view?.SetRight(vo.rightDatVO);
-            view?.SetMiddle(vo.diffDatVO);
-            base.ExecuteCommand(new SetCompareViewVisibleCmd(true));
+            actor?.SetLeft(vo.leftDatVO);
+            actor?.SetRight(vo.rightDatVO);
+            actor?.SetMiddle(vo.diffDatVO);
+            base.Execute(new SetCompareViewVisibleCmd(true));
         }
-        private void OnCompareClick() =>
-            base.ExecuteCommand(new CreateDatComparisonCmd());
+        private void OnCompareClick() 
+            => base.Execute(new CreateDatComparisonCmd());
         
-
         private void OnFormClosing() 
         {
             ClearView();
-            base.ExecuteCommand(new ClearCompareDatsModelAndViewCmd());
+            base.Execute(new ClearCompareDatsModelAndViewCmd());
         }
 
         private void OnCustomiseClick(DatVO datVO) 
-        {
-            base.ExecuteCommand(new SetCustomiseViewCmd(datVO));
-        }
+            => base.Execute(new SetCustomiseViewCmd(datVO));
 
         private void OnCreateDatClick(DatVO datVO) 
-        {
-            base.ExecuteCommand(new ShowCreateDatCmd(datVO));
-        }
+            => base.Execute(new ShowCreateDatCmd(datVO));
     }
 }

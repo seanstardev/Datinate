@@ -1,4 +1,4 @@
-﻿using Datinate.Shared.Dat;
+using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 using System.Diagnostics;
@@ -6,7 +6,7 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class LoadDatSummariesCmd : RCommandAsync
+    internal class LoadDatSummariesCmd : CommandBase<RVoid>
     {
         private readonly bool scanForDuplicateDats;
 
@@ -15,33 +15,27 @@ namespace Datinate.Rmvc.Command
             this.scanForDuplicateDats = scanForDuplicateDats;
         }
 
-        protected async override Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
 
-            if (Facade.Instance == null ||
-                Facade.Instance?.ActiveDatsModel == null ||
-                Facade.Instance?.DatDbProxy == null ||
-                Facade.Instance?.DatDetailsProxy == null ||
-                Facade.Instance?.UnitDisplayModel == null)
+            if (base.ActiveDatsModel == null ||
+                base.DatDbProxy == null ||
+                base.DatDetailsProxy == null ||
+                base.UnitDisplayModel == null)
             {
-                return;
+                return await Complete();
             }
 
-            var activeDatsModel = Facade.Instance.ActiveDatsModel;
-            var datDetailsProxy = Facade.Instance.DatDetailsProxy;
-            var datDbProxy = Facade.Instance.DatDbProxy;
-            var unitDisplayModel = Facade.Instance.UnitDisplayModel;
-            
-            
-            DatGrouperProjectEntry[]? datPaths = activeDatsModel.HierarchyDats;
+            DatGrouperProjectEntry[]? datPaths =
+                base.ActiveDatsModel.HierarchyDats;
 
-            if (datPaths == null) 
-                return;
+            if (datPaths == null)
+                return await Complete();
 
             List<string> unrecognisedDATs = new List<string>();
 
             // Note: We have to send something to force Progress view update:
-            base.ExecuteCommand(
+            await base.Execute(
                 new ShowProgressCmd("Fetching DAT Summary Information", 0, datPaths.Length));
 
             List<DatSummaryVO> datsSummaries = new List<DatSummaryVO>();
@@ -50,7 +44,8 @@ namespace Datinate.Rmvc.Command
             {
                 var datPath = datPaths[i];
 
-                DatSummaryVO? dbDatEntry = datDbProxy.GetDatSummary(datPath.DatFullpath);
+                DatSummaryVO? dbDatEntry =
+                    base.DatDbProxy.GetDatSummary(datPath.DatFullpath);
 
                 DatSummaryVO? summary = null;
 
@@ -62,7 +57,7 @@ namespace Datinate.Rmvc.Command
                 }
                 else
                 {
-                    var dat = datDetailsProxy.GetDat(datPath.DatFullpath, out var rawFile);
+                    var dat = DatDetailsProxy.GetDat(datPath.DatFullpath, out var rawFile);
 
                     if (dat != null)
                     {
@@ -78,25 +73,26 @@ namespace Datinate.Rmvc.Command
                 }
                 else
                 {
-                    base.ExecuteCommand(new ShowProgressCmd(
+                    await base.Execute(new ShowProgressCmd(
                         "Fetching DAT Summary Information (" + Path.GetDirectoryName(summary.DatFullpath) + " > " + Path.GetFileNameWithoutExtension(summary.DatFullpath) + ")", i + 1, datPaths.Length));
 
                     datsSummaries.Add(summary);
 
                     if (dbDatEntry == null)
                     {
-                        datDbProxy.CreateDatEntry(summary, sha1);
+                        base.DatDbProxy.CreateDatEntry(summary, sha1);
                     }
                 }
             }
 
-            base.ExecuteCommand(new ClearProgressCmd());
+            await base.Execute(new ClearProgressCmd());
 
             bool unhandledIssue = false;  
             if (unrecognisedDATs.Count > 0) 
             {
                 unhandledIssue = true;
-                base.ExecuteCommand(
+
+                await base.Execute(
                     new SetProblemListCmd(
                     SetProblemListCmd.UI.Unreadable
                     , unrecognisedDATs.ToArray()
@@ -113,7 +109,7 @@ namespace Datinate.Rmvc.Command
             // NOTE: Multiple tabs need viewing in this scenario, justifying a prompt:
             if (duplicatesIssue && unhandledIssue) 
             {
-                base.ExecuteCommand(
+                await base.Execute(
                     new ShowMessageCmd(
                     "Please review the Problem List tabs carefully. Multiple issues may need attending."));
             }
@@ -123,21 +119,23 @@ namespace Datinate.Rmvc.Command
             // NOTE: Only move on to next Tab if there is something to show in summaries' view.
             if (dats.Length > 0) 
             {
-                activeDatsModel.AllStoredDats = dats;
+                base.ActiveDatsModel.AllStoredDats = dats;
 
-                Facade.Instance?.DatSummaryMediator?.PopulateTable(
+                base.DatSummaryMediator?.PopulateTable(
                     dats
-                    , unitDisplayModel.GetUnit()
-                    , unitDisplayModel.GetShowUnitInCells());
+                    , base.UnitDisplayModel.GetUnit()
+                    , base.UnitDisplayModel.GetShowUnitInCells());
 
-                base.ExecuteCommand(new SwitchDatViewCmd(DAT_SCREEN_ENUM.DatManager));
+                await base.Execute(new SwitchDatViewCmd(DAT_SCREEN_ENUM.DatManager));
             }
             else {
-                base.ExecuteCommand(
+                await base.Execute(
                     new ShowMessageCmd(
                         "None of the discovered DAT files are valid. Please look at the Problem List and change your DAT Root directories."
                     ));
             }
+
+            return await Complete();
         }
     }
 }

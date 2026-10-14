@@ -13,6 +13,8 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 {
     public partial class DatGrouperUiBase : UserControl
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public static IDatGrouperNodePreview? NodePreview;
         
         public event Action? InitialisedEvt;
@@ -109,6 +111,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
         public DatGrouperUiBase()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             treeView.ShowNodeToolTips = true;
@@ -144,6 +147,12 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
             bool isSurrogate,
             bool isAutoUI)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetView(gameFamilies, projectName, partFingerprintReportDic, isSurrogate, isAutoUI));
+                return;
+            }
+
             var stopwatch = Stopwatch.StartNew();
 
             if (InvokeRequired)
@@ -184,11 +193,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
             }
 
             if (isAutoUI && !isSurrogate)
-                _ = new DatGrouperPerformanceUtil(
-                    this,
-                    onEnd: r => InitialisedEvt?.Invoke(),
-                    weakCallback: false,
-                    runCallbackOnThreadPool: false);
+                _ = new DatGrouperPerformanceUtil(this);
 
             suppressOverlayEvents = true;
 
@@ -271,6 +276,11 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
                 contextMenu.Reset();
             }
+
+            // Signal successful tree construction independently of paint timing.
+            // An exception above skips this notification.
+            if (isAutoUI && !isSurrogate)
+                InitialisedEvt?.Invoke();
         }
         public void SetMediaCache(
             IReadOnlyDictionary<IGameFamily, IMediaCollection> mediaCache)
@@ -543,14 +553,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
         public void ApplyDatGrouperDelta(
             DELTA_NATURE_ENUM deltaNatureEnum,

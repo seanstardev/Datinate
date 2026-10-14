@@ -1,9 +1,9 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ShowMediaCardCmd : RCommand
+    internal class ShowMediaCardCmd : CommandBase<RVoid>
     {
         private readonly ILookupSet lookupSet;
         private readonly string entryName;
@@ -18,56 +18,56 @@ namespace Datinate.Rmvc.Command
             this.sourceId = lookupSet.Id;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var mediaProxy = Facade.Instance?.RbAuxItemLoaderProxy;
-            var radioDatModel = Facade.Instance?.RadioDatModel;
-
-            if (mediaProxy == null ||
-                radioDatModel == null)
+            if (base.RbAuxItemLoaderProxy == null ||
+                base.RadioDatModel == null)
             {
-                return;
+                return await Complete();
             }
 
-            var source = radioDatModel.GetSource(sourceId);
+            var source = base.RadioDatModel.GetSource(sourceId);
 
-            if (source == null) return;
+            if (source == null) 
+                return await Complete();
 
-            var lookup = lookupSet.GetLookup(entryName);
+                var lookup = lookupSet.GetLookup(entryName);
             string? url = null;
             string? resourceHtml = null;
 
             if (lookup != null && !string.IsNullOrWhiteSpace(lookup))
             {
-                url = mediaProxy.CreateURI(
+                url = base.RbAuxItemLoaderProxy.CreateURI(
                     lookup, 
                     source,
-                    Facade.Instance?.ModelDataProxy?.R2DatResources ?? new List<R2DatResourceDTO>());
+                    base.ModelDataProxy?.R2DatResources ?? new List<R2DatResourceDTO>());
             }
 
-            if (url == null) return;
+                if (url == null) return await Complete();
 
             if (source.IsRadioResource)
             {
-                var resourceDetails = radioDatModel.GetResourceDetails(source.Id, lookup!);
+                var resourceDetails = base.RadioDatModel.GetResourceDetails(source.Id, lookup!);
                 
                 if (resourceDetails?.Info != null && !string.IsNullOrWhiteSpace(source.ContentPath))
-                    resourceHtml = mediaProxy.CreateResourceHtml(
+                    resourceHtml = base.RbAuxItemLoaderProxy.CreateResourceHtml(
                         resourceDetails, 
                         source,
                         url,
                         false);
             }
 
-            Facade.Instance?.MediaAssignmentMediator?.SetViewMediaItem(entryName, source);
+                base.MediaAssignmentMediator?.SetViewMediaItem(entryName, source);
 
-            if (!string.IsNullOrWhiteSpace(resourceHtml))
-                base.ExecuteCommand(new LoadWebMediaHtmlCmd(resourceHtml));
+            if (!string.IsNullOrWhiteSpace(resourceHtml) && resourceHtml != null)
+                await base.Execute(new LoadWebMediaHtmlCmd(resourceHtml));
             else
-                base.ExecuteCommand(new LoadWebMediaUrlCmd(url));
+                await base.Execute(new LoadWebMediaUrlCmd(url));
 
             if (!isAutoLoaded)
-                Facade.Instance?.MediaAssignmentMediator?.SetScoringActive(false);
+                base.MediaAssignmentMediator?.SetScoringActive(false);
+
+            return await Complete();
         }
     }
 }

@@ -1,16 +1,14 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ClearDatGrouperViewCmd : RCommand 
+    internal class ClearDatGrouperViewCmd : CommandBase<RVoid>
     {
-        public ClearDatGrouperViewCmd() 
+        protected override async Task<RVoid> Run() 
         {
-        }
-    
-        protected override void Run() 
-        {
-            Facade.Instance?.DatGrouperMediator?.ResetView();
+            base.DatGrouperMediator?.ResetView();
+
+            return await Complete();
         }
     }
 }

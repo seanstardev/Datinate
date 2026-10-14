@@ -9,6 +9,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class CompareView : UserControl, ICompareView 
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<DatVO>? CustomiseClickEvt;
         public event Action<DatVO>? CreateDatClickEvt;
         public event Action? CompareClickEvt;
@@ -19,6 +21,7 @@ namespace Datinate.App.WinForms.View
 
         public CompareView() 
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             leftUI.CustomiseClickEvt = new EventHandler(OnCustomiseClick);
@@ -34,13 +37,19 @@ namespace Datinate.App.WinForms.View
 
             UIHelper.PopButton(compareBtn);
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<ICompareView>(this);
         }
         protected void HandleDisposing()
-            => Facade.UnregisterActor(this);
+            => Facade.UnregisterActor<ICompareView>(this);
         
         public void ClearView() 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ClearView());
+                return;
+            }
+
             leftUI.ClearUI();
             rightUI.ClearUI();
             middleUI.ClearUI();
@@ -48,21 +57,45 @@ namespace Datinate.App.WinForms.View
 
         public void SetLeft(DatVO datVO) 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetLeft(datVO));
+                return;
+            }
+
             leftUI.SetUI(datVO, CompareUI.UiPosition.Left);
         }
 
         public void SetRight(DatVO datVO) 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetRight(datVO));
+                return;
+            }
+
             rightUI.SetUI(datVO, CompareUI.UiPosition.Right);
         }
 
         public void SetMiddle(DatVO datVO) 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetMiddle(datVO));
+                return;
+            }
+
             middleUI.SetUI(datVO, CompareUI.UiPosition.Middle);
         }
 
         public void UpdateUnits(UnitFormatHelper.Unit unit, bool showUnitInCells) 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => UpdateUnits(unit, showUnitInCells));
+                return;
+            }
+
             leftUI.UpdateUnits(unit, showUnitInCells);
             rightUI.UpdateUnits(unit, showUnitInCells);
             middleUI.UpdateUnits(unit, showUnitInCells);

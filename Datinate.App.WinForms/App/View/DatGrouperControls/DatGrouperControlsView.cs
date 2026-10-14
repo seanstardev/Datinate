@@ -12,6 +12,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class DatGrouperControlsView : UserControl, IDatGrouperControlsView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action? ExitMediaModeEvt;
         public event Action<bool, IGameEntity>? AssignMediaEvt;
         public event Action<bool>? EnterMediaModeEvt;
@@ -33,8 +35,10 @@ namespace Datinate.App.WinForms.View
 
         public DatGrouperControlsView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
+
             InitializeComponent();
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IDatGrouperControlsView>(this);
 
             UIHelper.PopButton(assignMediaBtn);
             UIHelper.PopButton(mediaToggleBtn);
@@ -67,6 +71,12 @@ namespace Datinate.App.WinForms.View
 
         public void ClearView()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ClearView());
+                return;
+            }
+
             entitySourceIsAuto = null;
             entityName = null;
             SelectedEntity = null;
@@ -91,6 +101,12 @@ namespace Datinate.App.WinForms.View
         }
         public void SetView(IGameEntity? entity, bool isFromAuto)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetView(entity, isFromAuto));
+                return;
+            }
+
             var newName = DatinateFamilyHelper.GetGameEntityName(entity);
 
             if (object.ReferenceEquals(entity, SelectedEntity) &&
@@ -169,7 +185,7 @@ namespace Datinate.App.WinForms.View
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IDatGrouperControlsView>(this);
         }
 
         private void SearchNameBtn_Click(object sender, EventArgs e)
@@ -180,14 +196,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void assignMediaBtn_Click(object sender, EventArgs e)

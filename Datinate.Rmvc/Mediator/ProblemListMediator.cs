@@ -3,29 +3,18 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class ProblemListMediator : RMediator 
+    public class ProblemListMediator : RMediator<IProblemListView>
     {
-        private IProblemListView? view => (IProblemListView?)base.viewBase;
-        public ProblemListMediator(Type actor) : base(actor)
-        {
-        }
-
         public void SetUnreadableView(string[] problemItems) 
-        {
-            view?.SetUnreadableView(problemItems);
-        }
-
+            => actor?.SetUnreadableView(problemItems);
+        
         public void SetDuplicatesView(string[] problemItems) 
-        {
-            view?.SetDuplicatesView(problemItems);
-        }
-
+            => actor?.SetDuplicatesView(problemItems);
+        
         public void ClearView() 
-        {
-            view?.ClearView();
-        }
-
-        protected override void Initialsed()
+            => actor?.ClearView();
+        
+        protected override void Initialised()
         {
 
         }

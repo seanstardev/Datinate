@@ -5,12 +5,15 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
 {
     public partial class ScoringUI : UserControl
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         private const int TopInsetPx = 25;
         private const int BottomInsetPx = 20;
         private const int MinHeightPx = TopInsetPx + BottomInsetPx;
 
         public ScoringUI()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             rowContainer.FlowDirection = FlowDirection.TopDown;
@@ -204,16 +207,7 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated)
-                    return;
-
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         protected override void OnSizeChanged(EventArgs e)

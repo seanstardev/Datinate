@@ -7,69 +7,59 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class ExportMediator : RMediator
+    public class ExportMediator : RMediator<IExportView>
     {
-        private IExportView? view => (IExportView?)base.viewBase;
-        public ExportMediator(Type view) : base(view)
-        {
-        }
-
         public void ClearView() => 
-            view?.ClearView();
+            actor?.ClearView();
         
         public void SetView(
             bool everyGameHasExactlyOnePart,
             ExportSoftwareOptionsDTO exportSoftwareOptions,
-            IReadOnlyDictionary<DatinateEnums.MEDIA_TYPE_ENUM, IReadOnlyList<MediaExportPriorityItemDTO>> mediaPriorityDictionary,
+            IReadOnlyDictionary<
+                DatinateEnums.MEDIA_TYPE_ENUM, 
+                IReadOnlyList<MediaExportPriorityItemDTO>> mediaPriorityDictionary,
             string exportSettingsMessage)
-        {
-            view?.SetView(
+            => actor?.SetView(
                 everyGameHasExactlyOnePart,
                 exportSoftwareOptions,
                 mediaPriorityDictionary, 
                 exportSettingsMessage);
-        }
-
+        
         private void OnBack()
-            => base.ExecuteCommand(new SetDatGrouperFormActiveCmd());
+            => base.Execute(new SetDatGrouperFormActiveCmd());
         
         private void OnExportProject(
             IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaOptions,
             ExportSoftwareOptionsDTO softwareOptions,
             DAT_GROUPER_EXPORT_ENUM exportEnum)
+            => base.Execute(new ExportDatGrouperProjectCmd(
+                mediaOptions,
+                softwareOptions,
+                exportEnum));
+        
+        private void OnSaveSettings(
+            IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaExportEntries,
+            ExportSoftwareOptionsDTO softwareExportOptions)
+            => base.Execute(new SaveDatGrouperExportSettingsCmd(
+                mediaExportEntries,
+                softwareExportOptions));
+        
+        protected override void Initialised()
         {
-            base.ExecuteCommand(
-                new ExportDatGrouperProjectCmd(
-                    mediaOptions,
-                    softwareOptions,
-                    exportEnum));
+            if (actor == null) return;
+            base.WithActor((actor) => { });
+            actor.BackEvt += OnBack;
+            actor.ExportProjectEvt += OnExportProject;
+            actor.SaveSettingsEvt += OnSaveSettings;
         }
 
         protected override void Disposing()
         {
-            if (view == null) return;
+            if (actor == null) return;
 
-            view.BackEvt -= OnBack;
-            view.ExportProjectEvt -= OnExportProject;
-            view.SaveSettingsEvt -= OnSaveSettings;
-        }
-
-        private void OnSaveSettings(
-            IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaExportEntries,
-            ExportSoftwareOptionsDTO softwareExportOptions)
-        {
-            base.ExecuteCommand(new SaveDatGrouperExportSettingsCmd(
-                mediaExportEntries,
-                softwareExportOptions));
-        }
-
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.BackEvt += OnBack;
-            view.ExportProjectEvt += OnExportProject;
-            view.SaveSettingsEvt += OnSaveSettings;
+            actor.BackEvt -= OnBack;
+            actor.ExportProjectEvt -= OnExportProject;
+            actor.SaveSettingsEvt -= OnSaveSettings;
         }
     }
 }

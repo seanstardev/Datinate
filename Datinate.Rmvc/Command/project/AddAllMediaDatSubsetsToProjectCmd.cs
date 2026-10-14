@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using RMVC;
 using System.Diagnostics;
@@ -6,7 +6,7 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class AddAllMediaDatSubsetsToProjectCmd : RCommand
+    internal class AddAllMediaDatSubsetsToProjectCmd : CommandBase<RVoid>
     {
         private readonly DatVO dat;
         private readonly DAT_GROUP_ENUM datGroupEnum;
@@ -17,12 +17,12 @@ namespace Datinate.Rmvc.Command
             this.datGroupEnum = datGroupEnum;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             if (datGroupEnum != DAT_GROUP_ENUM.R2DAT_EMUMOVIES)
             {
                 Debug.WriteLine(this +" Only EmuMovies supports this command at this time.");
-                return;
+                return await Complete();
             }
             var games = dat.Entries;
 
@@ -60,21 +60,21 @@ namespace Datinate.Rmvc.Command
                     if (enumMatch == null) continue;
 
                     var subset = new DatSubsetFilter(entryName);
-                    var cmd = new AddDatToProjectCmd(
+
+                    var success = await base.Execute(new AddDatToProjectCmd(
                         dat,
                         COLLECTION_SET_ENUM.Media,
                         DatinateEnums.DAT_GROUP_TARGET_ENUM.MEDIA_INCLUDE_GROUP,
                         DAT_GROUP_ENUM.R2DAT_EMUMOVIES,
                         enumMatch.ToString(),
-                        subset);
-
-                    base.ExecuteCommand(cmd);
+                        subset));
 
                     // NOTE: This command will already have show the user an error message:
-                    if (cmd.AddToProjectSucceeded == false)
+                    if (success == false)
                         break;
                 }
             }
+            return await Complete();
         }
     }
 }

@@ -1,11 +1,9 @@
-﻿using Datinate.Shared.DatGrouper;
-using RMVC;
+using Datinate.Shared.DatGrouper;
 
 namespace Datinate.Rmvc.Command
 {
-    public class CheckDatGrouperProjectValidCmd : RCommand
+    internal class CheckDatGrouperProjectValidCmd : CommandBase<bool>
     {
-        public bool AllDatAndExpressionFilesExist { get; private set; }
         private readonly DatGrouperProjectDTO dto;
 
         public CheckDatGrouperProjectValidCmd(DatGrouperProjectDTO dto)
@@ -13,12 +11,14 @@ namespace Datinate.Rmvc.Command
             this.dto = dto;
         }
 
-        protected override void Run()
+        protected override async Task<bool> Run()
         {
-            AllDatAndExpressionFilesExist =
+            var allDatAndExpressionFilesExist =
                 DatGrouperProjectDTO.GetAllDatFilesExist(dto) &&
                 DatGrouperProjectDTO.GetAllExpressionFilesExistOrAreEmpty(dto) &&
                 dto.GetAllDatContentPathsAreValidOrEmpty();
+
+            return await Complete(allDatAndExpressionFilesExist);
         }
     }
 }

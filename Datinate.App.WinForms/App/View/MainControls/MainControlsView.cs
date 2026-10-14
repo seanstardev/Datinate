@@ -9,6 +9,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class MainControlsView : UserControl, IMainControlsView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<Unit, bool>? UnitViewChangeEvt;
         public event Action? ShowCustomiseViewEvt;
         public event Action? ShowCompareViewEvt;
@@ -31,6 +33,7 @@ namespace Datinate.App.WinForms.View
 
         public MainControlsView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
             splashPanel.BringToFront();
             unitsCombo.SelectedIndex = 3;
@@ -48,7 +51,7 @@ namespace Datinate.App.WinForms.View
                 vgmBtn,
                 @"Install or Update the Video Game Music engine");
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IMainControlsView>(this);
 
             ApplyRightButtonLayout();
         }
@@ -143,7 +146,7 @@ namespace Datinate.App.WinForms.View
         protected void HandleDisposing()
         {
             controlsPanel.Resize -= ControlsPanel_Resize;
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IMainControlsView>(this);
         }
 
         /**
@@ -247,16 +250,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated)
-                    return;
-
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void vgmBtn_Click(object sender, EventArgs e)

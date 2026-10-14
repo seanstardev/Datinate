@@ -1,12 +1,14 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ClearDatSummaryViewCmd : RCommand 
+    internal class ClearDatSummaryViewCmd : CommandBase<RVoid>
     {
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.DatSummaryMediator?.ClearView();
+            base.DatSummaryMediator?.ClearView();
+
+            return await Complete();
         }
     }
 }

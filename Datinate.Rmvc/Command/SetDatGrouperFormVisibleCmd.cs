@@ -1,14 +1,18 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetDatGrouperFormVisibleCmd : RCommand
+    internal class SetDatGrouperFormVisibleCmd : CommandBase<RVoid>
     {
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            base.ExecuteCommand(new SetMainControlsBtnEnabledCmd(MAIN_CONTROL_ENUM.DatGrouper, true));
-            Facade.Instance?.Shell?.SetProjectsFormVisible(true);
+            await base.Execute(new SetMainControlsBtnEnabledCmd(
+                MAIN_CONTROL_ENUM.DatGrouper, true));
+
+            base.Shell?.SetProjectsFormVisible(true);
+
+            return await Complete();
         }
     }
 }

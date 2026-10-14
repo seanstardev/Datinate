@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetExcludeFamiliesInViewCmd : RCommand
+    internal class SetExcludeFamiliesInViewCmd : CommandBase<RVoid>
     {
         private readonly bool doExclude;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.doExclude = doExclude;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.DatGrouperMediator?.SetExcludeFamiliesVisible(doExclude);
+            base.DatGrouperMediator?.SetExcludeFamiliesVisible(doExclude);
+
+            return await Complete();
         }
     }
 }

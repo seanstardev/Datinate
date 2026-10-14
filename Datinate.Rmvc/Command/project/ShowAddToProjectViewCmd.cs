@@ -1,10 +1,10 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ShowAddToProjectViewCmd : RCommand 
+    internal class ShowAddToProjectViewCmd : CommandBase<RVoid> 
     {
         private readonly DatVO datVO;
         
@@ -13,39 +13,43 @@ namespace Datinate.Rmvc.Command
             this.datVO = datVO;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
         
-            if (datVO == null) return;
+            if (datVO == null) return await Complete();
 
-            if (Facade.Instance?.Shell is { } shell)
+            if (base.Shell is { })
             {
-                if (shell.CurrentProjectsPageIsProjectLoaderPage == false)
+                if (base.Shell.CurrentProjectsPageIsProjectLoaderPage == false)
                 {
-                    _ = shell.ShowMessageBox(
+                    _ = base.Shell.ShowMessageBox(
                         "Attention",
                         "Cannot proceed. Please Exit the active DAT Grouper Project and try again.");
 
-                    base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
-                    return;
+                    await base.Execute(new SetDatGrouperFormVisibleCmd());
+
+                    return await Complete();
                 }
 
-                if (Facade.Instance?.ProjectLoaderMediator is { } projects && projects.IsProjectLoaded == false)
+                if (base.ProjectLoaderMediator is { } && base.ProjectLoaderMediator.IsProjectLoaded == false)
                 {
-                    _ = shell.ShowMessageBox(
+                    _ = await base.Shell.ShowMessageBox(
                         "Attention",
                         "Cannot proceed. Please Load or Create a DAT Grouper Project and try again.");
 
-                    base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
-                    return;
+                    await base.Execute(new SetDatGrouperFormVisibleCmd());
+
+                    return await Complete();
                 }
             }
 
-            var resources = Facade.Instance?.ModelDataProxy?.R2DatResources;
-            Facade.Instance?.AddToProjectMediator?.SetR2DatResources(resources ?? new List<R2DatResourceDTO>());
-            Facade.Instance?.AddToProjectMediator?.SetView(datVO);
-            
-            Facade.Instance?.Shell?.SetAddToProjectFormVisible(true);
+            var resources = base.ModelDataProxy?.R2DatResources;
+            base.AddToProjectMediator?.SetR2DatResources(resources ?? new List<R2DatResourceDTO>());
+            base.AddToProjectMediator?.SetView(datVO);
+ 
+            base.Shell?.SetAddToProjectFormVisible(true);
+
+            return await Complete();
         }
     }
 }

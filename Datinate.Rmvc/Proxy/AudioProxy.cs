@@ -1,4 +1,4 @@
-﻿using RMVC;
+using RMVC;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
@@ -57,7 +57,7 @@ namespace Datinate.Rmvc.Proxy
 
         public async Task<bool> InstallOrUpdateVgmEngine(
             string vgmEngineUrl,
-            Action<int, int, string>? callback = null)
+            FileProgressCallback? callback = null)
         {
             if (string.IsNullOrWhiteSpace(vgmEngineUrl))
                 return false;
@@ -77,7 +77,7 @@ namespace Datinate.Rmvc.Proxy
                 // 1. Download
                 // ------------------------------------------------------------
 
-                callback?.Invoke(0, 4, "Downloading VGMPlay-JS-2...");
+                await (callback?.Invoke(0, 4, "Downloading VGMPlay-JS-2...") ?? Task.CompletedTask);
 
                 Directory.CreateDirectory(tempRoot);
 
@@ -107,7 +107,7 @@ namespace Datinate.Rmvc.Proxy
                 // 2. Verify ZIP
                 // ------------------------------------------------------------
 
-                callback?.Invoke(1, 4, "Verifying downloaded package...");
+                await (callback?.Invoke(1, 4, "Verifying downloaded package...") ?? Task.CompletedTask);
 
                 if (!File.Exists(zipPath))
                     return false;
@@ -164,7 +164,7 @@ namespace Datinate.Rmvc.Proxy
                 // 3. Remove existing VGMPlay installation
                 // ------------------------------------------------------------
 
-                callback?.Invoke(2, 4, "Preparing VGMPlay-JS-2 installation...");
+                await (callback?.Invoke(2, 4, "Preparing VGMPlay-JS-2 installation...") ?? Task.CompletedTask);
 
                 string vgmplayPath =
                     Path.Combine(
@@ -182,7 +182,7 @@ namespace Datinate.Rmvc.Proxy
                 // 4. Extract directly into VGM/vgmplay
                 // ------------------------------------------------------------
 
-                callback?.Invoke(3, 4, "Installing VGMPlay-JS-2...");
+                await (callback?.Invoke(3, 4, "Installing VGMPlay-JS-2...") ?? Task.CompletedTask);
 
                 using (ZipArchive archive = ZipFile.OpenRead(zipPath))
                 {
@@ -248,10 +248,10 @@ namespace Datinate.Rmvc.Proxy
                     return false;
                 }
 
-                callback?.Invoke(
+                await (callback?.Invoke(
                     4,
                     4,
-                    "VGMPlay-JS-2 installation complete.");
+                    "VGMPlay-JS-2 installation complete.") ?? Task.CompletedTask);
 
                 return true;
             }

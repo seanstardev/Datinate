@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 using System.Text;
@@ -6,16 +6,16 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetDatGrouperExportViewCmd : RCommandAsync
+    internal class SetDatGrouperExportViewCmd : CommandBase<RVoid>
     {
-        protected async override Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.Shell?.ShowExportView();
-            Facade.Instance?.ExportMediator?.ClearView();
+            base.Shell?.ShowExportView();
+            base.ExportMediator?.ClearView();
 
-            if (Facade.Instance?.DatGrouperModel is { } datGrouperModel &&
-                Facade.Instance?.RadioDatModel is { } radioDatModel &&
-                Facade.Instance?.RadioDatModel?.ActiveProject is { } activeProject)
+            if (base.DatGrouperModel is { } datGrouperModel &&
+                base.RadioDatModel is { } radioDatModel &&
+                base.RadioDatModel?.ActiveProject is { } activeProject)
             {
                 var families = datGrouperModel.CuratedFamilies;
 
@@ -43,7 +43,7 @@ namespace Datinate.Rmvc.Command
                                 ": " +
                                 lookupName;
 
-                            base.ExecuteCommand(new ShowProgressCmd(message, current, total));
+                            await base.Execute(new ShowProgressCmd(message, current, total));
                         });
 
                 var reconciled = ReconcileMediaExportPriorities(
@@ -51,15 +51,15 @@ namespace Datinate.Rmvc.Command
                     activeProject.MediaExports,
                     out var mediaExportSettingsMessage);
 
-                Facade.Instance?.ExportMediator?.SetView(
+                base.ExportMediator?.SetView(
                     everyGameHasExactlyOnePart,
                     activeProject.ExportSoftwareOptionsDTO,
                     reconciled,
                     mediaExportSettingsMessage ?? string.Empty);
 
-                base.ExecuteCommand(new ClearProgressCmd());
-
+                await base.Execute(new ClearProgressCmd());
             }
+            return await Complete();
         }
 
         private static IReadOnlyDictionary<MEDIA_TYPE_ENUM, IReadOnlyList<MediaExportPriorityItemDTO>> ReconcileMediaExportPriorities(

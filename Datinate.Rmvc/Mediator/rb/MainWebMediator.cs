@@ -1,4 +1,4 @@
-﻿using Datinate.Rmvc.Command;
+using Datinate.Rmvc.Command;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
@@ -7,100 +7,74 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class MainWebMediator : RMediator
+    public class MainWebMediator : RMediator<IMainWebView>
     {
-        private IMainWebView? view => (IMainWebView?)base.viewBase;
-        public MainWebMediator(Type view) : base(view)
-        {
-
-        }
-        public void SetMediaIsAvailable() 
-            => view?.SetMediaIsAvailable();
-        
+        public void SetMediaIsAvailable()
+            => actor?.SetMediaIsAvailable();
 
         public void LoadPageContent(string html)
-        {
-            view?.LoadPageContent(html);
-        }
+            => actor?.LoadPageContent(html);
 
         public void LoadUrl(string url)
-        {
-            view?.LoadUrl(url);  
-        }
+            => actor?.LoadUrl(url);
 
         public void ClearView(bool performFullReset)
-        {
-            view?.ClearView(performFullReset);
-        }
+            => actor?.ClearView(performFullReset);
 
         public string? RenderGamePartGroupingReports(
             IGamePart part,
             ManagedListItemReport? managedReport,
             string customiseReport)
-        {
-            return view?.RenderGamePartGroupingReports(part, managedReport, customiseReport) ?? null;
-        }
+            => actor?.RenderGamePartGroupingReports(
+                part, managedReport, customiseReport) ?? null;
+
         public string? RenderCuratedImportErrorsReport(Dictionary<string, IGamePart?> importErrorReport)
-        {
-            return view?.RenderCuratedImportErrorsReport(importErrorReport);
-        }
+            => actor?.RenderCuratedImportErrorsReport(importErrorReport);
+
         public void UnloadPageContent(bool doNotUnloadRemoteContent)
-        {
-            view?.UnloadPageContent(doNotUnloadRemoteContent);
-        }
-
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.ShowGamePartReportsEvt += OnShowGamePartReports;
-            view.AssignMediaEvt += OnAssignMedia;
-            view.PreviewMediaEvt += OnPreviewMedia;
-            view.SearchEntityNameEvt += OnSearchEntityName;
-        }
+            => actor?.UnloadPageContent(doNotUnloadRemoteContent);
 
         private void OnPreviewMedia(DatGrouperEntryDTO dto)
-        {
-            base.ExecuteCommand(new EnterMediaModeCmd(true, dto.IsFromAuto));
-            base.ExecuteCommand(new ShowMediaCollectionCmd(dto));
-        }
+            => base.Execute(new OpenMediaCollectionCmd(true, dto));
 
         private void OnAssignMedia(DatGrouperEntryDTO dto)
-        {
-            base.ExecuteCommand(new EnterMediaModeCmd(false, dto.IsFromAuto));
-            base.ExecuteCommand(new ShowMediaCollectionCmd(dto));
-        }
+            => base.Execute(new OpenMediaCollectionCmd(false, dto));
 
         private void OnShowGamePartReports(IGamePart part)
+            => base.Execute(new ShowRbPartGroupingReportsCmd(part));
+
+        private void OnSearchEntityName(string searchName)
         {
-            base.ExecuteCommand(new ShowRbPartGroupingReportsCmd(part));
+            base.Execute(new SetWebSearchTermsCmd(searchName, null, false));
+            base.Execute(new SetWebSearchEngineCmd(DatinateEnums.WEB_SOURCE_ENUM.Google, true));
+        }
+
+        internal void StartReceiveGameEntityDrop(DatGrouperEntryDTO datGrouperEntryDTO)
+            => actor?.StartReceiveGameEntityDrop(datGrouperEntryDTO);
+
+        internal void StopReceiveGameEntityDrop()
+            => actor?.StopReceiveGameEntityDrop();
+
+        public void SetCurationModeActive()
+            => actor?.SetCurationModeIsActive();
+
+        protected override void Initialised()
+        {
+            if (actor == null) return;
+
+            actor.ShowGamePartReportsEvt += OnShowGamePartReports;
+            actor.AssignMediaEvt += OnAssignMedia;
+            actor.PreviewMediaEvt += OnPreviewMedia;
+            actor.SearchEntityNameEvt += OnSearchEntityName;
         }
 
         protected override void Disposing()
         {
-            if (view == null) return;
-            view.ShowGamePartReportsEvt -= OnShowGamePartReports;
-            view.AssignMediaEvt -= OnAssignMedia;
-            view.PreviewMediaEvt -= OnPreviewMedia;
-            view.SearchEntityNameEvt -= OnSearchEntityName;
+            if (actor == null) return;
+            actor.ShowGamePartReportsEvt -= OnShowGamePartReports;
+            actor.AssignMediaEvt -= OnAssignMedia;
+            actor.PreviewMediaEvt -= OnPreviewMedia;
+            actor.SearchEntityNameEvt -= OnSearchEntityName;
         }
-
-        private void OnSearchEntityName(string searchName)
-        {
-            base.ExecuteCommand(new SetWebSearchTermsCmd(searchName, null, false));
-            base.ExecuteCommand(new SetWebSearchEngineCmd(DatinateEnums.WEB_SOURCE_ENUM.Google, true));
-        }
-
-        internal void StartReceiveGameEntityDrop(DatGrouperEntryDTO datGrouperEntryDTO)
-        {
-            view?.StartReceiveGameEntityDrop(datGrouperEntryDTO);
-        }
-        internal void StopReceiveGameEntityDrop()
-        {
-            view?.StopReceiveGameEntityDrop();
-        }
-
-        public void SetCurationModeActive() =>
-            view?.SetCurationModeIsActive();
     }
 }

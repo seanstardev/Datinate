@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.Dat;
+using Datinate.Shared.Dat;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class CreateNewDatCmd : RCommand
+    internal class CreateNewDatCmd : CommandBase<RVoid>
     {
         private readonly DatVO vo;
         private readonly string fileFullpath;
@@ -15,13 +15,15 @@ namespace Datinate.Rmvc.Command
             this.fileFullpath = fileFullpath;
             this.useMachineTags = useMachineTags;
         }
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.CreateDatProxy?.createXmlAndSave(
+            base.CreateDatProxy?.CreateXmlAndSave(
                 vo
                 , fileFullpath
                 , useMachineTags
             );
+
+            return await Complete();
         }
     }
 }

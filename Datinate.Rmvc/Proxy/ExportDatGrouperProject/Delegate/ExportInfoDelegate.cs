@@ -1,4 +1,5 @@
-﻿using Datinate.Shared;
+using Datinate.Rmvc.Proxy;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using static Datinate.Shared.DatinateEnums;
@@ -7,7 +8,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
 {
     internal class ExportInfoDelegate
     {
-        public IReadOnlyDictionary<IGameFamily, InfoSpec> Export(
+        public async Task<IReadOnlyDictionary<IGameFamily, InfoSpec>> Export(
             IReadOnlyList<IGameFamily> curatedFamilies,
             Dictionary<IGameFamily, string> familyUniqueNameDictionary,
             DatGrouperProjectDTO project,
@@ -15,7 +16,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> familyMediaDictionary,
             IReadOnlyDictionary<IGameFamily, IReadOnlyDictionary<string, ResourceDetailsDTO>> familyResourceDetailsDictionary,
             string mediaProjectPath,
-            Action<int, int, string>? progressCallback = null)
+            FileProgressCallback? progressCallback = null)
         {
             var infoSpecDictionary = new Dictionary<IGameFamily, InfoSpec>();
 
@@ -90,7 +91,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
 
                 Directory.CreateDirectory(familyMediaPath);
 
-                progressCallback?.Invoke(count, total, familyName);
+                await (progressCallback?.Invoke(count, total, familyName) ?? Task.CompletedTask);
                 count++;
 
                 InfoHelper.SaveInfoVO(

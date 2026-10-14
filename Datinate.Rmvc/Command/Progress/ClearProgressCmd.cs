@@ -1,13 +1,15 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ClearProgressCmd : RCommand 
+    internal class ClearProgressCmd : CommandBase<RVoid> 
     {
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.Shell?.SetProgressFormVisible(false);
-            Facade.Instance?.ProgressMediator?.ClearProgress();
+            base.Shell?.SetProgressFormVisible(false);
+            base.ProgressMediator?.ClearProgress();
+
+            return await Complete();
         }
     }
 }

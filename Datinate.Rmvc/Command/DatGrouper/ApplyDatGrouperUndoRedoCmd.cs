@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.DatGrouper;
+using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ApplyDatGrouperUndoRedoCmd : RCommandAsync
+    internal class ApplyDatGrouperUndoRedoCmd : CommandBase<RVoid>
     {
         private readonly bool performUndo;
 
@@ -12,64 +12,53 @@ namespace Datinate.Rmvc.Command
             this.performUndo = performUndo;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            var model =
-                Facade.Instance?.DatGrouperModel;
-
-            if (model == null)
-                return;
-
-            var radioDatModel =
-                Facade.Instance?.RadioDatModel;
+            if (base.DatGrouperModel == null)
+                return await Complete();
 
             var familiesAtRisk =
                 performUndo
-                    ? model.GetUndoMediaAssociationRisks()
-                    : model.GetRedoMediaAssociationRisks();
+                    ? base.DatGrouperModel.GetUndoMediaAssociationRisks()
+                    : base.DatGrouperModel.GetRedoMediaAssociationRisks();
 
             var assignedMediaWouldBeLost =
                 familiesAtRisk.Any(
                     family =>
-                        radioDatModel?.HasAssignedMedia(family) == true);
+                        base.RadioDatModel?.HasAssignedMedia(family) == true);
 
             if (assignedMediaWouldBeLost)
             {
                 var confirmed =
                     await ConfirmYesNoAsync(
-                        "This operation may cause media associations to be lost. Do you want to continue?");
+                        "This operation may cause media associations to be lost. Do you want to continue?",
+                        base.Shell);
 
                 if (!confirmed)
-                    return;
+                    return await Complete();
             }
 
             IDatGrouperDelta? delta =
                 performUndo
-                    ? model.ApplyUndo()
-                    : model.ApplyRedo();
+                    ? base.DatGrouperModel.ApplyUndo()
+                    : base.DatGrouperModel.ApplyRedo();
 
             if (delta != null)
             {
-                base.ExecuteCommand(
+                await base.Execute(
                     new ApplyDatGrouperEditCmd(
                         delta,
                         true));
             }
+
+            return await Complete();
         }
 
-        private static async Task<bool> ConfirmYesNoAsync(
-            string message)
+        private static Task<bool> ConfirmYesNoAsync(string message, IShell? shell)
         {
-            var shell =
-                Facade.Instance?.Shell;
-
-            if (shell == null)
-                return true;
-
-            return await shell.ShowMessageBox(
-                "Attention",
-                message,
-                true);
+            return shell == null
+                ? Task.FromResult(true)
+                : shell.ShowMessageBox("Attention", message, true);
         }
     }
 }

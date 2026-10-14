@@ -7,81 +7,63 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class MediaAssignmentMediator : RMediator
+    public class MediaAssignmentMediator : RMediator<IMediaAssignmentView>
     {
-        private IMediaAssignmentView? view => (IMediaAssignmentView?)base.viewBase;
-        public MediaAssignmentMediator(Type view) : base(view)
-        {
-        }
-        public void SetDescriptorDefinitions(IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
-            => view?.SetDescriptorDefinitions(descriptorDefinitions);
+        public void SetDescriptorDefinitions(
+            IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
+            => actor?.SetDescriptorDefinitions(descriptorDefinitions);
         
         public void SetScoring(DatGrouperScoring scoring)
-        {
-            view?.SetScoring(scoring);
-        }
-
+            => actor?.SetScoring(scoring);
+        
         public void SetView(IMediaCollection mediaCollection)
-        {
-            view?.SetView(mediaCollection);
-        }
+            => actor?.SetView(mediaCollection);
+        
         public void SetViewMediaItem(
             string entryName,
             RadioSourceDTO radioSource)
-        {
-            view?.SetViewMediaItem(entryName, radioSource);
-        }
+            => actor?.SetViewMediaItem(entryName, radioSource);
+        
         public void SetReadOnlyModeActive(bool readOnlyMode)
-        {
-            view?.SetReadOnlyModeActive(readOnlyMode);
-        }
-
+            => actor?.SetReadOnlyModeActive(readOnlyMode);
+        
         public void ClearView()
-        {
-            view?.ClearView();
-        }
-
+            => actor?.ClearView();
+        
         public void SetMediaCardDragStart()
-        {
-            view?.SetMediaCardDragStart();
-        }
+            => actor?.SetMediaCardDragStart();
 
         public void SetMediaCardDragStop()
-        {
-            view?.SetMediaCardDragStop();
-        }
-        protected override void Disposing()
-        {
-            if (view == null) return;
-
-            view.MediaMetaUpdateEvt -= OnDescriptorsUpdate;
-            view.LoadMediaInBrowserEvt -= OnLoadMediaInBrowser;
-        }
-
+            => actor?.SetMediaCardDragStop();
+        
         public void SetScoringActive(bool activate)
-        {
-            view?.SetScoringActive(activate);
-        }
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.MediaMetaUpdateEvt += OnDescriptorsUpdate;
-            view.LoadMediaInBrowserEvt += OnLoadMediaInBrowser;
-        }
-
+            => actor?.SetScoringActive(activate);
+        
         private void OnLoadMediaInBrowser()
-        {
-            base.ExecuteCommand(new ShowWebMediaInBrowserCmd());
-        }
-
+            => base.Execute(new ShowWebMediaInBrowserCmd());
+        
         private void OnDescriptorsUpdate(
             IGameFamily family, 
             HashSet<string> checkedDescriptors, 
             string familyNotesText,
             bool descriptorsChanged)
+            => base.Execute(new UpdateMediaCollectionMetaCmd(
+                family, checkedDescriptors, familyNotesText, descriptorsChanged));
+        
+        protected override void Initialised()
         {
-            base.ExecuteCommand(new UpdateMediaCollectionMetaCmd(family, checkedDescriptors, familyNotesText, descriptorsChanged));
+            if (actor == null) return;
+
+            actor.MediaMetaUpdateEvt += OnDescriptorsUpdate;
+            actor.LoadMediaInBrowserEvt += OnLoadMediaInBrowser;
+        }
+
+        protected override void Disposing()
+        {
+            if (actor == null) return;
+
+            actor.MediaMetaUpdateEvt -= OnDescriptorsUpdate;
+            actor.LoadMediaInBrowserEvt -= OnLoadMediaInBrowser;
         }
     }
 }

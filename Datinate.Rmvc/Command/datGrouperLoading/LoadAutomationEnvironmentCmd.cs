@@ -1,4 +1,4 @@
-﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Radio;
 using RMVC;
@@ -6,7 +6,7 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadAutomationEnvironmentCmd : RCommandAsync
+    internal class LoadAutomationEnvironmentCmd : CommandBase<RVoid>
     {
         private readonly string projectName;
         private readonly IEnumerable<GameFamilyVO> families;
@@ -22,31 +22,33 @@ namespace Datinate.Rmvc.Command
             this.softwareIdDatGroupEnumDictionary = softwareIdDatGroupEnumDictionary;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            var cmd = new LoadDatGrouperContentPathsCmd(false);
-            
-            await base.ExecuteCommandAsync(cmd);
+            var autoLoadSuccessful = await base.Execute(
+                new LoadDatGrouperContentPathsCmd(false));
 
-            if (cmd.AutoLoadSuccessful && Facade.Instance?.DatGrouperSessionModel != null)
-                Facade.Instance.DatGrouperSessionModel.ContentPathsResolved = true;
+            if (autoLoadSuccessful && base.DatGrouperSessionModel != null)
+                base.DatGrouperSessionModel.ContentPathsResolved = true;
 
-            base.ExecuteCommand(new ShowProgressCmd("Rendering Automated Set", 4, 5));
+            await base.Execute(new ShowProgressCmd("Rendering Automated Set", 4, 5));
 
             Dictionary<string, CurationPartReport> partReportsDictionary; 
 
             // NOTE: We need to do this because setting Exclude on GamePartVO is fragile:
             var baseFamilies = DatinateFamilyConverter.Convert(families, out partReportsDictionary);
 
-            var flagFilterSet = Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup 
+            var flagFilterSet = base.ModelDataProxy?.FlagFilterSetByGroup 
                 ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
 
-            Facade.Instance?.DatGrouperModel?.CreateSession(baseFamilies.ToList(), flagFilterSet, softwareIdDatGroupEnumDictionary);
+            base.DatGrouperModel?.CreateSession(
+                baseFamilies.ToList(), flagFilterSet, softwareIdDatGroupEnumDictionary);
 
             // NOTE: We MUST pass in this dictionary or we will see no shallow copy icons or include / exclude variants:
-            Facade.Instance?.DatGrouperMediator?.SetAutoView(baseFamilies.ToArray(), projectName, partReportsDictionary);
+            base.DatGrouperMediator?.SetAutoView(baseFamilies.ToArray(), projectName, partReportsDictionary);
 
-            Facade.Instance?.DatGrouperMediator?.SetCuratedView(Array.Empty<IGameFamily>(), projectName);
+            base.DatGrouperMediator?.SetCuratedView(Array.Empty<IGameFamily>(), projectName);
+
+            return await Complete();
         }
     }
 }

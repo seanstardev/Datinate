@@ -1,21 +1,21 @@
-﻿using Datinate.Rmvc.Model;
+
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ClearCompareDatsModelAndViewCmd : RCommand 
+    internal class ClearCompareDatsModelAndViewCmd : CommandBase<RVoid>
     {
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            if (Facade.Instance?.ActiveDatsModel != null)
+            if (base.ActiveDatsModel != null)
             {
-                ActiveDatsModel activeDatsModel = Facade.Instance.ActiveDatsModel;
+                base.ActiveDatsModel.CompareLeftDat = null;
+                base.ActiveDatsModel.CompareRightDat = null;
 
-                activeDatsModel.CompareLeftDat = null;
-                activeDatsModel.CompareRightDat = null;
-
-                Facade.Instance.CompareMediator?.ClearView();
+                base.CompareMediator?.ClearView();
             }
+
+            return await Complete();
         }
     }
 }

@@ -1,42 +1,31 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ClearDatGrouperSessionCmd : RCommand
+    internal class ClearDatGrouperSessionCmd : CommandBase<RVoid>
     {
-        public ClearDatGrouperSessionCmd()
+        protected override async Task<RVoid> Run()
         {
+            base.DatGrouperMediator?.ResetView();
+            base.DatGrouperControlsMediator?.ClearView();
 
-        }
+            base.MediaWebMediator?.ClearView();
+            base.MainWebMediator?.ClearView(true);
+            base.MediaAssignmentMediator?.ClearView();
+            base.MediaMediator?.TeardownView();
+            base.RbWebSearchMediator?.ClearView();
+            base.RadioDatModel?.Reset();
+            base.DatGrouperModel?.Teardown();
+            base.ProjectLoaderMediator?.ClearView();
+            base.ExportMediator?.ClearView();
 
-        protected override void Run()
-        {
-            Facade.Instance?.DatGrouperMediator?.ResetView();
-            Facade.Instance?.DatGrouperControlsMediator?.ClearView();
-
-            Facade.Instance?.MediaWebMediator?.ClearView();
-            Facade.Instance?.MainWebMediator?.ClearView(true);
-
-            Facade.Instance?.MediaAssignmentMediator?.ClearView();
-            Facade.Instance?.MediaMediator?.TeardownView();
-
-            Facade.Instance?.RbWebSearchMediator?.ClearView();
-
-            Facade.Instance?.RadioDatModel?.Reset();
-
-            Facade.Instance?.DatGrouperModel?.Teardown();
-
-            Facade.Instance?.ProjectLoaderMediator?.ClearView();
-            
-            Facade.Instance?.ExportMediator?.ClearView();
-
-            var appSession = Facade.Instance?.DatGrouperSessionModel;
-
-            if (appSession != null)
+            if (base.DatGrouperSessionModel != null)
             {
-                var layout = appSession.ClearSession();
-                Facade.Instance?.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
+                var layout = base.DatGrouperSessionModel.ClearSession();
+                base.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
             }
+
+            return await Complete();
         }
     }
 }

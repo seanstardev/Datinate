@@ -411,15 +411,15 @@ namespace Datinate.Rmvc.Model
 
                     var item = collection.SourceIdAssignmentDictionary[assignment.SourceId];
                     if (item.AssignmentEnum == MEDIA_ASSIGNMENT_ENUM.Assigned
-                        && !string.IsNullOrWhiteSpace(item.EntryName))
+                        && !string.IsNullOrWhiteSpace(item.EntryName) && item.EntryName != null)
                     {
                         _ = assignedMediaEntries[assignment.SourceId].Add(item.EntryName);
                     }
-                    else if (!string.IsNullOrWhiteSpace(item.EntryName))
+                    else if (!string.IsNullOrWhiteSpace(item.EntryName) && item.EntryName != null)
                         _ = assignedMediaEntries[assignment.SourceId].Remove(item.EntryName);
                 }
 
-                base.ExecuteCommand(new UpdateAssignedMediaCacheCmd(assignedMediaEntries));
+                base.Execute(new UpdateAssignedMediaCacheCmd(assignedMediaEntries));
                 return MediaCollectionsView;
             }
         }

@@ -1,16 +1,20 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class FetchMediaCardContentCmd : RCommand
+    internal class FetchMediaCardContentCmd : CommandBase<RVoid>
     {
         private ILookupSet lookupSet;
         private string lookupName;
         private bool entryWasSelectedByUser;
         string entryName;
 
-        public FetchMediaCardContentCmd(ILookupSet lookupSet, string lookupName, bool entryWasSelectedByUser, string entryName)
+        public FetchMediaCardContentCmd(
+            ILookupSet lookupSet, 
+            string lookupName, 
+            bool entryWasSelectedByUser, 
+            string entryName)
         {
             this.lookupSet = lookupSet;
             this.lookupName = lookupName;
@@ -18,13 +22,13 @@ namespace Datinate.Rmvc.Command
             this.entryName = entryName;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             var source = lookupSet.RadioSource;
 
-            if (Facade.Instance?.MediaMediator is { } mediaMediator &&
-                Facade.Instance?.RbAuxItemLoaderProxy is { } loaderProxy &&
-                Facade.Instance?.ModelDataProxy is { } modelDataProxy)
+            if (base.MediaMediator is { } mediaMediator &&
+                base.RbAuxItemLoaderProxy is { } loaderProxy &&
+                base.ModelDataProxy is { } modelDataProxy)
             {
                 string? uri = loaderProxy.CreateURI(
                     lookupName, 
@@ -33,8 +37,9 @@ namespace Datinate.Rmvc.Command
                 
                 string? resourceHtml = null;
 
-                if (source.IsRadioResource && 
-                    Facade.Instance?.RadioDatModel is { } radioDatModel &&
+                if (source.IsRadioResource &&
+                    base.RadioDatModel is { } radioDatModel &&
+                    uri != null &&
                     !string.IsNullOrWhiteSpace(uri))
                 {
                     var resourceDetails = radioDatModel.GetResourceDetails(source.Id, lookupName);
@@ -47,19 +52,21 @@ namespace Datinate.Rmvc.Command
                             true);
                 }
 
-                if (!string.IsNullOrWhiteSpace(resourceHtml))
+                if (resourceHtml != null && !string.IsNullOrWhiteSpace(resourceHtml))
                 {
-                    mediaMediator.SetMediaCardContent(lookupSet, resourceHtml, true, entryWasSelectedByUser, entryName);
+                mediaMediator.SetMediaCardContent(lookupSet, resourceHtml, true, entryWasSelectedByUser, entryName);
                 }
-                else if (!string.IsNullOrWhiteSpace(uri))
+                else if (!string.IsNullOrWhiteSpace(uri) && uri != null)
                 {
-                    mediaMediator.SetMediaCardContent(lookupSet, uri, false, entryWasSelectedByUser, entryName);
+                mediaMediator.SetMediaCardContent(lookupSet, uri, false, entryWasSelectedByUser, entryName);
                 }
                 else
                 {
-                    mediaMediator.SetMediaCardContentNotAvailable(lookupSet, entryName, entryWasSelectedByUser);
+                mediaMediator.SetMediaCardContentNotAvailable(lookupSet, entryName, entryWasSelectedByUser);
                 }
             }
+
+            return await Complete();
         }
     }
 }

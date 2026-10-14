@@ -6,68 +6,58 @@ using static Datinate.Shared.UnitFormatHelper;
 
 namespace Datinate.Rmvc.Mediator
 {
-    internal class MainControlsMediator : RMediator
+    internal class MainControlsMediator : RMediator<IMainControlsView>
     {
-        private IMainControlsView? view => (IMainControlsView?)base.viewBase;
-
-
-        public MainControlsMediator(Type actor) : base(actor)
-        {
-        }
-
         public void ActivateView()
-        {
-            view?.ActivateView();
-        }
+            => actor?.ActivateView();
 
         public void SetMainControlEnabled(DatinateEnums.MAIN_CONTROL_ENUM mainCtrlEnum, bool doSetEnabled)
-        {
-            view?.SetMainControlEnabled(mainCtrlEnum, doSetEnabled);
-        }
+            => actor?.SetMainControlEnabled(mainCtrlEnum, doSetEnabled);
+        
         public void SetActiveMainView(DatinateEnums.DAT_SCREEN_ENUM currentView)
-            => view?.SetActiveMainView(currentView);
+            => actor?.SetActiveMainView(currentView);
 
-        private void OnShowDatGrouperProjectsView() =>
-            base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
+        private void OnShowDatGrouperProjectsView() 
+            => base.Execute(new SetDatGrouperFormVisibleCmd());
 
-        private void OnShowCustomiseView() =>
-            base.ExecuteCommand(new SetCustomiseViewVisibleCmd(true));
+        private void OnShowCustomiseView() 
+            => base.Execute(new SetCustomiseViewVisibleCmd(true));
 
-        private void OnShowCompareView() =>
-            base.ExecuteCommand(new SetCompareViewVisibleCmd(true));
+        private void OnShowCompareView() 
+            => base.Execute(new SetCompareViewVisibleCmd(true));
 
-        private void OnViewChange(Unit unit, bool shoInCells)  =>
-            base.ExecuteCommand(new UpdateUnitDisplayCmd(unit, shoInCells));
+        private void OnViewChange(Unit unit, bool shoInCells)  
+            => base.Execute(new UpdateUnitDisplayCmd(unit, shoInCells));
         
         private void OnToggleMainView()
-            => base.ExecuteCommand(new ToggleMainViewCmd());
+            => base.Execute(new ToggleMainViewCmd());
 
         private void OnInstallVgm()
-            => base.ExecuteCommand(new InstallOrUpdateVgmEngineCmd());
+            => base.Execute(new InstallOrUpdateVgmEngineCmd());
 
-        protected override void Initialsed()
+        protected override void Initialised()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.UnitViewChangeEvt += OnViewChange;
-                view.ShowCustomiseViewEvt += OnShowCustomiseView;
-                view.ShowCompareViewEvt += OnShowCompareView;
-                view.ShowDatGrouperProjectsEvt += OnShowDatGrouperProjectsView;
-                view.ToggleMainViewEvt += OnToggleMainView;
-                view.InstallVgmEvt += OnInstallVgm;
+                actor.UnitViewChangeEvt += OnViewChange;
+                actor.ShowCustomiseViewEvt += OnShowCustomiseView;
+                actor.ShowCompareViewEvt += OnShowCompareView;
+                actor.ShowDatGrouperProjectsEvt += OnShowDatGrouperProjectsView;
+                actor.ToggleMainViewEvt += OnToggleMainView;
+                actor.InstallVgmEvt += OnInstallVgm;
             }
         }
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.UnitViewChangeEvt -= OnViewChange;
-                view.ShowCustomiseViewEvt -= OnShowCustomiseView;
-                view.ShowCompareViewEvt -= OnShowCompareView;
-                view.ShowDatGrouperProjectsEvt -= OnShowDatGrouperProjectsView;
-                view.ToggleMainViewEvt -= OnToggleMainView;
-                view.InstallVgmEvt -= OnInstallVgm;
+                actor.UnitViewChangeEvt -= OnViewChange;
+                actor.ShowCustomiseViewEvt -= OnShowCustomiseView;
+                actor.ShowCompareViewEvt -= OnShowCompareView;
+                actor.ShowDatGrouperProjectsEvt -= OnShowDatGrouperProjectsView;
+                actor.ToggleMainViewEvt -= OnToggleMainView;
+                actor.InstallVgmEvt -= OnInstallVgm;
             }
         }
     }

@@ -1,14 +1,16 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetMediaItemDragStartCmd : RCommand
+    internal class SetMediaItemDragStartCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             // NOTE: Order is critical:
-            Facade.Instance?.MediaAssignmentMediator?.SetMediaCardDragStart();
-            Facade.Instance?.MediaWebMediator?.StartReceiveMediaDrop();
+            base.MediaAssignmentMediator?.SetMediaCardDragStart();
+            base.MediaWebMediator?.StartReceiveMediaDrop();
+
+            return await Complete();
         }
     }
 }

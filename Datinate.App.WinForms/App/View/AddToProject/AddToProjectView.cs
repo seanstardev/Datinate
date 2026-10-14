@@ -10,6 +10,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class AddToProjectView : UserControl, IAddToProjectView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
 
         public event Action<
             DatVO,
@@ -54,7 +56,13 @@ namespace Datinate.App.WinForms.View
             };
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public IReadOnlyList<R2DatResourceDTO> R2DatResources { get; set; } = new List<R2DatResourceDTO>();
+        private IReadOnlyList<R2DatResourceDTO> r2DatResources = new List<R2DatResourceDTO>();
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        public IReadOnlyList<R2DatResourceDTO> R2DatResources
+        {
+            get => uiDispatcher.Read(() => r2DatResources);
+            set => uiDispatcher.Run(() => r2DatResources = value);
+        }
 
         private COLLECTION_SET_ENUM? activeCollectionSetEnum = null;
 
@@ -64,10 +72,11 @@ namespace Datinate.App.WinForms.View
 
         public AddToProjectView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             addAllContentBtn.Visible = false;
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IAddToProjectView>(this);
 
             PopulateDatGroupChips();
 
@@ -191,11 +200,17 @@ namespace Datinate.App.WinForms.View
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IAddToProjectView>(this);
         }
 
         public void SetProjectUiDatSubsetInfo(Dictionary<string, List<string>> datSubsetDictionary)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetProjectUiDatSubsetInfo(datSubsetDictionary));
+                return;
+            }
+
 
             if (datSubsetDictionary.Count == 0)
             {
@@ -212,6 +227,12 @@ namespace Datinate.App.WinForms.View
 
         public void SetView(DatVO datVO)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetView(datVO));
+                return;
+            }
+
             Reset();
 
             this.datVO = datVO;
@@ -228,6 +249,12 @@ namespace Datinate.App.WinForms.View
         }
         public void Reset()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => Reset());
+                return;
+            }
+
             activeCollectionSetEnum = null;
             selectedDatGroupEnum = DAT_GROUP_ENUM.NOT_SET;
 

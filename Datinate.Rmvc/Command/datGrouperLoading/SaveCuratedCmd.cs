@@ -1,45 +1,35 @@
-﻿using Datinate.Rmvc.Model;
-using Datinate.Rmvc.Proxy;
-using Datinate.Shared.Dat;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SaveCuratedCmd : RCommandAsync 
+    internal class SaveCuratedCmd : CommandBase<RVoid>
     {
-        protected override Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-
-            RadioDatModel? radioDatModel = Facade.Instance?.RadioDatModel;
-            DatGrouperModel? datGrouperModel = Facade.Instance?.DatGrouperModel;
-            CuratedDatProxy? curatedDatProxy = Facade.Instance?.CuratedDatProxy;
-
-            if (radioDatModel == null || datGrouperModel == null || curatedDatProxy == null) 
-                return Task.CompletedTask;
+            if (base.RadioDatModel == null || base.DatGrouperModel == null || base.CuratedDatProxy == null) 
+                return await Complete();
             
-            if (string.IsNullOrWhiteSpace(radioDatModel.ProjectName) || radioDatModel.DatMeta == null)
-                return Task.CompletedTask;
+            if (base.RadioDatModel == null ||
+                base.RadioDatModel.ProjectName == null ||
+                string.IsNullOrWhiteSpace(RadioDatModel.ProjectName) ||
+                base.RadioDatModel.DatMeta == null)
+                return await Complete();
 
-            base.ExecuteCommand(new ShowProgressCmd("Saving Project", 1, 2));
+            await base.Execute(new ShowProgressCmd("Saving Project", 1, 2));
 
-            var familiesWithMedia = radioDatModel.CreateExportCollection(
-                datGrouperModel.CuratedFamilies);
+            var familiesWithMedia = base.RadioDatModel.CreateExportCollection(
+                DatGrouperModel.CuratedFamilies);
 
-            curatedDatProxy?.SaveCurated(
-                radioDatModel.ProjectName,
+            base.CuratedDatProxy?.SaveCurated(
+                base.RadioDatModel.ProjectName,
                 familiesWithMedia,
-                radioDatModel.SourceIdContentDictionary,
-                radioDatModel.CreateSourceDatExportSnapshot(),
-                radioDatModel.DatMeta);
+                base.RadioDatModel.SourceIdContentDictionary,
+                base.RadioDatModel.CreateSourceDatExportSnapshot(),
+                base.RadioDatModel.DatMeta);
 
-            base.ExecuteCommand(new ClearProgressCmd());
-            
-            return Task.CompletedTask;
-        }
+            await base.Execute(new ClearProgressCmd());
 
-        public static bool ContainsEntry(DatVO dat, string entryName)
-        {
-            return dat.Entries.FirstOrDefault(e => e.Name == entryName) != null;
+            return await Complete();
         }
     }
 }

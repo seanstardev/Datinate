@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ShowProgressCmd : RCommand
+    internal class ShowProgressCmd : CommandBase<RVoid>
     {
         private readonly string message;
         private readonly int part;
@@ -15,10 +15,12 @@ namespace Datinate.Rmvc.Command
             this.total = total;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.Shell?.SetProgressFormVisible(true);
-            Facade.Instance?.ProgressMediator?.UpdateProgress(message, part, total);
+            base.Shell?.SetProgressFormVisible(true);
+            base.ProgressMediator?.UpdateProgress(message, part, total);
+
+            return await Complete();
         }
     }
 }

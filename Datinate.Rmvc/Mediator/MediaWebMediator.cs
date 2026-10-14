@@ -3,50 +3,37 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class MediaWebMediator : RMediator
+    public class MediaWebMediator : RMediator<IWebMediaView>
     {
-        private IWebMediaView? view => (IWebMediaView?)base.viewBase;
-        public MediaWebMediator(Type view) : base(view)
-        {
-        }
         public void LoadUrl(string url)
-        {
-            view?.LoadUrl(url);
-        }
+            => actor?.LoadUrl(url);
+        
         public void LoadPageContent(string html)
-        {
-            view?.LoadPageContent(html);
-        }
+            => actor?.LoadPageContent(html);
+        
         public void ClearView()
+            => actor?.ClearView();
+
+        public void StartReceiveMediaDrop()
+            => actor?.StartReceiveMediaDrop();
+
+        public void StopReceiveMediaDrop()
+            => actor?.StopReceiveMediaDrop();
+
+        public void LoadUriInBrowser()
+            => actor?.LoadUriInBrowser();
+
+        public void SetAudioEnvironmentPath(string? audioEnvironmentPath) 
+            => actor?.SetAudioEnvironmentPath(audioEnvironmentPath);
+
+        protected override void Initialised()
         {
-            view?.ClearView();
+
         }
 
         protected override void Disposing()
         {
 
         }
-
-        protected override void Initialsed()
-        {
-
-        }
-
-        public void StartReceiveMediaDrop()
-        {
-            view?.StartReceiveMediaDrop();
-        }
-
-        public void StopReceiveMediaDrop()
-        {
-            view?.StopReceiveMediaDrop();
-        }
-
-        public void LoadUriInBrowser()
-            => view?.LoadUriInBrowser();
-
-        public void SetAudioEnvironmentPath(string? audioEnvironmentPath) =>
-            view?.SetAudioEnvironmentPath(audioEnvironmentPath);
-
     }
 }

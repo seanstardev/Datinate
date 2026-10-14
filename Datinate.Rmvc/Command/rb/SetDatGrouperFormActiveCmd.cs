@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetDatGrouperFormActiveCmd : RCommand
+    internal class SetDatGrouperFormActiveCmd : CommandBase<RVoid>
     {
         private readonly string? title;
 
@@ -11,12 +11,14 @@ namespace Datinate.Rmvc.Command
             this.title = title;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.Shell?.ShowDatGrouperWindowView();
+            base.Shell?.ShowDatGrouperWindowView();
 
-            if (string.IsNullOrWhiteSpace(title) == false)
-                Facade.Instance?.Shell?.SetProjectsFormTitle(title);
+            if (string.IsNullOrWhiteSpace(title) == false && title != null)
+                base.Shell?.SetProjectsFormTitle(title);
+
+            return await Complete();
         }
     }
 }

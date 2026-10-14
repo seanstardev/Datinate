@@ -5,7 +5,10 @@ namespace Datinate.Shared.Rmvc
 {
     public interface IMainView : IRContract
     {
+        event Action? AppStartupCompleteEvt;
         event Action? ExitProjectsFormEvt;
+        void SetRmvcRegisterActorComplete();
+
         DatinateEnums.DAT_SCREEN_ENUM GetCurrentView();
         void ToggleDatListView(DAT_SCREEN_ENUM datScreenEnum);
     }

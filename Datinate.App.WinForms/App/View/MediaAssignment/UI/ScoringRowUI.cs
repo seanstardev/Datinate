@@ -7,8 +7,11 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
 {
     public partial class ScoringRowUI : UserControl
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public ScoringRowUI()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             UpdateRoundedRegion();
@@ -121,14 +124,7 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
     }
 }

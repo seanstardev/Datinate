@@ -1,11 +1,12 @@
-﻿using Datinate.Shared;
+using Datinate.Rmvc.Proxy;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 using static Datinate.Rmvc.Proxy.DatHierarchyProxy;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class LoadDatManagerCmd : RCommandAsync
+    internal class LoadDatManagerCmd : CommandBase<RVoid>
     {
         private readonly DatRootDTO[] datRootPaths;
         private readonly string mameHashPath;
@@ -15,22 +16,22 @@ namespace Datinate.Rmvc.Command
             this.datRootPaths = datRootPaths;
             this.mameHashPath = mameHashPath;
         }
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.DatHierarchyProxy == null || Facade.Instance?.ActiveDatsModel == null)
-                return;
+            if (base.DatHierarchyProxy == null || base.ActiveDatsModel == null)
+                return await Complete();
 
-            if (Facade.Instance?.GlobalSettingsProxy is { } globalProxy)
-                globalProxy.MameSlHashPath = mameHashPath;
+            if (base.GlobalSettingsProxy is { })
+                base.GlobalSettingsProxy.MameSlHashPath = mameHashPath;
 
-            Facade.Instance?.DatDetailsProxy?.ClearDatCache();
-            Facade.Instance?.DatDetailsMediator?.ResetView();
+            base.DatDetailsProxy?.ClearDatCache();
+            base.DatDetailsMediator?.ResetView();
 
             var ctx = SynchronizationContext.Current;
 
-            base.ExecuteCommand(new ShowProgressCmd("Loading Dats...", 0, 100));
+            await base.Execute(new ShowProgressCmd("Loading Dats...", 0, 100));
 
-            Facade.Instance?.Shell?.SetProgressFormVisible(true);
+            base.Shell?.SetProgressFormVisible(true);
 
             int postScheduled = 0;
             string? pendingText = null;
@@ -40,7 +41,7 @@ namespace Datinate.Rmvc.Command
             {
                 if (ctx == null)
                 {
-                    Facade.Instance?.ProgressMediator?.UpdateProgress(text, pct, 100);
+                    base.ProgressMediator?.UpdateProgress(text, pct, 100);
                     return;
                 }
 
@@ -55,7 +56,7 @@ namespace Datinate.Rmvc.Command
                     var t = Volatile.Read(ref pendingText) ?? string.Empty;
                     var p = Volatile.Read(ref pendingPct);
 
-                    Facade.Instance?.ProgressMediator?.UpdateProgress(t, p, 100);
+                    base.ProgressMediator?.UpdateProgress(t, p, 100);
 
                     Volatile.Write(ref postScheduled, 0);
                 }, null);
@@ -69,7 +70,7 @@ namespace Datinate.Rmvc.Command
                 var rootCount = datRootPaths.Length;
                 var root = datRootPaths[rootIndex];
 
-                Action<string, int, int> progress = (msg, part, total) =>
+                ProgressCallback progress = (msg, part, total) =>
                 {
                     var pctLocal = total <= 0 ? 0 : (int)Math.Round((part * 100.0) / total, MidpointRounding.AwayFromZero);
                     if (pctLocal < 0) pctLocal = 0;
@@ -82,10 +83,11 @@ namespace Datinate.Rmvc.Command
                     var text = "Scanning (" + (rootIndex + 1) + " / " + rootCount + "): " + msg;
 
                     PostProgress(text, globalPct);
+                    return Task.CompletedTask;
                 };
 
-                var result = await Task.Run(() =>
-                    Facade.Instance?.DatHierarchyProxy.FetchDatsAsync(root, progress));
+                var result = await
+                    base.DatHierarchyProxy!.FetchDatsAsync(root, progress);
 
                 var status = result.Status;
                 var runningList = result.DatHeadlines;
@@ -93,35 +95,35 @@ namespace Datinate.Rmvc.Command
                 switch (status)
                 {
                     case DatFetchStatusEnum.Error_NoDatsFound:
-                        base.ExecuteCommand(new ShowMessageCmd(
+                        await base.Execute(new ShowMessageCmd(
                             "A DAT Root directory contained no DAT files. Please remove the following Path:\n" + root.RootPath
                         ));
-                        base.ExecuteCommand(new ClearProgressCmd());
-                        return;
+                        await base.Execute(new ClearProgressCmd());
+                        return await Complete();
 
                     case DatFetchStatusEnum.Error_Access:
-                        base.ExecuteCommand(new ShowMessageCmd(
+                        await base.Execute(new ShowMessageCmd(
                             "You are trying to scan folders that " + Constants.APP_NAME + " does not have access to (System, Recycle Bin, etc.).\n" +
                             "Did you select the wrong directory? Check the following Path:\n" + root.RootPath
                         ));
-                        base.ExecuteCommand(new ClearProgressCmd());
-                        return;
+                        await base.Execute(new ClearProgressCmd());
+                        return await Complete();
 
                     case DatFetchStatusEnum.Error_TooManyLevels:
-                        base.ExecuteCommand(new ShowMessageCmd(
+                        await base.Execute(new ShowMessageCmd(
                             "The path you have chosen to scan contains too many subfolders (over " + Constants.MAX_DIRS_LEVELS_TO_PARSE + ").\n" +
                             "Did you select the wrong directory? The problem Path:\n" + root.RootPath
                         ));
-                        base.ExecuteCommand(new ClearProgressCmd());
-                        return;
+                        await base.Execute(new ClearProgressCmd());
+                        return await Complete();
 
                     case DatFetchStatusEnum.Error_TooManyDirs:
-                        base.ExecuteCommand(new ShowMessageCmd(
+                        await base.Execute(new ShowMessageCmd(
                             "The path you have chosen to scan contains over " + Constants.MAX_DIRS_TO_PARSE.ToString() + " folders.\n" +
                             "Did you select the wrong directory? The problem Path:\n" + root.RootPath
                         ));
-                        base.ExecuteCommand(new ClearProgressCmd());
-                        return;
+                        await base.Execute(new ClearProgressCmd());
+                        return await Complete();
 
                     case DatFetchStatusEnum.OK:
                         datHeadlineList.AddRange(runningList);
@@ -131,24 +133,27 @@ namespace Datinate.Rmvc.Command
 
             DatGrouperProjectEntry[] datHeadlines = datHeadlineList.ToArray();
             
-            if (Facade.Instance?.ActiveDatsModel is { })
+            if (base.ActiveDatsModel is { })
             {
-                Facade.Instance.ActiveDatsModel.HierarchyDats = datHeadlines;
+                base.ActiveDatsModel.HierarchyDats = datHeadlines;
                 
-                await base.ExecuteCommandAsync(new LoadDatSummariesCmd(false));
+                await base.Execute(new LoadDatSummariesCmd(false));
                 
-                await base.ExecuteCommandAsync(new ShowDatHierarchyCmd(datHeadlines.Select(d => d.DatFullpath).ToArray()));
+                await base.Execute(new ShowDatHierarchyCmd(
+                    datHeadlines.Select(d => d.DatFullpath).ToArray()));
             }
             else
             {
-                base.ExecuteCommand(new ClearProgressCmd());
+                await base.Execute(new ClearProgressCmd());
             }
 
             // TODO: Lazy:
             // Opaque RGB(240, 240, 240): conventional WinForms SystemColors.Control colour.
-            Facade.Instance?.Shell?.SetMainFormsSizeBarBackColorArgb(unchecked((int)0xFFF0F0F0));
+            base.Shell?.SetMainFormsSizeBarBackColorArgb(unchecked((int)0xFFF0F0F0));
 
-            Facade.Instance?.MainControlsMediator?.ActivateView();
+            base.MainControlsMediator?.ActivateView();
+
+            return await Complete();
         }
     }
 }

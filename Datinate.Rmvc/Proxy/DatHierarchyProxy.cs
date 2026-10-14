@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 using System.Diagnostics;
@@ -21,7 +21,7 @@ namespace Datinate.Rmvc.Proxy
 
         public async Task<DatFetchResult> FetchDatsAsync(
             DatRootDTO datRootVO, 
-            Action<string, int, int>? progress)
+            ProgressCallback? progress)
         {
             LastTotalDirectoryCount = 0;
 
@@ -32,7 +32,7 @@ namespace Datinate.Rmvc.Proxy
 
             var state = new ScanProgressState(datRootVO.RootPath, progress);
 
-            state.Report("Starting scan: " + ShortPath(datRootVO.RootPath), 0);
+            await state.Report("Starting scan: " + ShortPath(datRootVO.RootPath), 0);
 
             status = await FetchDatsRecursivelyAsync(datRootVO, tempPaths, 0, state).ConfigureAwait(false);
 
@@ -45,7 +45,7 @@ namespace Datinate.Rmvc.Proxy
                 };
             }
 
-            state.Report("Sorting results (" + tempPaths.Count + ")", 95);
+            await state.Report("Sorting results (" + tempPaths.Count + ")", 95);
 
             tempPaths.Sort();
 
@@ -70,7 +70,7 @@ namespace Datinate.Rmvc.Proxy
 
             status = headlines.Count == 0 ? DatFetchStatusEnum.Error_NoDatsFound : DatFetchStatusEnum.OK;
 
-            state.Report("Scan complete (" + headlines.Count + ")", 100);
+            await state.Report("Scan complete (" + headlines.Count + ")", 100);
 
             return new DatFetchResult()
             {
@@ -93,7 +93,7 @@ namespace Datinate.Rmvc.Proxy
             if (level > Constants.MAX_DIRS_LEVELS_TO_PARSE)
                 return DatFetchStatusEnum.Error_TooManyLevels;
 
-            state.MaybeReport(datRootVO.RootPath, level, tempPaths.Count, LastTotalDirectoryCount);
+            await state.MaybeReport(datRootVO.RootPath, level, tempPaths.Count, LastTotalDirectoryCount);
 
             string[] files;
 
@@ -132,7 +132,7 @@ namespace Datinate.Rmvc.Proxy
             {
                 var dir = dirs[i];
 
-                state.MaybeReport(dir, level, tempPaths.Count, LastTotalDirectoryCount);
+                await state.MaybeReport(dir, level, tempPaths.Count, LastTotalDirectoryCount);
 
                 var childVO = new DatRootDTO(dir, string.Empty);
 
@@ -155,20 +155,20 @@ namespace Datinate.Rmvc.Proxy
 
         private sealed class ScanProgressState
         {
-            private readonly Action<string, int, int>? progress;
+            private readonly ProgressCallback? progress;
             private readonly string root;
             private readonly Stopwatch progressClock = Stopwatch.StartNew();
             private long lastTick = -150; // Allow the first scanning update immediately.
             private uint lastDirReported;
             private int lastPct;
 
-            public ScanProgressState(string root, Action<string, int, int>? progress)
+            public ScanProgressState(string root, ProgressCallback? progress)
             {
                 this.root = root;
                 this.progress = progress;
             }
 
-            public void Report(string msg, int pct)
+            public async Task Report(string msg, int pct)
             {
                 if (progress == null)
                     return;
@@ -177,10 +177,10 @@ namespace Datinate.Rmvc.Proxy
                 if (pct > 100) pct = 100;
 
                 lastPct = pct;
-                progress(msg, pct, 100);
+                await progress(msg, pct, 100);
             }
 
-            public void MaybeReport(string currentDir, int level, int foundCount, uint dirCount)
+            public async Task MaybeReport(string currentDir, int level, int foundCount, uint dirCount)
             {
                 if (progress == null)
                     return;
@@ -206,7 +206,7 @@ namespace Datinate.Rmvc.Proxy
                     ", dats: " + foundCount +
                     ", depth: " + level + ")";
 
-                progress(msg, pct, 100);
+                await progress(msg, pct, 100);
             }
 
             private static int ApproxPct(uint dirCount)

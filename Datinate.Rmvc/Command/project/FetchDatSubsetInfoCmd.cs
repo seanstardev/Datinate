@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.Dat;
+using Datinate.Shared.Dat;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class FetchDatSubsetInfoCmd : RCommand 
+    internal class FetchDatSubsetInfoCmd : CommandBase<RVoid>
     {
         private readonly DatVO datVO;
 
@@ -12,7 +12,7 @@ namespace Datinate.Rmvc.Command
             this.datVO = datVO;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
             var games = datVO.Entries;
 
@@ -48,7 +48,9 @@ namespace Datinate.Rmvc.Command
                     dic.Remove(pairs[i].Key);
             }
 
-            Facade.Instance?.AddToProjectMediator?.SetProjectUiDatSubsetInfo(dic);
+            base.AddToProjectMediator?.SetProjectUiDatSubsetInfo(dic);
+
+            return await Complete();
         }
     }
 }

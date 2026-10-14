@@ -1,13 +1,15 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetGameEntityDragStopCmd : RCommand
+    internal class SetGameEntityDragStopCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaMediator?.StopReceiveGameEntityDrop();
-            Facade.Instance?.MainWebMediator?.StopReceiveGameEntityDrop();
+            base.MediaMediator?.StopReceiveGameEntityDrop();
+            base.MainWebMediator?.StopReceiveGameEntityDrop();
+
+            return await Complete();
         }
     }
 }

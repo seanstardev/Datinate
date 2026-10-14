@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.DatGrouper;
+using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetGameEntityDragStartCmd : RCommand
+    internal class SetGameEntityDragStartCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperEntryDTO datGrouperEntryDTO;
 
@@ -12,10 +12,12 @@ namespace Datinate.Rmvc.Command
             this.datGrouperEntryDTO = datGrouperEntryDTO;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaMediator?.StartReceiveGameEntityDrop();
-            Facade.Instance?.MainWebMediator?.StartReceiveGameEntityDrop(datGrouperEntryDTO);
+            base.MediaMediator?.StartReceiveGameEntityDrop();
+            base.MainWebMediator?.StartReceiveGameEntityDrop(datGrouperEntryDTO);
+
+            return await Complete();
         }
     }
 }

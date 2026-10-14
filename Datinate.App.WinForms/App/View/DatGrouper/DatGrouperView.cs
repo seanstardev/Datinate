@@ -12,6 +12,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class DatGrouperView : UserControl, IDatGrouperView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action? InitialisedEvt;
 
         public event Action<DatGrouperEditRequestDTO>? EditRequestEvt;
@@ -55,8 +57,11 @@ namespace Datinate.App.WinForms.View
 
         public DatGrouperView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
+            
             InitializeComponent();
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IDatGrouperView>(this);
+
             datChipContainer.Visible = false;
             summaryLabel.Visible = true;
 
@@ -89,24 +94,36 @@ namespace Datinate.App.WinForms.View
 
         public void SetRenderAliases(bool doRender)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetRenderAliases(doRender));
+                return;
+            }
+
             autoGrouperUI.SetRenderAliases(doRender);
             curatedGrouperUI.SetRenderAliases(doRender);
         }
 
         public void SetExcludeFamiliesVisible(bool doExclude)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetExcludeFamiliesVisible(doExclude));
+                return;
+            }
+
             autoGrouperUI.SetExcludeFamiliesVisible(doExclude);
             curatedGrouperUI.SetExcludeFamiliesVisible(doExclude);
         }
 
         public void ResetView()
         {
-            if (InvokeRequired)
+            if (!uiDispatcher.CheckAccess)
             {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(new Action(() => ResetView()));
+                uiDispatcher.Run(() => ResetView());
                 return;
             }
+
 
             summaryLabel.Text = "-";
             datChipContainer.Controls.Clear();
@@ -136,6 +153,12 @@ namespace Datinate.App.WinForms.View
 
         public void SetScreenLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM layoutEnum)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetScreenLayout(layoutEnum));
+                return;
+            }
+
             if (object.Equals(layoutEnum, _currentLayout))
                 return;
 
@@ -512,16 +535,7 @@ namespace Datinate.App.WinForms.View
 
         private void RunOnUiThread(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsHandleCreated)
-                    BeginInvoke(action);
-                else
-                    _pendingUiWork = action;
-
-                return;
-            }
-            action();
+            uiDispatcher.Run(action);
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -582,7 +596,7 @@ namespace Datinate.App.WinForms.View
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IDatGrouperView>(this);
         }
 
         private void OnDatChipsRefresh(ISet<string> pointerIds)
@@ -924,14 +938,7 @@ namespace Datinate.App.WinForms.View
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void summaryLabel_Click(object sender, EventArgs e)

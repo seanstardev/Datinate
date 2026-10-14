@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetProjectLoaderDatExpressionsCmd:RCommand 
+    internal class SetProjectLoaderDatExpressionsCmd : CommandBase<RVoid>
     {
         private readonly string expressionsXmlFullpath;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.expressionsXmlFullpath = expressionsXmlFullpath;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.ProjectLoaderMediator?.SetExpressionsFile(expressionsXmlFullpath);
+            base.ProjectLoaderMediator?.SetExpressionsFile(expressionsXmlFullpath);
+
+            return await Complete();
         }
     }
 }

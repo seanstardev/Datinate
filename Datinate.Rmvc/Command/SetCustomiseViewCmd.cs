@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
 using RMVC;
@@ -6,7 +6,7 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    internal sealed class SetCustomiseViewCmd : RCommand
+    internal sealed class SetCustomiseViewCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperProjectEntry? datHeadlineVO;
         private readonly DatVO? datVO;
@@ -21,58 +21,57 @@ namespace Datinate.Rmvc.Command
             this.datVO = datVO;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             if (datHeadlineVO != null)
-                LoadFromHeadline(datHeadlineVO);
+                await LoadFromHeadline(datHeadlineVO);
             else if (datVO != null)
-                LoadFromDat(datVO);
+                await LoadFromDat(datVO);
+
+            return await Complete();
         }
 
-        private void LoadFromHeadline(DatGrouperProjectEntry datHeadlineVO)
+        private async Task LoadFromHeadline(DatGrouperProjectEntry datHeadlineVO)
         {
-            var facade = Facade.Instance;
-            if (facade == null)
-                return;
-
-            var datVO = facade.DatDetailsProxy?.GetDat(datHeadlineVO.DatFullpath);
+            var datVO = base.DatDetailsProxy?.GetDat(datHeadlineVO.DatFullpath);
             if (datVO == null)
                 return;
 
-            facade.ActiveDatsModel!.CustomiseDat = datVO;
+            base.ActiveDatsModel!.CustomiseDat = datVO;
 
             var flags = GetFlags(datVO);
             var cats = GetCategories(datVO);
 
             var expressions =
                 datHeadlineVO.ExpressionsXmlFullpath != null
-                    ? facade.ExpressionsProxy?.FetchExpressions(datHeadlineVO.ExpressionsXmlFullpath) ?? Array.Empty<DatFilter>()
+                    ? base.ExpressionsProxy?.FetchExpressions(datHeadlineVO.ExpressionsXmlFullpath) ?? Array.Empty<DatFilter>()
                     : Array.Empty<DatFilter>();
 
-            facade.CustomListMediator?.SetView(datVO, flags, cats, expressions);
-            facade.Shell?.SetCustomFormVisible(true);
+            base.CustomListMediator?.SetView(datVO, flags, cats, expressions);
+            base.Shell?.SetCustomFormVisible(true);
 
-            base.ExecuteCommand(new SetMainControlsBtnEnabledCmd(MAIN_CONTROL_ENUM.DatCustomiser, true));
+            await base.Execute(new SetMainControlsBtnEnabledCmd(
+                MAIN_CONTROL_ENUM.DatCustomiser, true));
         }
 
-        private void LoadFromDat(DatVO datVO)
+        private async Task LoadFromDat(DatVO datVO)
         {
-            var facade = Facade.Instance;
-            if (facade == null)
-                return;
-
-            facade.ActiveDatsModel!.CustomiseDat = datVO;
+            if (base.ActiveDatsModel is { })
+                base.ActiveDatsModel.CustomiseDat = datVO;
 
             var flags = GetFlags(datVO);
             var cats = GetCategories(datVO);
 
-            facade.CustomListMediator?.SetView(datVO, flags, cats);
-            facade.Shell?.SetCustomFormVisible(true);
+            base.CustomListMediator?.SetView(datVO, flags, cats);
+            base.Shell?.SetCustomFormVisible(true);
 
-            base.ExecuteCommand(new SetMainControlsBtnEnabledCmd(MAIN_CONTROL_ENUM.DatCustomiser, true));
+            await base.Execute(new SetMainControlsBtnEnabledCmd(
+                MAIN_CONTROL_ENUM.DatCustomiser, true));
         }
+
         private static Flag[] GetCategories(DatVO datVO) =>
             DatFilterHelper.GetCategorySets(datVO); 
+        
         private static Flag[] GetFlags(DatVO datVO) =>
             DatFilterHelper.GetFlagSets(datVO.Entries.ToArray());
     }

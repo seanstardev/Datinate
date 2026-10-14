@@ -1,26 +1,28 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ToggleMainViewCmd : RCommand
+    internal class ToggleMainViewCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.MainMediator is { } mainMediator)
+            if (base.MainMediator is { })
             {
-                var currentView = mainMediator.GetCurrentView();
+                var currentView = base.MainMediator.GetCurrentView();
 
                 if (currentView == DAT_SCREEN_ENUM.Landing)
-                    mainMediator.ToggleDatListView(DAT_SCREEN_ENUM.DatManager);
+                    base.MainMediator.ToggleDatListView(DAT_SCREEN_ENUM.DatManager);
                 else
-                    mainMediator.ToggleDatListView(DAT_SCREEN_ENUM.Landing);
+                    base.MainMediator.ToggleDatListView(DAT_SCREEN_ENUM.Landing);
 
-                if (Facade.Instance?.MainControlsMediator is { } controlsMediator)
+                if (base.MainControlsMediator is { })
                 {
-                    controlsMediator.SetActiveMainView(currentView);
+                    base.MainControlsMediator.SetActiveMainView(currentView);
                 }
             }
+
+            return await Complete();
         }
     }
 }

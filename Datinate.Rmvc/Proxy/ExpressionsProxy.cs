@@ -18,34 +18,6 @@ namespace Datinate.Rmvc.Proxy
             Directory.CreateDirectory(lastPath);
         }
 
-        //public void ShowLoadExpressionsDialog(EXPRESSIONS_FILE_TARGET_ENUM expressionsFileTargetEnum) 
-        //{    
-        //    OpenFileDialog d = new OpenFileDialog();
-            
-        //    d.Filter = "XML Files (*.xml)|*.xml";
-        //    d.Multiselect = false;
-        //    d.Title = "Select Expressions XML";
-        //    d.InitialDirectory = lastPath;
-
-        //    DialogResult dr = d.ShowDialog();
-
-        //    if (dr == DialogResult.OK) 
-        //    {    
-        //        DatFilter[] expressions = FetchExpressions(d.FileName);
-                
-        //        lastPath = Path.GetDirectoryName(d.FileName);
-
-        //        if (expressionsFileTargetEnum == EXPRESSIONS_FILE_TARGET_ENUM.CUSTOM_LIST) 
-        //        {
-        //            base.ExecuteCommand(new ApplyExpressionsFileCmd(expressions));
-        //        }
-        //        else 
-        //        {
-        //            base.ExecuteCommand(new SetProjectLoaderDatExpressionsCmd(d.FileName));
-        //        }
-        //    }
-        //}
-
         public bool SaveExpressions(DatFilter[] expressions, string xmlFullpath) 
         {
             XmlDocument doc = new XmlDocument();

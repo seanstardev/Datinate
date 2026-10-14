@@ -11,6 +11,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class MediaAssignmentView : UserControl, IMediaAssignmentView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<IGameFamily, HashSet<string>, string, bool>? MediaMetaUpdateEvt;
         public event Action? LoadMediaInBrowserEvt;
 
@@ -48,11 +50,12 @@ namespace Datinate.App.WinForms.View
 
         public MediaAssignmentView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             if (DatinateHelper.IsDesignTime)
             {
-                Facade.RegisterActor(this);
+                Facade.RegisterActor<IMediaAssignmentView>(this);
                 return;
             }
 
@@ -85,12 +88,18 @@ namespace Datinate.App.WinForms.View
                 LayoutScoringDescriptorContainer();
 
             if (DatinateHelper.IsDesignTime == false)
-                Facade.RegisterActor(this);
+                Facade.RegisterActor<IMediaAssignmentView>(this);
 
         }
 
         public void SetDescriptorDefinitions(IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetDescriptorDefinitions(descriptorDefinitions));
+                return;
+            }
+
             if (IsDisposed)
                 return;
 
@@ -168,6 +177,12 @@ namespace Datinate.App.WinForms.View
         }
         public void SetScoring(DatGrouperScoring scoring)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetScoring(scoring));
+                return;
+            }
+
             if (lastReadOnlyMode)
                 return;
 
@@ -238,6 +253,12 @@ namespace Datinate.App.WinForms.View
 
         public void SetReadOnlyModeActive(bool readOnlyMode)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetReadOnlyModeActive(readOnlyMode));
+                return;
+            }
+
             if (readOnlyRowCache == null || readOnlyControls == null)
                 CacheReadOnlyLayout();
 
@@ -580,19 +601,12 @@ namespace Datinate.App.WinForms.View
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IMediaAssignmentView>(this);
 
             if (DatinateHelper.IsDesignTime) return;
 

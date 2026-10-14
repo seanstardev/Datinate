@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.Radio;
+using Datinate.Shared.Radio;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetDatGrouperControlsCmd : RCommand
+    internal class SetDatGrouperControlsCmd : CommandBase<RVoid>
     {
         private readonly IGameEntity? entity;
         private readonly bool isFromAuto;
@@ -14,12 +14,12 @@ namespace Datinate.Rmvc.Command
             this.isFromAuto = isFromAuto;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.DatGrouperControlsMediator is { } controls) 
-            {
-                controls.SetViewForEntity(entity, isFromAuto);
-            } 
+            if (base.DatGrouperControlsMediator is { })
+                base.DatGrouperControlsMediator.SetViewForEntity(entity, isFromAuto);
+            
+            return await Complete();
         }
     }
 }

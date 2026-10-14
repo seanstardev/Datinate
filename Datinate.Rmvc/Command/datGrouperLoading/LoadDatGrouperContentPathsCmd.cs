@@ -1,12 +1,11 @@
-﻿using Datinate.Rmvc.Model;
+using Datinate.Rmvc.Model;
 using Datinate.Rmvc.Proxy;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadDatGrouperContentPathsCmd : RCommandAsync
+    internal class LoadDatGrouperContentPathsCmd : CommandBase<bool>
     {
-        public bool AutoLoadSuccessful { get; private set; } = false;
         private readonly bool jumpToViewAfterLoad;
 
         public LoadDatGrouperContentPathsCmd(
@@ -15,47 +14,44 @@ namespace Datinate.Rmvc.Command
             this.jumpToViewAfterLoad = jumpToViewAfterLoad;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<bool> Run()
         {
-            var facade = Facade.Instance;
+            if (base.DatGrouperSessionModel == null)
+                return await Complete(false);
 
-            RadioDatModel? radioDatModel = facade?.RadioDatModel;
-            ProjectProxy? projectProxy = facade?.ProjectProxy;
-            DatGrouperSessionModel? sessionModel = facade?.DatGrouperSessionModel;
+            var projectName = base.RadioDatModel?.ProjectName ?? string.Empty;
 
-            if (sessionModel == null)
-                return;
+            bool autoLoadSuccessful = false;
 
-            var projectName = radioDatModel?.ProjectName ?? string.Empty;
-
-            if (!sessionModel.ContentPathsResolved)
+            if (base.DatGrouperSessionModel.ContentPathsResolved == false)
             {
-                if (radioDatModel?.ProjectName == null ||
-                    projectProxy == null)
+                if (base.RadioDatModel?.ProjectName == null ||
+                    base.ProjectProxy == null)
                 {
-                    return;
+                    return await Complete(false);
                 }
 
-                var project = projectProxy.LoadProject(projectName);
-                if (project == null) 
-                    return;
+                var project = base.ProjectProxy.LoadProject(projectName);
+                if (project == null)
+                    return await Complete(false);
 
-                base.ExecuteCommand(new ShowProgressCmd("Checking Content Paths", 1, 4));
+                await base.Execute(new ShowProgressCmd("Checking Content Paths", 1, 4));
 
-                AutoLoadSuccessful = project.GetAllDatContentPathsAreValidOrEmpty();
+                autoLoadSuccessful = project.GetAllDatContentPathsAreValidOrEmpty();
 
-                base.ExecuteCommand(new ClearProgressCmd());
+                await base.Execute(new ClearProgressCmd());
             }
             else
             {
-                AutoLoadSuccessful = true;
+                autoLoadSuccessful = true;
 
-                base.ExecuteCommand(new ClearProgressCmd());
+                await base.Execute(new ClearProgressCmd());
 
                 if (jumpToViewAfterLoad)
-                    await base.ExecuteCommandAsync(new LoadCurationEnvironmentCmd(projectName));
+                    await base.Execute(new LoadCurationEnvironmentCmd(projectName));
             }
 
+            return await Complete(autoLoadSuccessful);
         }
     }
 }

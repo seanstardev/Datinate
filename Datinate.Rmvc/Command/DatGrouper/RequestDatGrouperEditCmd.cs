@@ -1,11 +1,11 @@
-﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 using static Datinate.Shared.DatGrouper.DatGrouperEditRequestDTO;
 
 namespace Datinate.Rmvc.Command
 {
-    public class RequestDatGrouperEditCmd : RCommandAsync
+    internal class RequestDatGrouperEditCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperEditRequestDTO dto;
 
@@ -14,64 +14,54 @@ namespace Datinate.Rmvc.Command
             this.dto = dto;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.DatGrouperModel == null ||
+            if (base.DatGrouperModel == null ||
                 dto.EditActionEnum == EDIT_ACTION_ENUM.NOT_SET)
             {
-                return;
+                return await Complete();
             }
 
-            var model =
-                Facade.Instance.DatGrouperModel;
-
-            var radioDatModel =
-                Facade.Instance.RadioDatModel;
-
             var familiesAtRisk =
-                model.GetUpdateMediaAssociationRisks(
+                base.DatGrouperModel.GetUpdateMediaAssociationRisks(
                     dto);
 
             var assignedMediaWouldBeLost =
                 familiesAtRisk.Any(
                     family =>
-                        radioDatModel?.HasAssignedMedia(family) == true);
+                        base.RadioDatModel?.HasAssignedMedia(family) == true);
 
             if (assignedMediaWouldBeLost)
             {
                 var confirmed =
                     await ConfirmYesNoAsync(
-                        "This operation may cause media associations to be lost. Do you want to continue?");
+                        "This operation may cause media associations to be lost. Do you want to continue?",
+                        base.Shell);
 
                 if (!confirmed)
-                    return;
+                    return await Complete();
             }
 
             DatGrouperEditDelta? delta =
-                model.PerformUpdate(dto);
+                base.DatGrouperModel.PerformUpdate(dto);
 
             if (delta != null)
             {
-                base.ExecuteCommand(
+                await base.Execute(
                     new ApplyDatGrouperEditCmd(
                         delta,
                         true));
             }
+
+            return await Complete();
         }
 
-        private static async Task<bool> ConfirmYesNoAsync(
-            string message)
+        private static Task<bool> ConfirmYesNoAsync(
+            string message, IShell? shell)
         {
-            var shell =
-                Facade.Instance?.Shell;
-
-            if (shell == null)
-                return true;
-
-            return await shell.ShowMessageBox(
-                "Attention",
-                message,
-                true);
+            return shell == null
+                ? Task.FromResult(true)
+                : shell.ShowMessageBox("Attention", message, true);
         }
     }
 }

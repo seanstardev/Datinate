@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadWebMediaHtmlCmd : RCommand
+    internal class LoadWebMediaHtmlCmd : CommandBase<RVoid>
     {
         private readonly string html;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.html = html;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaWebMediator?.LoadPageContent(html);
+            base.MediaWebMediator?.LoadPageContent(html);
+
+            return await Complete();
         }
     }
 }

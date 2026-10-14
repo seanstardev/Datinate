@@ -5,36 +5,32 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class Media2Mediator : RMediator
+    public class Media2Mediator : RMediator<IMedia2View>
     {
-        private IMedia2View? view => (IMedia2View?)base.viewBase;
-        public Media2Mediator(Type view) : base(view)
-        {
-        }
         public void InitialiseView(IReadOnlyCollection<ILookupSet> lookupSets)
-            => view?.InitialiseView(lookupSets);
+            => actor?.InitialiseView(lookupSets);
         
         public void SetAudioEnvironmentPath(string? audioEnvironmentPath) 
-            => view?.SetAudioEnvironmentPath(audioEnvironmentPath);
+            => actor?.SetAudioEnvironmentPath(audioEnvironmentPath);
 
         public void SetAssignedEntriesCache(
             IReadOnlyDictionary<string, HashSet<string>> assignedEntriesCache)
-            => view?.SetAssignedEntriesCache(assignedEntriesCache);
+            => actor?.SetAssignedEntriesCache(assignedEntriesCache);
         
         public void TeardownView()
-            => view?.TeardownView();
+            => actor?.TeardownView();
 
         public void EmptyView() 
-            => view?.EmptyView();
+            => actor?.EmptyView();
         
         public void ShowViewPreview(IReadOnlySet20<string> searchNames)
-            => view?.ShowViewPreview(searchNames);
+            => actor?.ShowViewPreview(searchNames);
         
         public void ShowViewAssign(
             IReadOnlySet20<string> searchNames, 
             IMediaCollection mediaCollection, 
             IReadOnlyList<string> prompts)
-            => view?.ShowViewAssign(searchNames, mediaCollection, prompts);
+            => actor?.ShowViewAssign(searchNames, mediaCollection, prompts);
         
         public void SetMediaCardContent(
             ILookupSet lookupSet, 
@@ -42,65 +38,65 @@ namespace Datinate.Rmvc.Mediator
             bool isHtmlRawText, 
             bool entryWasSelectedByUser, 
             string entryName)
-            => view?.SetMediaCardContent(lookupSet, urlOrHtml, isHtmlRawText, entryWasSelectedByUser, entryName);
+            => actor?.SetMediaCardContent(lookupSet, urlOrHtml, isHtmlRawText, entryWasSelectedByUser, entryName);
         
         public void SetMediaCardContentNotAvailable(
             ILookupSet lookupSet, 
             string entryName, 
             bool entryWasSelectedByUser)
-            => view?.SetMediaCardContentNotAvailable(lookupSet, entryName, entryWasSelectedByUser);
+            => actor?.SetMediaCardContentNotAvailable(lookupSet, entryName, entryWasSelectedByUser);
         
         internal void StopReceiveGameEntityDrop()
-            => view?.StopReceiveMediaDrop();
+            => actor?.StopReceiveMediaDrop();
         
         public void StartReceiveGameEntityDrop()
-            => view?.StartReceiveMediaDrop();
+            => actor?.StartReceiveMediaDrop();
         
         private void OnMediaCardDragStart()
-            => base.ExecuteCommand(new SetMediaItemDragStartCmd());
+            => base.Execute(new SetMediaItemDragStartCmd());
         
         private void OnMediaCardDragEnd()
-            => base.ExecuteCommand(new SetMediaItemDragStopCmd());
+            => base.Execute(new SetMediaItemDragStopCmd());
         
-
         private void OnRequestMediaContent(
             ILookupSet lookupSet,
             string lookupName,
             bool entryWasSelectedByUser,
             string entryName)
-            => base.ExecuteCommand(
+            => base.Execute(
                 new FetchMediaCardContentCmd(lookupSet, lookupName, entryWasSelectedByUser, entryName));
 
         private void OnMediaAssignmentChange(RbMediaItemAssignmentUpdate assignment)
-            => base.ExecuteCommand(new UpdateMediaCollectionItemCmd(assignment));
+            => base.Execute(new UpdateMediaCollectionItemCmd(assignment));
 
         private void OnShowMediaCard(ILookupSet lookupSet, string entryName, bool isAutoLoaded)
-            => base.ExecuteCommand(new ShowMediaCardCmd(lookupSet, entryName, isAutoLoaded));
+            => base.Execute(new ShowMediaCardCmd(lookupSet, entryName, isAutoLoaded));
 
         private void OnCloseMedia()
-            => base.ExecuteCommand(new ExitMediaModeCmd());
+            => base.Execute(new ExitMediaModeCmd());
+
+        protected override void Initialised()
+        {
+            if (actor == null) return;
+
+            actor.ShowMediaCardEvt += OnShowMediaCard;
+            actor.MediaAssignmentChangeEvt += OnMediaAssignmentChange;
+            actor.MediaCardDragStartEvt += OnMediaCardDragStart;
+            actor.MediaCardDragEndEvt += OnMediaCardDragEnd;
+            actor.CloseMediaEvt += OnCloseMedia;
+            actor.RequestMediaContentEvt += OnRequestMediaContent;
+        }
 
         protected override void Disposing()
         {
-            if (view == null) return;
+            if (actor == null) return;
 
-            view.MediaAssignmentChangeEvt -= OnMediaAssignmentChange;
-            view.MediaCardDragStartEvt -= OnMediaCardDragStart;
-            view.MediaCardDragEndEvt -= OnMediaCardDragEnd;
-            view.CloseMediaEvt -= OnCloseMedia;
-            view.ShowMediaCardEvt -= OnShowMediaCard;
-            view.RequestMediaContentEvt -= OnRequestMediaContent;
-        }
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.ShowMediaCardEvt += OnShowMediaCard;
-            view.MediaAssignmentChangeEvt += OnMediaAssignmentChange;
-            view.MediaCardDragStartEvt += OnMediaCardDragStart;
-            view.MediaCardDragEndEvt += OnMediaCardDragEnd;
-            view.CloseMediaEvt += OnCloseMedia;
-            view.RequestMediaContentEvt += OnRequestMediaContent;
+            actor.MediaAssignmentChangeEvt -= OnMediaAssignmentChange;
+            actor.MediaCardDragStartEvt -= OnMediaCardDragStart;
+            actor.MediaCardDragEndEvt -= OnMediaCardDragEnd;
+            actor.CloseMediaEvt -= OnCloseMedia;
+            actor.ShowMediaCardEvt -= OnShowMediaCard;
+            actor.RequestMediaContentEvt -= OnRequestMediaContent;
         }
     }
 }

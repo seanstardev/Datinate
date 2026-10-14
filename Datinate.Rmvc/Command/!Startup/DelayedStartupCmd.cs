@@ -1,47 +1,43 @@
-﻿using Datinate.Shared;
+using Datinate.Rmvc.Proxy;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class DelayedStartupCmd : RCommandAsync
+    internal class DelayedStartupCmd : CommandBase<RVoid>
     {
-        protected async override Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            base.ExecuteCommand(new UpdateUnitDisplayCmd(UnitFormatHelper.Unit.GB, true));
-            base.ExecuteCommand(new SetAudioConfigurationCmd());
+            await base.Execute(new UpdateUnitDisplayCmd(UnitFormatHelper.Unit.GB, true));
+            await base.Execute(new SetAudioConfigurationCmd());
 
             DatGrouperProjectDTO? datGrouperStartupProject = null;
 
-            
-
-            if (string.IsNullOrWhiteSpace(Facade.Instance?.Shell?.DatGrouperModeStartupProjectName) == false)
+            if (string.IsNullOrWhiteSpace(base.Shell?.DatGrouperModeStartupProjectName) == false)
             {
-                datGrouperStartupProject = Facade.Instance?.ProjectProxy?.LoadProject(
-                    Facade.Instance?.Shell?.DatGrouperModeStartupProjectName!);
-
+                datGrouperStartupProject = base.ProjectProxy?.LoadProject(
+                    base.Shell?.DatGrouperModeStartupProjectName!);
             }
 
             if (datGrouperStartupProject == null)
             {
-                var datDbProxy = Facade.Instance?.DatDbProxy;
-
-                if (datDbProxy is not null && datDbProxy.GetDbExists() == false)
+                if (base.DatDbProxy is not null && base.DatDbProxy.GetDbExists() == false)
                 {
-                    Facade.Instance?.Shell?.ShowMessageBox(
+                    _ = base.Shell?.ShowMessageBox(
                         "Attention",
                         "Please note that Datinate will perform an initial scan of DATs once directories are set. This is a one-time process to create the Database that may take several minutes.");
                 }
 
-                base.ExecuteCommand(new ShowProgressCmd("Loading DAT Grouper Project Summaries", 1, 4));
+                await base.Execute(new ShowProgressCmd("Loading DAT Grouper Project Summaries", 1, 4));
 
-                base.ExecuteCommand(new LoadDatGrouperProjectsCmd(null, false, false));
+                await base.Execute(new LoadDatGrouperProjectsCmd(null, false, false));
 
-                base.ExecuteCommand(new ShowProgressCmd("Initialising Database.", 2, 4));
+                await base.Execute(new ShowProgressCmd("Initialising Database.", 2, 4));
 
-                void SendProgress(string text, int part, int total)
+                async Task SendProgress(string text, int part, int total)
                 {
-                    base.ExecuteCommand(new ShowProgressCmd(text, part, total));
+                    await base.Execute(new ShowProgressCmd(text, part, total));
                 }
 
                 var report = ProgressReportThrottle.CreateReporter(
@@ -52,39 +48,43 @@ namespace Datinate.Rmvc.Command
                     minIntervalMs: 120,
                     reportOnMessageChange: true);
 
-                await Task.Run(() => Facade.Instance?.DatDbProxy?.EnsureDbExists(report));
+                if (base.DatDbProxy is { } datDbProxy)
+                    await datDbProxy.EnsureDbExists(report);
 
-                Facade.Instance?.LandingMediator?.ActivateView();
+                base.LandingMediator?.ActivateView();
 
-                base.ExecuteCommand(new LoadDatRootPathsCmd());
-                base.ExecuteCommand(new ClearProgressCmd());
+                await base.Execute(new LoadDatRootPathsCmd());
+                await base.Execute(new ClearProgressCmd());
             }
             else
             {
-                Facade.Instance?.LandingMediator?.ActivateView();
-                base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
+                base.LandingMediator?.ActivateView();
+                await base.Execute(new SetDatGrouperFormVisibleCmd());
 
-                base.ExecuteCommand(new LoadDatGrouperProjectsCmd(
+                await base.Execute(new LoadDatGrouperProjectsCmd(
                     datGrouperStartupProject!.ProjectName,
                     false,
                     false));
-                
-                Facade.Instance?.Shell?.SetMainFormVisible(false);
 
-                var cmd = new CheckDatGrouperProjectValidCmd(datGrouperStartupProject);
-                base.ExecuteCommand(cmd);
+                base.Shell?.SetMainFormVisible(false);
+
+                bool allDatAndExpressionFilesExist = 
+                    await base.Execute(
+                        new CheckDatGrouperProjectValidCmd(datGrouperStartupProject));
                 
-                if (cmd.AllDatAndExpressionFilesExist)
-                    await base.ExecuteCommandAsync(new StartDatGrouperCmd(datGrouperStartupProject!));
+                if (allDatAndExpressionFilesExist)
+                    await base.Execute(new StartDatGrouperCmd(datGrouperStartupProject!));
             }
 
-            Facade.Instance?.Shell?.StartResizeMonitor();
+            base.Shell?.StartResizeMonitor();
+
+            return await Complete();
         }
 
         private static class ProgressReportThrottle
         {
-            public static Action<string, int, int> CreateReporter(
-                Action<string, int, int> send,
+            public static ProgressCallback CreateReporter(
+                ProgressCallback send,
                 string prefix,
                 int outputTotal = 100,
                 int minPercentDelta = 1,
@@ -97,7 +97,7 @@ namespace Datinate.Rmvc.Command
                 long lastTick = -(long)minIntervalMs; // Allow the first report immediately.
                 string? lastMsg = null;
 
-                return (msg, part, total) =>
+                return async (msg, part, total) =>
                 {
                     var pct = ToPercent(part, total);
 
@@ -120,7 +120,7 @@ namespace Datinate.Rmvc.Command
                     lastTick = now;
                     lastMsg = fullMsg;
 
-                    send(fullMsg, pct, outputTotal);
+                    await send(fullMsg, pct, outputTotal);
                 };
             }
 

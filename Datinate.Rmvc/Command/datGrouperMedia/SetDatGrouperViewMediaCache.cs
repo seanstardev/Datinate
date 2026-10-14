@@ -1,10 +1,10 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Radio;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetDatGrouperViewMediaCache : RCommand
+    internal class SetDatGrouperViewMediaCache : CommandBase<RVoid>
     {
         private readonly IReadOnlyDictionary<IGameFamily, IMediaCollection> mediaCache;
 
@@ -13,9 +13,11 @@ namespace Datinate.Rmvc.Command
             this.mediaCache = mediaCache;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.DatGrouperMediator?.SetMediaCache(mediaCache);
+            base.DatGrouperMediator?.SetMediaCache(mediaCache);
+
+            return await Complete();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
@@ -7,7 +7,7 @@ namespace Datinate.Rmvc.Command
     /// Show the difference DAT of the left and right Dats:
     /// Don't update model as we haven't committed to anything. 
     /// </summary>
-    internal class SetCompareViewResultCmd : RCommand 
+    internal class SetCompareViewResultCmd : CommandBase<RVoid> 
     {
         private readonly DatComparisonVO vo;
 
@@ -16,9 +16,11 @@ namespace Datinate.Rmvc.Command
             this.vo = vo;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.CompareMediator?.SetComparisonResult(vo);
+            base.CompareMediator?.SetComparisonResult(vo);
+
+            return await Complete();
         }
     }
 }

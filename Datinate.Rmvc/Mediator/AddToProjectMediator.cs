@@ -7,28 +7,20 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class AddToProjectMediator : RMediator 
+    public class AddToProjectMediator : RMediator<IAddToProjectView>
     {
-        private IAddToProjectView? view => (IAddToProjectView?)base.viewBase;
-
-        public AddToProjectMediator(Type actor) : base(actor)
-        {
-        }
-
         public void SetProjectUiDatSubsetInfo(Dictionary<string, List<string>> dic) 
-        {
-            view?.SetProjectUiDatSubsetInfo(dic);
-        }
+            => actor?.SetProjectUiDatSubsetInfo(dic);
+
+        public void SetView(DatVO datVO)
+            => actor?.SetView(datVO);
+
         public void SetR2DatResources(IReadOnlyList<R2DatResourceDTO> r2DatResources) 
         {
-            if (view != null)
-                view.R2DatResources = r2DatResources;
+            if (actor != null)
+                actor.R2DatResources = r2DatResources;
         }
-        public void SetView(DatVO datVO) 
-        {
-            view?.SetView(datVO);
-        }
-        
+
         private void OnAddToProject(
             DatVO datVO, 
             COLLECTION_SET_ENUM collectionSetEnum,
@@ -36,37 +28,33 @@ namespace Datinate.Rmvc.Mediator
             DAT_GROUP_TARGET_ENUM target,
             string? internalDescriptor,
             DatSubsetFilter? filter)
-        {
-            base.ExecuteCommand(
-                new AddDatToProjectCmd(datVO, collectionSetEnum, target, datGroup, internalDescriptor, filter));
-        }
-
-        private void OnFetchDatSubsetInfo(DatVO datVO) 
-            => base.ExecuteCommand(new FetchDatSubsetInfoCmd(datVO));
+            => base.Execute(new AddDatToProjectCmd(
+                datVO, collectionSetEnum, target, datGroup, internalDescriptor, filter));
         
 
-        protected override void Initialsed()
+        private void OnFetchDatSubsetInfo(DatVO datVO) 
+            => base.Execute(new FetchDatSubsetInfoCmd(datVO));
+        
+        protected override void Initialised()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.AddDatToProjectEvt += OnAddToProject;
-                view.FetchDatSubsetInfoEvt += OnFetchDatSubsetInfo;
-                view.AddResourceBatchToProjectEvt += OnAddResourceBatchToProject;
+                actor.AddDatToProjectEvt += OnAddToProject;
+                actor.FetchDatSubsetInfoEvt += OnFetchDatSubsetInfo;
+                actor.AddResourceBatchToProjectEvt += OnAddResourceBatchToProject;
             }
         }
 
         private void OnAddResourceBatchToProject(DatVO dat, DAT_GROUP_ENUM datGroupEnum)
-        {
-            base.ExecuteCommand(new AddAllMediaDatSubsetsToProjectCmd(dat, datGroupEnum));  
-        }
-
+            => base.Execute(new AddAllMediaDatSubsetsToProjectCmd(dat, datGroupEnum));  
+        
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.AddDatToProjectEvt -= OnAddToProject;
-                view.FetchDatSubsetInfoEvt -= OnFetchDatSubsetInfo;
-                view.AddResourceBatchToProjectEvt -= OnAddResourceBatchToProject;
+                actor.AddDatToProjectEvt -= OnAddToProject;
+                actor.FetchDatSubsetInfoEvt -= OnFetchDatSubsetInfo;
+                actor.AddResourceBatchToProjectEvt -= OnAddResourceBatchToProject;
             }
         }
     }

@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetCompareViewVisibleCmd : RCommand 
+    internal class SetCompareViewVisibleCmd : CommandBase<RVoid> 
     {
         private readonly bool makeVisible;
 
@@ -10,9 +10,11 @@ namespace Datinate.Rmvc.Command
         {
             this.makeVisible = makeVisible;
         }
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.Shell?.SetCompareFormVisible(makeVisible);
+            base.Shell?.SetCompareFormVisible(makeVisible);
+
+            return await Complete();
         }
     }
 }

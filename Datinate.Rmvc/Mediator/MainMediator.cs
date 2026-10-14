@@ -5,44 +5,54 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class MainMediator : RMediator 
+    public class MainMediator : RMediator<IMainView>
     {
-        private IMainView? view => (IMainView?)base.viewBase;
+        private static bool appStartupCompleteHandled = false;
 
-        public MainMediator(Type actor) : base(actor)
-        {
-        }
         public DAT_SCREEN_ENUM GetCurrentView()
         {
-            if (view is { })
-                return view.GetCurrentView();
+            if (base.actor is { })
+                return base.actor.GetCurrentView();
             else 
                 return DAT_SCREEN_ENUM.NOT_SET;
         }
+
         public void ToggleDatListView(DAT_SCREEN_ENUM datScreenEnum)
-            => view?.ToggleDatListView(datScreenEnum);
+            => actor?.ToggleDatListView(datScreenEnum);
 
         private void OnExitProjectsForm()
-        {
-            base.ExecuteCommand(new ExitDatGrouperProjectsCmd());
-        }
+            => base.Execute(new ExitDatGrouperProjectsCmd());
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.ExitProjectsFormEvt -= OnExitProjectsForm;
+                actor.ExitProjectsFormEvt -= OnExitProjectsForm;
+                actor.AppStartupCompleteEvt -= OnAppStartupComplete;
             }
         }
 
-        protected override void Initialsed()
+        protected override void Initialised()
         {
-            if (view != null) 
+            if (actor != null) 
             {
-                view.ExitProjectsFormEvt += OnExitProjectsForm;
+                actor.AppStartupCompleteEvt += OnAppStartupComplete;
+                actor.ExitProjectsFormEvt += OnExitProjectsForm;
+                actor?.SetRmvcRegisterActorComplete();
             }
+        }
 
-            base.ExecuteCommand(new DelayedStartupCmd());
+        private void OnAppStartupComplete()
+        {
+            if (actor != null)
+                actor.AppStartupCompleteEvt -= OnAppStartupComplete;
+            
+            if (appStartupCompleteHandled)
+                return;
+
+            appStartupCompleteHandled = true;
+
+            base.Execute(new DelayedStartupCmd());
         }
     }
 }

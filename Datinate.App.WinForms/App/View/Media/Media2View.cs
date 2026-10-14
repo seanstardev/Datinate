@@ -12,6 +12,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class Media2View : UserControl, IMedia2View
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<RbMediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
         public event Action<ILookupSet, string, bool>? ShowMediaCardEvt;
         public event Action? MediaCardDragStartEvt;
@@ -55,9 +57,10 @@ namespace Datinate.App.WinForms.View
 
         public Media2View()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IMedia2View>(this);
 
             if (DatinatePerformanceUtil.SCROLLER_UseStock == false)
             {
@@ -81,6 +84,12 @@ namespace Datinate.App.WinForms.View
 
         public void InitialiseView(IReadOnlyCollection<ILookupSet> lookupSets)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => InitialiseView(lookupSets));
+                return;
+            }
+
             pendingInitialisationSets = lookupSets;
             awaitingInitialisationSets = false;
 
@@ -95,10 +104,16 @@ namespace Datinate.App.WinForms.View
         }
 
         public void SetAudioEnvironmentPath(string? audioEnvironmentPath)
-            => this.audioEnvironmentPath = audioEnvironmentPath;
+            => uiDispatcher.Run(() => this.audioEnvironmentPath = audioEnvironmentPath);
         
         public void SetCloseBtnPosition(bool left)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetCloseBtnPosition(left));
+                return;
+            }
+
             if (left)
             {
                 closeLeftBtn.Visible = true;
@@ -115,6 +130,12 @@ namespace Datinate.App.WinForms.View
             IMediaCollection? mediaCollection,
             IReadOnlyList<string>? prompts)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ShowView(searchNames, mediaCollection, prompts));
+                return;
+            }
+
             if (awaitingInitialisationSets)
             {
                 pendingSearchNames = searchNames;
@@ -265,7 +286,13 @@ namespace Datinate.App.WinForms.View
 
         public void SetAssignedEntriesCache(IReadOnlyDictionary<string, HashSet<string>> assignedEntriesCache)
         {
-            var uis = MediaAssignUIs;
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetAssignedEntriesCache(assignedEntriesCache));
+                return;
+            }
+
+                var uis = MediaAssignUIs;
             foreach (var ui in uis)
             {
                 if (!string.IsNullOrWhiteSpace(ui.SourceId)
@@ -278,11 +305,23 @@ namespace Datinate.App.WinForms.View
 
         public void ShowViewAssign(IReadOnlySet20<string> searchNames, IMediaCollection mediaCollection, IReadOnlyList<string> prompts)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ShowViewAssign(searchNames, mediaCollection, prompts));
+                return;
+            }
+
             readOnlyMode = false;
             ShowView(searchNames, mediaCollection, prompts);
         }
         public void ShowViewPreview(IReadOnlySet20<string> searchNames)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ShowViewPreview(searchNames));
+                return;
+            }
+
             this.readOnlyMode = true;
             ShowView(searchNames, null, null);
         }
@@ -425,6 +464,9 @@ namespace Datinate.App.WinForms.View
             if (string.IsNullOrWhiteSpace(lookup))
                 return;
 
+            if (!entryWasSelectedByUser)
+                sourceUI.AutoPlayEntryName = info.Name;
+
             RequestMediaContentEvt?.Invoke(lookupSet, lookup, entryWasSelectedByUser, info.Name);
         }
 
@@ -462,7 +504,7 @@ namespace Datinate.App.WinForms.View
         {
             if (disposingHandled) return;
 
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IMedia2View>(this);
 
             disposingHandled = true;
 
@@ -496,7 +538,7 @@ namespace Datinate.App.WinForms.View
 
             mediaContainer.SuspendLayout();
 
-            var uis = MediaAssignUIs;
+                var uis = MediaAssignUIs;
 
             foreach (var ui in uis)
                 ui.Visible = false;
@@ -723,14 +765,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void closeBtn_Click(object sender, EventArgs e) =>
@@ -853,11 +888,13 @@ namespace Datinate.App.WinForms.View
                     return;
 
                 var visibleUIs = VisibleMediaAssignUIs;
-                foreach (var ui  in visibleUIs)
+                foreach (var ui in visibleUIs)
                 {
-                    if (!string.IsNullOrWhiteSpace(ui.ActivelyLoadedMediaItem) && ui.LookupSet != null) 
+                    var entryName = ui.AutoPlayEntryName;
+
+                    if (!string.IsNullOrWhiteSpace(entryName) && ui.LookupSet != null)
                     {
-                        ShowMediaCardEvt?.Invoke(ui.LookupSet, ui.ActivelyLoadedMediaItem, true);
+                        ShowMediaCardEvt?.Invoke(ui.LookupSet, entryName, true);
                         break;
                     }
                 }

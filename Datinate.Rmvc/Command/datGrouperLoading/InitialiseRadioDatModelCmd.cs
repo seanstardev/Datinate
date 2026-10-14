@@ -1,4 +1,4 @@
-﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Dto;
 using Datinate.Rmvc.Model;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
@@ -6,7 +6,7 @@ using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class InitialiseRadioDatModelCmd : RCommand 
+    internal class InitialiseRadioDatModelCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperProjectDTO projectVO;
         private readonly AutoGrouperTraceStore? autoGroupTraceStore;
@@ -22,12 +22,13 @@ namespace Datinate.Rmvc.Command
             this.autoGrouperSourceCollection = autoGrouperSourceCollection;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            RadioDatModel? radioDatModel = Facade.Instance?.RadioDatModel;
-            radioDatModel?.SetRadioDat(projectVO, autoGroupTraceStore, autoGrouperSourceCollection);
+            base.RadioDatModel?.SetRadioDat(projectVO, autoGroupTraceStore, autoGrouperSourceCollection);
 
-            base.ExecuteCommand(new SetDescriptorDefinitionsCmd());
+            await base.Execute(new SetDescriptorDefinitionsCmd());
+
+            return await Complete();
         }
     }
 }

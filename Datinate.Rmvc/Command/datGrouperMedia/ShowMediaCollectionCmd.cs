@@ -1,67 +1,70 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ShowMediaCollectionCmd : RCommand
+    internal class ShowMediaCollectionCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperEntryDTO datGrouperEntryDTO;
 
-        public ShowMediaCollectionCmd(DatGrouperEntryDTO datGrouperEntryDTO)
+        public ShowMediaCollectionCmd(
+            DatGrouperEntryDTO datGrouperEntryDTO)
         {
             this.datGrouperEntryDTO = datGrouperEntryDTO;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var sessionModel = Facade.Instance?.DatGrouperSessionModel;
 
-            if (sessionModel == null)
-                return;
+            if (base.DatGrouperSessionModel == null)
+                return await Complete();
 
-            if (!sessionModel.IsInMediaMode)
-                return;
+            if (!base.DatGrouperSessionModel.IsInMediaMode)
+                return await Complete();
 
-            Facade.Instance?.MediaWebMediator?.ClearView();
+            base.MediaWebMediator?.ClearView();
 
             var filters = DatinateFamilyHelper.GetAllNames(datGrouperEntryDTO.Entity);
 
             if (filters.Any() == false || string.IsNullOrWhiteSpace(filters.First()))
-                return;
+                return await Complete();
 
 
-            if (sessionModel.IsInMediaReadOnlyMode)
+            if (base.DatGrouperSessionModel.IsInMediaReadOnlyMode)
             {
-                Facade.Instance?.MediaMediator?.ShowViewPreview(filters!);
+                base.MediaMediator?.ShowViewPreview(filters!);
 
                 // TODO: ?:
-                Facade.Instance?.DatGrouperMediator?.SetMediaMode(sessionModel.CurrentLayout);
+                base.DatGrouperMediator?.SetMediaMode(DatGrouperSessionModel.CurrentLayout);
             }
 
             else if (datGrouperEntryDTO.Entity is IGameFamily family)
             {
-                if (Facade.Instance?.RadioDatModel is { } radioDatModel)
+                if (base.RadioDatModel != null)
                 {
-                    var collection = radioDatModel.GetMediaCollection(family);
+                    var collection = base.RadioDatModel.GetMediaCollection(family);
 
                     if (collection != null)
                     {
                         var prompts = DatinateFamilyHelper.CreateSearchPrompts(family);
 
-                        Facade.Instance?.MediaMediator?.ShowViewAssign(filters, collection, prompts);
-                        Facade.Instance?.MediaAssignmentMediator?.SetView(collection);
+                        base.MediaMediator?.ShowViewAssign(filters, collection, prompts);
+                        base.MediaAssignmentMediator?.SetView(collection);
 
-                        var scoring = radioDatModel.GetScoring(family);
+                        var scoring = base.RadioDatModel.GetScoring(family);
+                        
                         if (scoring != null)
-                            Facade.Instance?.MediaAssignmentMediator?.SetScoring(scoring);
+                            base.MediaAssignmentMediator?.SetScoring(scoring);
 
                         // TODO: ?:
-                        Facade.Instance?.DatGrouperMediator?.SetMediaMode(sessionModel.CurrentLayout);
+                        base.DatGrouperMediator?.SetMediaMode(DatGrouperSessionModel.CurrentLayout);
                     }
                 }
             }
+
+            return await Complete();
         }
     }
 }

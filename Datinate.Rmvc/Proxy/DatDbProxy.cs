@@ -1,4 +1,4 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.Dat;
 using RMVC;
 using System.Data.SQLite;
@@ -17,7 +17,7 @@ namespace Datinate.Rmvc.Proxy
         }
         public bool GetDbExists() => File.Exists(dbFullpath);
 
-        public void EnsureDbExists(Action<string, int, int>? progress)
+        public async Task EnsureDbExists(ProgressCallback? progress)
         {
             if (string.IsNullOrWhiteSpace(dbFullpath))
             {
@@ -25,19 +25,19 @@ namespace Datinate.Rmvc.Proxy
                 return;
             }
 
-            progress?.Invoke("Checking database", 0, 100);
+            await (progress?.Invoke("Checking database", 0, 100) ?? Task.CompletedTask);
 
             Directory.CreateDirectory(Path.GetDirectoryName(dbFullpath)!);
 
             if (File.Exists(dbFullpath))
             {
-                progress?.Invoke("Database exists. Checking for removed DATs", 5, 100);
-                PurgeRemovedDats(progress, 5, 100);
-                progress?.Invoke("Database ready", 100, 100);
+                await (progress?.Invoke("Database exists. Checking for removed DATs", 5, 100) ?? Task.CompletedTask);
+                await PurgeRemovedDats(progress, 5, 100);
+                await (progress?.Invoke("Database ready", 100, 100) ?? Task.CompletedTask);
                 return;
             }
 
-            progress?.Invoke("Creating database", 10, 100);
+            await (progress?.Invoke("Creating database", 10, 100) ?? Task.CompletedTask);
 
             string connectionString =
                 $"Data Source={dbFullpath};Version=3;Pooling=False;Default Timeout=5;";
@@ -46,7 +46,7 @@ namespace Datinate.Rmvc.Proxy
             {
                 connection.Open();
 
-                progress?.Invoke("Creating tables", 35, 100);
+                await (progress?.Invoke("Creating tables", 35, 100) ?? Task.CompletedTask);
 
                 string createTableQuery = @"
 CREATE TABLE IF NOT EXISTS Dat (
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS Dat (
                     command.ExecuteNonQuery();
             }
 
-            progress?.Invoke("Database ready", 100, 100);
+            await (progress?.Invoke("Database ready", 100, 100) ?? Task.CompletedTask);
         }
 
         public void CreateDatEntry(DatSummaryVO vo, string? sha1)
@@ -235,7 +235,7 @@ WHERE fullpath = @fullpath;
             }
         }
 
-        private void PurgeRemovedDats(Action<string, int, int>? progress, int startPercent, int endPercent)
+        private async Task PurgeRemovedDats(ProgressCallback? progress, int startPercent, int endPercent)
         {
             try
             {
@@ -251,7 +251,7 @@ WHERE fullpath = @fullpath;
                 int lastReportedPct = -1;
                 long lastTick = -120; // Allow the first report immediately.
 
-                void Report(string msg, double t)
+                async Task Report(string msg, double t)
                 {
                     if (progress == null) return;
 
@@ -262,11 +262,11 @@ WHERE fullpath = @fullpath;
                     {
                         lastReportedPct = pct;
                         lastTick = now;
-                        progress(msg, pct, 100);
+                        await progress(msg, pct, 100);
                     }
                 }
 
-                Report("Loading DAT entries from database", 0.05);
+                await Report("Loading DAT entries from database", 0.05);
 
                 List<string> allPaths = new List<string>();
 
@@ -286,13 +286,13 @@ WHERE fullpath = @fullpath;
                 var count = allPaths.Count;
                 if (count == 0)
                 {
-                    Report("No DAT entries in Database", 1.0);
+                    await Report("No DAT entries in Database", 1.0);
                     return;
                 }
 
                 List<string> missingPaths = new List<string>();
 
-                Report("Scanning filesystem for altered DATs (0/" + count + ")", 0.20);
+                await Report("Scanning filesystem for altered DATs (0/" + count + ")", 0.20);
 
                 long scanTick = -150; // Allow the first scan update immediately.
 
@@ -313,7 +313,7 @@ WHERE fullpath = @fullpath;
                         var overall = 0.20 + (0.65 * scanT);
 
                         var pct = Pct(overall);
-                        progress(
+                        await progress(
                             "Scanning filesystem for altered DATs (" +
                             DatinateHelper.GetReadableNumber(i + 1) +
                             " / " +
@@ -323,8 +323,8 @@ WHERE fullpath = @fullpath;
 
                 if (missingPaths.Count == 0)
                 {
-                    Report("No removed DATs to purge", 0.90);
-                    Report("Purge complete", 1.0);
+                    await Report("No removed DATs to purge", 0.90);
+                    await Report("Purge complete", 1.0);
                     return;
                 }
 
@@ -346,7 +346,7 @@ WHERE fullpath = @fullpath;
                             var overall = 0.85 + (0.15 * delT);
 
                             var pct = Pct(overall);
-                            progress?.Invoke("Purging entry '" + name + "' (" + (i + 1) + " / " + delCount + ")", pct, 100);
+                            await (progress?.Invoke("Purging entry '" + name + "' (" + (i + 1) + " / " + delCount + ")", pct, 100) ?? Task.CompletedTask);
 
                             command.Parameters.Clear();
                             command.Parameters.AddWithValue("@fullpath", fullpath);
@@ -355,7 +355,7 @@ WHERE fullpath = @fullpath;
                     }
                 }
 
-                Report("Purge complete", 1.0);
+                await Report("Purge complete", 1.0);
             }
             catch (Exception ex)
             {

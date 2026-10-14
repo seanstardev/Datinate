@@ -6,49 +6,32 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    internal class DatDetailsMediator : RMediator 
+    internal class DatDetailsMediator : RMediator<IDatDetailsView>
     {
-        public DatDetailsMediator(Type actor) : base(actor)
-        {
-        }
-
-        private IDatDetailsView? view => (IDatDetailsView?)base.viewBase;
-
         public void SetView(DatVO datVO, UnitFormatHelper.Unit unit, bool showUnitInCells) 
-        {
-            view?.SetView(datVO, unit, showUnitInCells);
-        }
+            => actor?.SetView(datVO, unit, showUnitInCells);
+        
         public void UpdateUnitsView(UnitFormatHelper.Unit unit, bool showUnitInCells) 
-        {
-            view?.UpdateUnits(unit, showUnitInCells);
-        }
-
+            => actor?.UpdateUnits(unit, showUnitInCells);
+        
         public void ResetView() 
-        {
-            view?.ClearView();
-        }
-
+            => actor?.ClearView();
+        
         private void OnCompareRight() 
-        {
-            base.ExecuteCommand(new SetCompareViewSideCmd(false));
-        }
-
+            => base.Execute(new SetCompareViewSideCmd(false));
+        
         private void OnCompareLeft() 
-        {
-            base.ExecuteCommand(new SetCompareViewSideCmd(true));
-        }
-
+            => base.Execute(new SetCompareViewSideCmd(true));
+        
         private void OnCustomiseClick(DatVO datVO) 
-        {
-            base.ExecuteCommand(new SetCustomiseViewCmd(datVO));
-        }
+            => base.Execute(new SetCustomiseViewCmd(datVO));
+        
         private void OnShowAddToProject(DatVO datVO) 
-        {
-            base.ExecuteCommand(new ShowAddToProjectViewCmd(datVO));
-        }
+            => base.Execute(new ShowAddToProjectViewCmd(datVO));
+        
         private void OnDefaultAppFail() 
         {
-            base.ExecuteCommand(
+            base.Execute(
                 new ShowMessageCmd(
                     "The selected DAT's file type does not have a default application associated with it, and cannot be viewed. The "
                     + Constants.APP_NAME
@@ -56,27 +39,27 @@ namespace Datinate.Rmvc.Mediator
             ));
         }
 
-        protected override void Initialsed()
+        protected override void Initialised()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.CustomiseClickEvt += OnCustomiseClick;
-                view.CompareLeftEvt += OnCompareLeft;
-                view.CompareRightEvt += OnCompareRight;
-                view.ReadDatInDefaultAppFailEvt += OnDefaultAppFail;
-                view.ShowAddToProjectEvt += OnShowAddToProject;
+                actor.CustomiseClickEvt += OnCustomiseClick;
+                actor.CompareLeftEvt += OnCompareLeft;
+                actor.CompareRightEvt += OnCompareRight;
+                actor.ReadDatInDefaultAppFailEvt += OnDefaultAppFail;
+                actor.ShowAddToProjectEvt += OnShowAddToProject;
             }
         }
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.CustomiseClickEvt -= OnCustomiseClick;
-                view.CompareLeftEvt -= OnCompareLeft;
-                view.CompareRightEvt -= OnCompareRight;
-                view.ReadDatInDefaultAppFailEvt -= OnDefaultAppFail;
-                view.ShowAddToProjectEvt -= OnShowAddToProject;
+                actor.CustomiseClickEvt -= OnCustomiseClick;
+                actor.CompareLeftEvt -= OnCompareLeft;
+                actor.CompareRightEvt -= OnCompareRight;
+                actor.ReadDatInDefaultAppFailEvt -= OnDefaultAppFail;
+                actor.ShowAddToProjectEvt -= OnShowAddToProject;
             }
         }
     }

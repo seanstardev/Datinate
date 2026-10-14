@@ -8,7 +8,7 @@ namespace Datinate.Rmvc.Proxy
 {
     internal class CreateDatProxy : RModel 
     {
-        public void createXmlAndSave(DatVO datVO, string fileFullpath, bool useMachineTags) 
+        public void CreateXmlAndSave(DatVO datVO, string fileFullpath, bool useMachineTags) 
         {
 
             string gameElementName = useMachineTags ? "machine" : "game";
@@ -97,7 +97,7 @@ namespace Datinate.Rmvc.Proxy
             doc.Save(outStream);
             outStream.Close();
 
-            base.ExecuteCommand(new ShowMessageCmd(
+            base.Execute(new ShowMessageCmd(
                 "The DAT file has been created.\r" + fileFullpath, ShowMessageCmd.MessageTitleEnum.Ok));
         }
 

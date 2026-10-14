@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadWebUrlCmd : RCommand
+    internal class LoadWebUrlCmd : CommandBase<RVoid>
     {
         private readonly string url;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.url = url;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MainWebMediator?.LoadUrl(url);
+            base.MainWebMediator?.LoadUrl(url);
+
+            return await Complete();
         }
     }
 }

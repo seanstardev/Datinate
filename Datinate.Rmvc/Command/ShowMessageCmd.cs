@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ShowMessageCmd : RCommand 
+    internal class ShowMessageCmd : CommandBase<RVoid>
     {
         private readonly string message;
         private readonly MessageTitleEnum messageTitle;
@@ -19,7 +19,7 @@ namespace Datinate.Rmvc.Command
             , Ok
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         { 
             string title = "";
 
@@ -34,7 +34,12 @@ namespace Datinate.Rmvc.Command
                     break;
             }
 
-            _ = Facade.Instance?.Shell?.ShowMessageBox(title, message);
+            if (base.Shell != null)
+            {
+                _ = await base.Shell.ShowMessageBox(title, message);
+            }
+
+            return await Complete();
         }
     }
 }

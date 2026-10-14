@@ -5,42 +5,33 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    internal class DatPathsUpdateMediator : RMediator
+    internal class DatPathsUpdateMediator : RMediator<IDatPathsUpdateView>
     {
-        private IDatPathsUpdateView? view => (IDatPathsUpdateView?)base.viewBase;
-
-        public DatPathsUpdateMediator(Type actor) : base(actor)
-        {
-        }
-
-        void OnSave(DatGrouperProjectDTO projectVO) 
-        {
-            
-            view?.Hide();
-            
-            // TODO: Untested with showing dialog?:
-            base.ExecuteCommand(new SaveProjectCmd(projectVO));
-        }
-
         public void SetView(DatGrouperProjectDTO projectVO) 
+            => actor?.SetView(projectVO);
+        
+        protected override void Initialised()
         {
-            view?.SetView(projectVO);
-        }
-
-        protected override void Initialsed()
-        {
-            if (view != null)
+            if (actor != null)
             {
-                view.SaveClickEvt += OnSave;
+                actor.SaveClickEvt += OnSave;
             }
         }
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.SaveClickEvt -= OnSave;
+                actor.SaveClickEvt -= OnSave;
             }
+        }
+
+        private void OnSave(DatGrouperProjectDTO projectVO)
+        {
+            actor?.Hide();
+
+            // TODO: Untested with showing dialog?:
+            base.Execute(new SaveProjectCmd(projectVO));
         }
     }
 }

@@ -60,7 +60,7 @@ namespace Datinate.Rmvc.Proxy
         /*
          * NOTE: Requirement: family.GetFamilyDisplayName() must be guaranteed path-safe at this entry point.
          */
-        public void ExportSoftware(
+        public async Task ExportSoftware(
             IReadOnlyList<IGameFamily> curatedFamilies,
             Dictionary<IGamePart, DatGameVO> partDatEntryDictionary,
             DatGrouperProjectDTO project,
@@ -68,7 +68,7 @@ namespace Datinate.Rmvc.Proxy
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> familyMediaDictionary,
             IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> flagFilterSetByGroup,
             IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary,
-            Action<int, int, string>? progressCallback = null)
+            FileProgressCallback? progressCallback = null)
         {
             Dictionary<IGameFamily, string> familyUniqueNameDictionary =
                 BuildUniqueFamilyNames(curatedFamilies);
@@ -80,13 +80,13 @@ namespace Datinate.Rmvc.Proxy
             if (softwareProjectPath == null || string.IsNullOrWhiteSpace(softwareProjectPath))
                 return;
 
-            progressCallback?.Invoke(2, 2, "Deleting existing Software Export content");
+            await (progressCallback?.Invoke(2, 2, "Deleting existing Software Export content") ?? Task.CompletedTask);
 
             DeleteExportSoftwareProject(projectName);
 
             ExportSoftwareDelegate softwareDelegate = new ExportSoftwareDelegate();
 
-            softwareDelegate.Export(
+            await softwareDelegate.Export(
                 curatedFamilies,
                 familyUniqueNameDictionary,
                 partDatEntryDictionary,
@@ -103,7 +103,7 @@ namespace Datinate.Rmvc.Proxy
         /*
          * NOTE: Requirement: family.GetFamilyDisplayName() must be guaranteed path-safe at this entry point.
          */
-        public void ExportMedia(
+        public async Task ExportMedia(
             IReadOnlyList<IGameFamily> curatedFamilies,
             DatGrouperProjectDTO project,
             IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaPriorities,
@@ -111,7 +111,7 @@ namespace Datinate.Rmvc.Proxy
             IReadOnlyDictionary<IGameFamily, IReadOnlyDictionary<string, ResourceDetailsDTO>> resourceDetailsDictionary,
             IReadOnlyDictionary<string, DatVO> sourceIdDatDictionary,
             IReadOnlyDictionary<string, ISourceDefinition> sourceIdContentDictionary,
-            Action<int, int, string>? progressCallback = null)
+            FileProgressCallback? progressCallback = null)
         {
             Dictionary<IGameFamily, string> familyUniqueNameDictionary =
                 BuildUniqueFamilyNames(curatedFamilies);
@@ -123,13 +123,13 @@ namespace Datinate.Rmvc.Proxy
             if (string.IsNullOrWhiteSpace(mediaProjectPath))
                 return;
 
-            progressCallback?.Invoke(1, 2, "Deleting existing Media Export content");
+            await (progressCallback?.Invoke(1, 2, "Deleting existing Media Export content") ?? Task.CompletedTask);
             DeleteExportMediaProject(projectName);
 
             var exportInfoDelegate = new ExportInfoDelegate();
 
             IReadOnlyDictionary<IGameFamily, InfoSpec> infoSpecDictionary =
-                exportInfoDelegate.Export(
+                await exportInfoDelegate.Export(
                     curatedFamilies,
                     familyUniqueNameDictionary,
                     project,

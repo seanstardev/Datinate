@@ -1,12 +1,14 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ShowWebMediaInBrowserCmd : RCommand
+    internal class ShowWebMediaInBrowserCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaWebMediator?.LoadUriInBrowser();
+            base.MediaWebMediator?.LoadUriInBrowser();
+            
+            return await Complete();
         }
     }
 }

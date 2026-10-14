@@ -1,12 +1,16 @@
 ﻿using Datinate.App.WinForms.View.UI;
 using Datinate.Rmvc;
 using Datinate.Shared;
+using RMVC;
 using System.Runtime.InteropServices;
 
 namespace Datinate.App.WinForms
 {
     public partial class MainForm : Form, IShell
     {
+        private readonly object startupGate = new object();
+        private bool rmvcStartupCommandCompleted;
+
         private CustomListForm CustomListForm;
         private ProblemListForm ProblemListForm;
         private CompareForm CompareForm;
@@ -53,7 +57,8 @@ namespace Datinate.App.WinForms
                 DatGrouperModeStartupProjectName = args[1];
             }
 
-            Facade.Create(typeof(Facade), this);
+            //Facade.EnableDebugMode = true;
+            RFacade.Create<Facade>(this);
 
             base.Text = Constants.APP_NAME + " " + Constants.APP_VERSION;
 
@@ -220,37 +225,46 @@ namespace Datinate.App.WinForms
 
         public void SetCompareFormVisible(bool doShow)
         {
-            if (doShow)
-                CompareForm.ShowAndBringToFront();
-            else if (CompareForm.Visible)
+            Ui(() =>
             {
-                CompareForm.Hide();
-                BringToFront();
-            }
+                if (doShow)
+                    CompareForm.ShowAndBringToFront();
+                else if (CompareForm.Visible)
+                {
+                    CompareForm.Hide();
+                    BringToFront();
+                }
+            });
         }
 
         public void SetCustomFormVisible(bool doShow)
         {
-            if (doShow)
+            Ui(() =>
             {
-                CustomListForm.Show();
-                CustomListForm.BringToFront();
-            }
-            else if (CustomListForm.Visible)
-            {
-                CustomListForm.Hide();
-                BringToFront();
-            }
+                if (doShow)
+                {
+                    CustomListForm.Show();
+                    CustomListForm.BringToFront();
+                }
+                else if (CustomListForm.Visible)
+                {
+                    CustomListForm.Hide();
+                    BringToFront();
+                }
+            });
         }
 
         public void SetCreateDatFormVisible(bool doShow)
         {
-            if (doShow)
-                CreateDatForm.ShowAndBringToFront();
-            else if (CreateDatForm.Visible)
+            Ui(() =>
             {
-                CreateDatForm.Hide();
-            }
+                if (doShow)
+                    CreateDatForm.ShowAndBringToFront();
+                else if (CreateDatForm.Visible)
+                {
+                    CreateDatForm.Hide();
+                }
+            });
         }
 
         public void SetProblemListFormVisible(bool doShow)
@@ -282,6 +296,24 @@ namespace Datinate.App.WinForms
             => ProjectsForm.ProjectsView.CurrentProjectsPageIsProjectLoaderPage;
 
         public string? DatGrouperModeStartupProjectName { get; } = null;
+
+        public void HandleOperationsStarted()
+        {
+
+        }
+
+        public void HandleOperationsCompleted()
+        {
+            lock (startupGate)
+            {
+                if (rmvcStartupCommandCompleted)
+                    return;
+
+                rmvcStartupCommandCompleted = true;
+            }
+
+            Ui(() => mainView?.SetRmvcStartupComplete());
+        }
 
         public void SetAppEnabled(bool doEnable)
         {
@@ -460,16 +492,13 @@ namespace Datinate.App.WinForms
 
         public void SetProjectsFormVisible(bool doShow)
         {
-            if (doShow)
-                ProjectsForm.ShowProjectsFormAndBringToFront();
-            else
+            Ui(() =>
             {
-                Ui(() => {
+                if (doShow)
+                    ProjectsForm.ShowProjectsFormAndBringToFront();
+                else
                     ProjectsForm.Hide();
-                });
-            }
-
-
+            });
         }
 
         public void SetProjectsFormTitle(string title)
@@ -794,8 +823,21 @@ namespace Datinate.App.WinForms
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+            => StartAppExit();
+        
+        protected override void OnShown(EventArgs e)
         {
-            StartAppExit();
+            base.OnShown(e);
+
+            bool startupCompleted;
+
+            lock (startupGate)
+            {
+                startupCompleted = rmvcStartupCommandCompleted;
+            }
+
+            if (startupCompleted)
+                mainView.SetRmvcStartupComplete();
         }
     }
 }

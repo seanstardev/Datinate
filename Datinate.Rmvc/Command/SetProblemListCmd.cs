@@ -1,10 +1,10 @@
-﻿using Datinate.Rmvc.Mediator;
+using Datinate.Rmvc.Mediator;
 using RMVC;
 using System.Diagnostics;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetProblemListCmd : RCommand
+    internal class SetProblemListCmd : CommandBase<RVoid>
     {
         public enum UI { Duplicates, Unreadable }
 
@@ -17,28 +17,26 @@ namespace Datinate.Rmvc.Command
             this.problemItems = problemItems;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            var instance = Facade.Instance;
-
-            Facade.Instance?.Shell?.SetProblemListFormVisible(true);
-
-            ProblemListMediator? problemListMediator = instance?.ProblemListMediator;
+            base.Shell?.SetProblemListFormVisible(true);
 
             switch (ui) 
             {     
                 case UI.Unreadable:
-                    problemListMediator?.SetUnreadableView(problemItems);
+                    base.ProblemListMediator?.SetUnreadableView(problemItems);
                     break;
 
                 case UI.Duplicates:
-                    problemListMediator?.SetDuplicatesView(problemItems);
+                    base.ProblemListMediator?.SetDuplicatesView(problemItems);
                     break;
 
                 default:
                     Debug.WriteLine("SetProblemListCmd. UNKNOWN PROBLEM: " + ui);
                     break;
             }
+
+            return await Complete();
         }
     }
 }

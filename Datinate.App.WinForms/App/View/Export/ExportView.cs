@@ -10,6 +10,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class ExportView : UserControl, IExportView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         private const int MaxContentWidth = 1200;
         private const int PriorityUiBottomGapPx = 8;
         private const int PriorityUiMinWidthPx = 320;
@@ -20,9 +22,10 @@ namespace Datinate.App.WinForms.View
 
         public ExportView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IExportView>(this);
             
             BackColor = SystemColors.Control;
             bodyPanel.BackColor = SystemColors.Control;
@@ -233,7 +236,7 @@ namespace Datinate.App.WinForms.View
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IExportView>(this);
         }
 
         private void exportMediaBtn_Click(object sender, EventArgs e)
@@ -255,16 +258,7 @@ namespace Datinate.App.WinForms.View
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated)
-                    return;
-
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void saveSettingsBtn_Click(object sender, EventArgs e)

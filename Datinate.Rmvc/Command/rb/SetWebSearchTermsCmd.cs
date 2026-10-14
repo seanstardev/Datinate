@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetWebSearchTermsCmd : RCommand
+    internal class SetWebSearchTermsCmd : CommandBase<RVoid>
     {
         private readonly string? gameName;
         private readonly string? systemName;
@@ -15,17 +15,18 @@ namespace Datinate.Rmvc.Command
             this.searchNow = searchNow;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var webSearch = Facade.Instance?.RbWebSearchMediator;
-            
-            if (webSearch == null)
-                return;
+            if (base.RbWebSearchMediator == null)
+                return await Complete();
 
-            webSearch.SetSearchTerms(gameName, systemName);
+            base.RbWebSearchMediator.SetSearchTerms(
+                gameName, systemName);
 
             if (searchNow)
-                webSearch.SearchCurrent();
+                base.RbWebSearchMediator.SearchCurrent();
+
+            return await Complete();
         }
     }
 }

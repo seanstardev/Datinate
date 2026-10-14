@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ShowDatHierarchyCmd : RCommandAsync
+    internal class ShowDatHierarchyCmd : CommandBase<RVoid>
     {
         private readonly string[] paths;
 
@@ -11,15 +11,16 @@ namespace Datinate.Rmvc.Command
             this.paths = paths;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            base.ExecuteCommand(new ShowProgressCmd("Loading View", 1, 1));
+            await base.Execute(new ShowProgressCmd("Loading View", 1, 1));
 
-            Facade.Instance?.Shell?.SetProgressFormVisible(false);
-            base.ExecuteCommand(new ClearProgressCmd());
+            base.Shell?.SetProgressFormVisible(false);
+            await base.Execute(new ClearProgressCmd());
 
-            Facade.Instance?.Shell?.ApplicationDoEventsHack();
-            //Application.DoEvents();
+            base.Shell?.ApplicationDoEventsHack();
+
+            return await Complete();
         }
     }
 }

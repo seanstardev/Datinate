@@ -1,10 +1,10 @@
-﻿using Datinate.Rmvc.Mediator;
+using Datinate.Rmvc.Mediator;
 using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ApplyExpressionsFileCmd:RCommand 
+    internal class ApplyExpressionsFileCmd : CommandBase<RVoid> 
     {
         private readonly DatFilter[] expressions;
 
@@ -12,11 +12,11 @@ namespace Datinate.Rmvc.Command
         {
             this.expressions = expressions;
         }
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade? context = Facade.Instance;
-            CustomListMediator? customListMediator = context?.CustomListMediator;
-            customListMediator?.ApplyExpressions(expressions);
+            base.CustomListMediator?.ApplyExpressions(expressions);
+
+            return await Complete();
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class UpdateMediaCollectionItemCmd : RCommand
+    internal class UpdateMediaCollectionItemCmd : CommandBase<RVoid>
     {
         private readonly RbMediaItemAssignmentUpdate assignment;
 
@@ -12,24 +12,26 @@ namespace Datinate.Rmvc.Command
             this.assignment = assignment;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var cache = Facade.Instance?.RadioDatModel?.UpdateMediaCollectionItem(assignment);
+            var cache = base.RadioDatModel?.UpdateMediaCollectionItem(assignment);
             
             if (cache != null)
-                Facade.Instance?.DatGrouperMediator?.SetMediaCache(cache);
+                base.DatGrouperMediator?.SetMediaCache(cache);
 
             // TODO: DRY with meta updates:
-            if (Facade.Instance?.RadioDatModel is { } radioModel && 
-                Facade.Instance?.DatGrouperSessionModel is { } sessionModel &&
-                sessionModel.IsInMediaAssignmentMode)
+            if (base.RadioDatModel != null &&
+                base.DatGrouperSessionModel != null &&
+                base.DatGrouperSessionModel.IsInMediaAssignmentMode)
             {
-                var scoring = radioModel.GetScoring(assignment.Family);
+                var scoring = base.RadioDatModel.GetScoring(assignment.Family);
+                
                 if (scoring != null) 
-                {
-                    Facade.Instance?.MediaAssignmentMediator?.SetScoring(scoring);
-                }
+                    base.MediaAssignmentMediator?.SetScoring(scoring);
+                
             }
+
+            return await Complete();
         }
     }
 }

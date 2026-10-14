@@ -1,14 +1,11 @@
-﻿using Datinate.Shared.Dat;
+using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
-using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class AddDatToProjectCmd : RCommand
+    internal class AddDatToProjectCmd : CommandBase<bool>
     {
-        public bool AddToProjectSucceeded { get; private set; } = true;
-
         private readonly DatVO dat;
         private readonly COLLECTION_SET_ENUM collectionSetEnum;
         private readonly DAT_GROUP_TARGET_ENUM datGroupTargetEnum;
@@ -32,23 +29,23 @@ namespace Datinate.Rmvc.Command
             this.datSubsetFilter = datSubsetFilter;
         }
 
-        protected override void Run() 
+        protected override async Task<bool> Run() 
         {
-            if (Facade.Instance?.ProjectLoaderMediator is { } projects 
-                && projects.IsProjectLoaded == false &&
-                Facade.Instance?.Shell is { } shell)
+            if (base.ProjectLoaderMediator is { } && 
+                ProjectLoaderMediator.IsProjectLoaded == false &&
+                base.Shell is { })
             {
-                _ = shell.ShowMessageBox(
+                _ = base.Shell.ShowMessageBox(
                     "Attention",
                     "Cannot proceed. Please Load or Create a DAT Grouper Project and try again.");
 
-                base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
-                AddToProjectSucceeded = false;
-                return;
+                await base.Execute(new SetDatGrouperFormVisibleCmd());
+
+                return await Complete(false);
             }
 
-            DatGrouperProjectEntry[] existingVOs = 
-                Facade.Instance?.ProjectLoaderMediator?.GetAllDats() ?? new DatGrouperProjectEntry[] { };
+            DatGrouperProjectEntry[] existingVOs =
+                base.ProjectLoaderMediator?.GetAllDats() ?? new DatGrouperProjectEntry[] { };
 
             bool problemFound;
 
@@ -69,12 +66,11 @@ namespace Datinate.Rmvc.Command
 
                     if (problemFound) 
                     {
-                        Facade.Instance?.Shell?.ShowMessageBox(
+                        _ = base.Shell?.ShowMessageBox(
                             "There was a Problem",
                             "Cannot proceed. This DAT File has already been added to the Project.");
 
-                        AddToProjectSucceeded = false;
-                        return;
+                        return await Complete(false);
                     }
                 }
             }
@@ -92,10 +88,12 @@ namespace Datinate.Rmvc.Command
                 null,
                 false);
 
-            Facade.Instance?.ProjectLoaderMediator?.AddDat(datHeadlineVO, datGroupTargetEnum);
-            base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
+            base.ProjectLoaderMediator?.AddDat(datHeadlineVO, datGroupTargetEnum);
+            await base.Execute(new SetDatGrouperFormVisibleCmd());
 
-            Facade.Instance?.Shell?.SetAddToProjectFormVisible(false);
+            base.Shell?.SetAddToProjectFormVisible(false);
+
+            return await Complete(true);
         }
     }
 }

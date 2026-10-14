@@ -9,14 +9,18 @@ namespace Datinate.App.WinForms.View
 {
     public partial class ProjectPathsUpdateView : UserControl, IDatPathsUpdateView 
     {
+        void IDatPathsUpdateView.Hide() => uiDispatcher.Run(() => base.Hide());
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<DatGrouperProjectDTO>? SaveClickEvt;
 
         DatGrouperProjectDTO? projectVO;
 
         public ProjectPathsUpdateView() 
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IDatPathsUpdateView>(this);
         }
 
         public void SetView(DatGrouperProjectDTO projectVO)
@@ -81,7 +85,7 @@ namespace Datinate.App.WinForms.View
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IDatPathsUpdateView>(this);
         }
 
         private void ShowError() 
@@ -144,14 +148,7 @@ namespace Datinate.App.WinForms.View
         }
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
     }
 }

@@ -1,19 +1,16 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class InstallOrUpdateVgmEngineCmd : RCommandAsync
+    internal class InstallOrUpdateVgmEngineCmd : CommandBase<RVoid>
     {
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            var audioProxy = Facade.Instance?.AudioProxy;
-            var shell = Facade.Instance?.Shell;
+            if (base.AudioProxy == null || base.Shell == null)
+                return await Complete();
 
-            if (audioProxy == null || shell == null)
-                return;
-
-            bool vgmInstalled = audioProxy.IsVgmEngineInstalled;
+            bool vgmInstalled = base.AudioProxy.IsVgmEngineInstalled;
 
             string title = vgmInstalled
                 ? "Update VGMPlay-JS-2?"
@@ -37,18 +34,14 @@ Datinate does not require VGMPlay-JS-2 and will continue to operate normally wit
 
 Do you want to download and install VGMPlay-JS-2?";
 
-            bool okClicked = await shell.ShowMessageBox(
-                title,
-                body,
-                true);
+            bool okClicked = await base.Shell.ShowMessageBox(title, body, true);
 
             if (!okClicked)
-                return;
+                return await Complete();
 
             string operation = vgmInstalled ? "Updating" : "Installing";
 
-            bool success =
-                await audioProxy.InstallOrUpdateVgmEngine(
+            bool success = await base.AudioProxy.InstallOrUpdateVgmEngine(
                     Constants.VGM_DOWNLOAD_URL,
                     async (current, total, txt) =>
                     {
@@ -57,11 +50,11 @@ Do you want to download and install VGMPlay-JS-2?";
                             current + " / " + total + ": " +
                             txt;
 
-                        base.ExecuteCommand(
+                        await base.Execute(
                             new ShowProgressCmd(message, current, total));
                     });
 
-            base.ExecuteCommand(new ClearProgressCmd());
+            await base.Execute(new ClearProgressCmd());
 
             if (success)
             {
@@ -69,7 +62,7 @@ Do you want to download and install VGMPlay-JS-2?";
                     ? "VGMPlay-JS-2 has been updated successfully."
                     : "VGMPlay-JS-2 has been installed successfully.";
 
-                _ = await shell.ShowMessageBox(
+                _ = await base.Shell.ShowMessageBox(
                     "Complete",
                     successMessage);
             }
@@ -79,10 +72,12 @@ Do you want to download and install VGMPlay-JS-2?";
                     ? "The VGMPlay-JS-2 update was unsuccessful."
                     : "The VGMPlay-JS-2 installation was unsuccessful.";
 
-                _ = await shell.ShowMessageBox(
+                _ = await base.Shell.ShowMessageBox(
                     "Error",
                     errorMessage);
             }
+
+            return await Complete();
         }
     }
 }

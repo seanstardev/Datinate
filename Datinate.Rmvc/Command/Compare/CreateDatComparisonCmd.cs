@@ -1,4 +1,4 @@
-﻿using Datinate.Rmvc.Model;
+using Datinate.Rmvc.Model;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using RMVC;
@@ -9,33 +9,35 @@ namespace Datinate.Rmvc.Command
     /**
      * Take the local left and right dats in the comparison view and compare them:
      */
-    internal class CreateDatComparisonCmd : RCommand {
-        protected override void Run()
+    internal class CreateDatComparisonCmd : CommandBase<RVoid> 
+    {
+        protected override async Task<RVoid> Run()
         {
-            Facade? instance = Facade.Instance;
+            if (base.ActiveDatsModel == null)
+                return await Complete();
 
-            ActiveDatsModel? activeDatsModel = instance?.ActiveDatsModel;
-            if (activeDatsModel == null)
-                return;
-
-            DatVO? leftDat = activeDatsModel.CompareLeftDat;
-            DatVO? rightDat = activeDatsModel.CompareRightDat;
+            DatVO? leftDat = base.ActiveDatsModel.CompareLeftDat;
+            DatVO? rightDat = base.ActiveDatsModel.CompareRightDat;
 
             if (leftDat == null || rightDat == null)
             {
-                base.ExecuteCommand(
-                    new ShowMessageCmd("Cannot proceed. You must load DATs in both the left and right views to proceed."));
-                return;
+                await base.Execute(new ShowMessageCmd(
+                    "Cannot proceed. You must load DATs in both the left and right views to proceed."));
+
+                return await Complete();
             }
             else if (leftDat == rightDat)
             {
-                base.ExecuteCommand(
-                    new ShowMessageCmd("Cannot proceed. The DATs on the left and right sides are the same."));
-                return;
+                await base.Execute(new ShowMessageCmd(
+                    "Cannot proceed. The DATs on the left and right sides are the same."));
+                
+                return await Complete();
             }
 
             var vo = CreateComparison(leftDat, rightDat);
-            base.ExecuteCommand(new SetCompareViewResultCmd(vo));
+            await base.Execute(new SetCompareViewResultCmd(vo));
+
+            return await Complete();
         }
         private static DatComparisonVO CreateComparison(DatVO leftDat, DatVO rightDat)
         {
@@ -276,7 +278,8 @@ namespace Datinate.Rmvc.Command
         {
             if (name.StartsWith("[Datinate Diff DAT]"))
                 return name;
-            else return "[Datinate Diff DAT] " + name;
+            else 
+                return "[Datinate Diff DAT] " + name;
         }
         private static DatHeaderVO CreateDiffDatHeader(DatHeaderVO header)
         {

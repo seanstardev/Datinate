@@ -1,3 +1,4 @@
+using Datinate.Rmvc.Proxy;
 using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
@@ -11,7 +12,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
 {
     internal class ExportSoftwareDelegate
     {
-        public void Export(
+        public async Task Export(
             IReadOnlyList<IGameFamily> curatedFamilies,
             IReadOnlyDictionary<IGameFamily, string> familyUniqueNameDictionary,
             Dictionary<IGamePart, DatGameVO> partDatEntryDictionary,
@@ -22,7 +23,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
             IReadOnlyDictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary,
             string softwareProjectPath,
             string m3uExportFolder,
-            Action<int, int, string>? progressCallback = null)
+            FileProgressCallback? progressCallback = null)
         {
             string projectName = project.ProjectName;
             IReadOnlySet20<string> excludedDescriptors = project.ExcludedDescriptorCodes;
@@ -173,7 +174,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
                 }
 
                 ExportDatGrouperDelegate.ExportDat(playlistDoc!, softwareProjectPath, playlistProjectName);
-                ExportM3us(
+                await ExportM3us(
                     m3uFilenameContentDictionary, 
                     softwareProjectPath, 
                     m3uExportFolder,
@@ -692,11 +693,11 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
             return zipPartDisplayNameOverrides;
         }
 
-        private void ExportM3us(
+        private async Task ExportM3us(
             Dictionary<string, string> m3uNameContentDictionary,
             string projectPath,
             string m3uExportFolder,
-            Action<int, int, string>? progressCallback = null)
+            FileProgressCallback? progressCallback = null)
         {
             var m3uExportPath = Path.Combine(projectPath, m3uExportFolder);
             Directory.CreateDirectory(m3uExportPath);
@@ -708,7 +709,7 @@ namespace Datinate.Rmvc.Delegate.ExportDatGrouperProject
                 var content = kvp.Value.Trim();
                 var fullpath = Path.Combine(m3uExportPath, m3uFilenameWithExt);
 
-                progressCallback?.Invoke(count, m3uNameContentDictionary.Count, m3uFilenameWithExt);
+                await (progressCallback?.Invoke(count, m3uNameContentDictionary.Count, m3uFilenameWithExt) ?? Task.CompletedTask);
                 count++;
 
                 File.WriteAllText(fullpath, content);

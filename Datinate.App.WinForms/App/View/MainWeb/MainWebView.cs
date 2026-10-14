@@ -13,6 +13,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class MainWebView : UserControl, IMainWebView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<IGamePart>? ShowGamePartReportsEvt;
         public event Action<DatGrouperEntryDTO>? PreviewMediaEvt;
         public event Action<DatGrouperEntryDTO>? AssignMediaEvt;
@@ -32,9 +34,10 @@ namespace Datinate.App.WinForms.View
         private string autoSource = "Automated";
         public MainWebView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IMainWebView>(this);
 
             DatinateWebView2Manager.Register(browser);
 
@@ -57,6 +60,12 @@ namespace Datinate.App.WinForms.View
 
         public void StartReceiveGameEntityDrop(DatGrouperEntryDTO datGrouperEntryDTO)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => StartReceiveGameEntityDrop(datGrouperEntryDTO));
+                return;
+            }
+
             pendingPayload = datGrouperEntryDTO;
 
             Ui(() =>
@@ -68,6 +77,12 @@ namespace Datinate.App.WinForms.View
         }
         public void StopReceiveGameEntityDrop()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => StopReceiveGameEntityDrop());
+                return;
+            }
+
             pendingPayload = null;
 
             Ui(() =>
@@ -132,6 +147,12 @@ namespace Datinate.App.WinForms.View
         }
         public void LoadPageContent(string html)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => LoadPageContent(html));
+                return;
+            }
+
             rawHtmlContentActive = true;
             blankRequested = false;
             Ui(ApplyOverlayState);
@@ -150,6 +171,12 @@ namespace Datinate.App.WinForms.View
         }
         public void LoadUrl(string url)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => LoadUrl(url));
+                return;
+            }
+
             rawHtmlContentActive = false;
             blankRequested = false;
             Ui(ApplyOverlayState);
@@ -218,6 +245,9 @@ namespace Datinate.App.WinForms.View
             ManagedListItemReport? managedReport,
             string customiseReport)
         {
+            if (!uiDispatcher.CheckAccess)
+                return uiDispatcher.Read(() => RenderGamePartGroupingReports(part, managedReport, customiseReport));
+
             return HtmlReportsUtil.CreatePartReports(part, customiseReport, managedReport, this);
         }
         private void ApplyAutoSourceTextToPromptCards()
@@ -305,7 +335,7 @@ namespace Datinate.App.WinForms.View
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IMainWebView>(this);
             DatinateWebView2Manager.Unregister(browser);
         }
 
@@ -430,34 +460,21 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void BrowserUi(Action action)
         {
-            if (!browser.IsHandleCreated)
-                return;
-
-            browser.BeginInvoke(action);
+            uiDispatcher.PostWhenHandleCreated(browser, action);
         }
 
         private void BrowserUi(Func<Task> action)
         {
-            if (!browser.IsHandleCreated)
-                return;
-
-            browser.BeginInvoke(new Action(async () =>
+            uiDispatcher.PostWhenHandleCreated(browser, async () =>
             {
                 try { await action(); }
-                catch (Exception) { }
-            }));
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Browser UI operation failed: {ex}"); }
+            });
         }
 
         private Uri? TryGetBrowserSource()

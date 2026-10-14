@@ -5,8 +5,11 @@ namespace Datinate.App.WinForms.View
 {
     public partial class ProblemListView : UserControl, IProblemListView 
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public ProblemListView() 
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             unreadableUI.setView(
@@ -21,11 +24,11 @@ namespace Datinate.App.WinForms.View
             );
 
             ClearView();
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IProblemListView>(this);
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IProblemListView>(this);
         }
 
         public void SetUnreadableView(string[] problemItems) 
@@ -67,14 +70,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
     }
 }

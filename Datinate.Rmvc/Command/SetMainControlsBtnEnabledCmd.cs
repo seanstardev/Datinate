@@ -1,9 +1,9 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetMainControlsBtnEnabledCmd : RCommand
+    internal class SetMainControlsBtnEnabledCmd : CommandBase<RVoid>
     {
         private readonly MAIN_CONTROL_ENUM mainCtrlEnum;
         private readonly bool doSetEnabled;
@@ -14,9 +14,12 @@ namespace Datinate.Rmvc.Command
             this.doSetEnabled = doSetEnabled;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MainControlsMediator?.SetMainControlEnabled(mainCtrlEnum, doSetEnabled);
+            base.MainControlsMediator?.SetMainControlEnabled(
+                mainCtrlEnum, doSetEnabled);
+
+            return await Complete();
         }
     }
 }

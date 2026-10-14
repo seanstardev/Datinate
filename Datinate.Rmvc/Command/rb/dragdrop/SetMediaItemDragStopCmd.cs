@@ -1,14 +1,15 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetMediaItemDragStopCmd : RCommand
+    internal class SetMediaItemDragStopCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaWebMediator?.StopReceiveMediaDrop();
+            base.MediaWebMediator?.StopReceiveMediaDrop();
+            base.MediaAssignmentMediator?.SetMediaCardDragStop();
 
-            Facade.Instance?.MediaAssignmentMediator?.SetMediaCardDragStop();
+            return await Complete();
         }
     }
 }

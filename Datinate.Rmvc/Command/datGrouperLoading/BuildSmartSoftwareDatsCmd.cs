@@ -1,14 +1,12 @@
-﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
-using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class BuildSmartSoftwareDatsCmd : RCommandAsync
+    internal class BuildSmartSoftwareDatsCmd : CommandBase<IReadOnlyList<DatAdvanced>?>
     {
-        public IReadOnlyList<DatAdvanced>? DatAdvancedCollection;
         private readonly DatGrouperProjectDTO projectVO;
 
         public BuildSmartSoftwareDatsCmd(DatGrouperProjectDTO projectVO)
@@ -16,18 +14,13 @@ namespace Datinate.Rmvc.Command
             this.projectVO = projectVO;
         }
 
-        protected override Task RunAsync()
+        protected override async Task<IReadOnlyList<DatAdvanced>?> Run()
         {
-            var radioDatModel = Facade.Instance?.RadioDatModel;
-            var globalSettings = Facade.Instance?.GlobalSettingsProxy;
-            var datDetailsProxy = Facade.Instance?.DatDetailsProxy;
-            var expressionsProxy = Facade.Instance?.ExpressionsProxy;
-
-            if (radioDatModel == null || 
-                globalSettings == null ||
-                datDetailsProxy == null ||
-                expressionsProxy == null)
-                return Task.CompletedTask;
+            if (base.RadioDatModel == null ||
+                base.GlobalSettingsProxy == null ||
+                base.DatDetailsProxy == null ||
+                base.ExpressionsProxy == null)
+                return null;
 
             var priority = 0;
 
@@ -35,16 +28,16 @@ namespace Datinate.Rmvc.Command
 
             foreach (var datHeadline in projectVO.SoftwareEntries)
             {
-                DatVO? dat = datDetailsProxy.GetDat(datHeadline.DatFullpath);
+                DatVO? dat = base.DatDetailsProxy.GetDat(datHeadline.DatFullpath);
 
                 if (dat == null) throw new Exception();
 
-                dat = datDetailsProxy.ApplyDatSubfilters(dat, datHeadline.DatSubsetFilter);
+                dat = base.DatDetailsProxy.ApplyDatSubfilters(dat, datHeadline.DatSubsetFilter);
 
                 if (dat == null) continue;
 
-                DatFilter[] filters = datHeadline.HasExpressionFilterDat ? 
-                    expressionsProxy.FetchExpressions(datHeadline.ExpressionsXmlFullpath)
+                DatFilter[] filters = datHeadline.HasExpressionFilterDat ?
+                    base.ExpressionsProxy.FetchExpressions(datHeadline.ExpressionsXmlFullpath)
                     : Array.Empty<DatFilter>();
 
                 advs.Add(new DatAdvanced(
@@ -64,11 +57,10 @@ namespace Datinate.Rmvc.Command
             {
                 datsDic.Add(adv.Key, adv.Dat);
             }
-            
-            radioDatModel.AddDats(datsDic);
 
-            DatAdvancedCollection = advs;
-            return Task.CompletedTask;
+            base.RadioDatModel.AddDats(datsDic);
+
+            return await Complete(advs);
         }
     }
 }

@@ -1,15 +1,17 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetDescriptorDefinitionsCmd : RCommand
+    internal class SetDescriptorDefinitionsCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             var defs = DescriptorDefinitions.All;
-            Facade.Instance?.MediaAssignmentMediator?.SetDescriptorDefinitions(defs);
-            Facade.Instance?.RadioDatModel?.SetDescriptorDefinitions(defs);
+            base.MediaAssignmentMediator?.SetDescriptorDefinitions(defs);
+            base.RadioDatModel?.SetDescriptorDefinitions(defs);
+
+            return await Complete();
         }
     }
 }

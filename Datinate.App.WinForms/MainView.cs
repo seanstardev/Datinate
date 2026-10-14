@@ -7,7 +7,11 @@ namespace Datinate.App.WinForms.View
 {
     public partial class MainView : UserControl, IMainView 
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
+        public event Action? AppStartupCompleteEvt;
         public event Action? ExitProjectsFormEvt;
+
         public MainControlsView MainControlsView => mainControlsView;
 
         public DatSummaryView DatSummaryView => datSummaryView;
@@ -17,15 +21,20 @@ namespace Datinate.App.WinForms.View
 
         public MainView() 
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
             UIHelper.PopSplitter(splitContainer);
             FormsHelper.HideTabs(tabControl);
             ToggleDatListView(DatinateEnums.DAT_SCREEN_ENUM.Landing);
-            Facade.RegisterActor(this);
+
+            Facade.RegisterActor<IMainView>(this);
         }
 
         public DatinateEnums.DAT_SCREEN_ENUM GetCurrentView()
         {
+            if (!uiDispatcher.CheckAccess)
+                return uiDispatcher.Read(GetCurrentView);
+
             if (tabControl.SelectedTab == datManagerPage)
                 return DatinateEnums.DAT_SCREEN_ENUM.DatManager;
             else
@@ -33,12 +42,13 @@ namespace Datinate.App.WinForms.View
         }
         public void ToggleDatListView(DatinateEnums.DAT_SCREEN_ENUM datScreenEnum) 
         {
-
-            if (this.InvokeRequired)
+            if (!uiDispatcher.CheckAccess)
             {
-                this.BeginInvoke(new Action(() => ToggleDatListView(datScreenEnum)));
+                uiDispatcher.Run(() => ToggleDatListView(datScreenEnum));
                 return;
             }
+
+
             splitContainer.Panel2Collapsed = false;
             switch (datScreenEnum) {
 
@@ -52,12 +62,57 @@ namespace Datinate.App.WinForms.View
                     break;
             }
         }
+
+        private bool delayedStartupEventInvoked = false;
+        private bool rmvcStartupComplete = false;
+        private bool rmvcRegisterActorComplete  = false;
+
+        public void SetRmvcStartupComplete()
+        {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetRmvcStartupComplete());
+                return;
+            }
+
+            if (delayedStartupEventInvoked || rmvcStartupComplete) 
+                return;
+
+            rmvcStartupComplete = true;
+
+            if (rmvcRegisterActorComplete && rmvcStartupComplete)
+            {
+                delayedStartupEventInvoked = true;
+                AppStartupCompleteEvt?.Invoke();
+            }
+        }
+
+        public void SetRmvcRegisterActorComplete()
+        {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetRmvcRegisterActorComplete());
+                return;
+            }
+
+            if (delayedStartupEventInvoked || rmvcRegisterActorComplete) 
+                return;
+
+            rmvcRegisterActorComplete = true;
+
+            if (rmvcRegisterActorComplete && rmvcStartupComplete)
+            {
+                delayedStartupEventInvoked = true;
+                AppStartupCompleteEvt?.Invoke();
+            }
+        }
+
         public void HandleProjectsFormHidden()
             => ExitProjectsFormEvt?.Invoke();
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IMainView>(this);
         }
     }
 }

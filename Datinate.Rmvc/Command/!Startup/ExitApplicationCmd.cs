@@ -1,12 +1,14 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ExitApplicationCmd : RCommand
+    internal class ExitApplicationCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.Shell?.ExitApplication();
+            base.Shell?.ExitApplication();
+
+            return await Complete();
         }
     }
 }

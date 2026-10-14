@@ -1,4 +1,4 @@
-using Datinate.App.WinForms.View.Data;
+﻿using Datinate.App.WinForms.View.Data;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
@@ -10,6 +10,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class MediaWebView : UserControl, IWebMediaView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         private Control? dragDropOverlay;
         private bool blankRequested;
         private bool overlayWired;
@@ -23,9 +25,10 @@ namespace Datinate.App.WinForms.View
 
         public MediaWebView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IWebMediaView>(this);
 
             DatinateWebView2Manager.Register(browser);
 
@@ -50,6 +53,12 @@ namespace Datinate.App.WinForms.View
         
         public void SetAudioEnvironmentPath(string? audioEnvironmentPath)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetAudioEnvironmentPath(audioEnvironmentPath));
+                return;
+            }
+
             if (string.Equals(this.audioEnvironmentPath, audioEnvironmentPath, StringComparison.OrdinalIgnoreCase))
                 return;
 
@@ -78,6 +87,12 @@ namespace Datinate.App.WinForms.View
         }
         public void LoadPageContent(string html)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => LoadPageContent(html));
+                return;
+            }
+
             int token = unchecked(++loadToken);
 
             blankRequested = false;
@@ -118,6 +133,12 @@ namespace Datinate.App.WinForms.View
 
         public void LoadUrl(string url)
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => LoadUrl(url));
+                return;
+            }
+
             if (!WebHelper.TryGetSupportedUri(url, out var uri))
             {
                 ShowUnavailableContent(
@@ -254,6 +275,12 @@ namespace Datinate.App.WinForms.View
 
         public void LoadUriInBrowser()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => LoadUriInBrowser());
+                return;
+            }
+
             Uri? source =
                 audioSession?.IsPlayerActive == true
                     ? audioSession.CurrentSource
@@ -267,6 +294,12 @@ namespace Datinate.App.WinForms.View
 
         public void ClearView()
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ClearView());
+                return;
+            }
+
             int token = unchecked(++loadToken);
 
             Ui(() =>
@@ -314,7 +347,7 @@ namespace Datinate.App.WinForms.View
             audioSession?.Dispose();
             audioSession = null;
 
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IWebMediaView>(this);
 
             try
             {
@@ -626,14 +659,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         protected override void OnVisibleChanged(EventArgs e)
@@ -667,14 +693,11 @@ namespace Datinate.App.WinForms.View
         }
         private void BrowserUi(Func<Task> action)
         {
-            if (!browser.IsHandleCreated)
-                return;
-
-            browser.BeginInvoke(new Action(async () =>
+            uiDispatcher.PostWhenHandleCreated(browser, async () =>
             {
                 try { await action(); }
-                catch (Exception) { }
-            }));
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Browser UI operation failed: {ex}"); }
+            });
         }
     }
 }

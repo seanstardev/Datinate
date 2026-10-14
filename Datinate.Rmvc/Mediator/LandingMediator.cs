@@ -7,31 +7,25 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class LandingMediator : RMediator 
+    public class LandingMediator : RMediator<ILandingView>
     {
-        private ILandingView? view => (ILandingView?)base.viewBase;
-
-        public LandingMediator(Type actor) : base(actor)
-        {
-        }
-
         public void LoadDatPaths(DatRootDTO[] paths, string mameHashPath)   
-            => view?.SetDatRootPaths(paths, mameHashPath);
+            => actor?.SetDatRootPaths(paths, mameHashPath);
         
         public void SetDatGrouperProjects(DatGrouperProjectDTO[] projectVOs)
-            => view?.SetDatGrouperProjects(projectVOs);
+            => actor?.SetDatGrouperProjects(projectVOs);
         
         public void ActivateView()
-            => view?.ActivateView();
+            => actor?.ActivateView();
         
         private void OnLoadDatGrouperView(string projectName)
-            => base.ExecuteCommand(new LoadDatGrouperProjectsCmd(projectName, true, true));
+            => base.Execute(new LoadDatGrouperProjectsCmd(projectName, true, true));
         
         private void OnLoadDatManager(DatRootDTO[] datRootVOs, string mameHashPath) 
-            => base.ExecuteCommand(new LoadDatManagerCmd(datRootVOs, mameHashPath));    
+            => base.Execute(new LoadDatManagerCmd(datRootVOs, mameHashPath));    
         
         private void OnSaveDatRootPaths(DatRootDTO[] datRootVOs, string mameHashPath) 
-            => base.ExecuteCommand(new SaveDatRootPathsCmd(datRootVOs, mameHashPath));
+            => base.Execute(new SaveDatRootPathsCmd(datRootVOs, mameHashPath));
 
 
         private void OnRootDatPathRemoved() 
@@ -44,26 +38,26 @@ namespace Datinate.Rmvc.Mediator
         
         }
 
-        protected override void Initialsed()
+        protected override void Initialised()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.LoadDatManagerEvt += OnLoadDatManager;
-                view.DatRootPathAddedEvt += OnDatRootPathAdded;
-                view.RootDatPathRemovedEvt += OnRootDatPathRemoved;
-                view.SaveDatRootPathsEvt += OnSaveDatRootPaths;
-                view.LoadDatGrouperProjectEvt += OnLoadDatGrouperView;
+                actor.LoadDatManagerEvt += OnLoadDatManager;
+                actor.DatRootPathAddedEvt += OnDatRootPathAdded;
+                actor.RootDatPathRemovedEvt += OnRootDatPathRemoved;
+                actor.SaveDatRootPathsEvt += OnSaveDatRootPaths;
+                actor.LoadDatGrouperProjectEvt += OnLoadDatGrouperView;
             }
         }
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.LoadDatManagerEvt -= OnLoadDatManager;
-                view.DatRootPathAddedEvt -= OnDatRootPathAdded;
-                view.RootDatPathRemovedEvt -= OnRootDatPathRemoved;
-                view.SaveDatRootPathsEvt -= OnSaveDatRootPaths;
-                view.LoadDatGrouperProjectEvt -= OnLoadDatGrouperView;
+                actor.LoadDatManagerEvt -= OnLoadDatManager;
+                actor.DatRootPathAddedEvt -= OnDatRootPathAdded;
+                actor.RootDatPathRemovedEvt -= OnRootDatPathRemoved;
+                actor.SaveDatRootPathsEvt -= OnSaveDatRootPaths;
+                actor.LoadDatGrouperProjectEvt -= OnLoadDatGrouperView;
             }
         }
     }

@@ -1,10 +1,9 @@
-﻿using Datinate.Rmvc.Model;
 using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class UpdateUnitDisplayCmd : RCommand 
+    internal class UpdateUnitDisplayCmd : CommandBase<RVoid> 
     {
         private readonly UnitFormatHelper.Unit unit;
         private readonly bool showUnitInCells;
@@ -15,17 +14,16 @@ namespace Datinate.Rmvc.Command
             this.showUnitInCells = showUnitInCells;
         }
 
-        protected override void Run() 
-        { 
-            Facade? instance = Facade.Instance;
+        protected override async Task<RVoid> Run() 
+        {
+            base.UnitDisplayModel?.SetUnit(unit);
+            base.UnitDisplayModel?.SetShowUnitInCells(showUnitInCells);
 
-            UnitDisplayModel? displayModel = instance?.UnitDisplayModel;
-            displayModel?.SetUnit(unit);
-            displayModel?.SetShowUnitInCells(showUnitInCells);
+            base.DatSummaryMediator?.UpdateUnitsView(unit, showUnitInCells);
+            base.DatDetailsMediator?.UpdateUnitsView(unit, showUnitInCells);
+            base.CompareMediator?.UpdateUnitsView(unit, showUnitInCells);
 
-            Facade.Instance?.DatSummaryMediator?.UpdateUnitsView(unit, showUnitInCells);
-            Facade.Instance?.DatDetailsMediator?.UpdateUnitsView(unit, showUnitInCells);
-            Facade.Instance?.CompareMediator?.UpdateUnitsView(unit, showUnitInCells);
+            return await Complete();
         }
     }
 }

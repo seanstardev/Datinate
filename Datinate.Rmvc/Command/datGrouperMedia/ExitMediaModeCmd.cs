@@ -1,23 +1,26 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ExitMediaModeCmd : RCommand
+    internal class ExitMediaModeCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaMediator?.EmptyView();
+            base.MediaMediator?.EmptyView();
 
-            if (Facade.Instance?.DatGrouperSessionModel != null)
+            if (base.DatGrouperSessionModel != null)
             {
-                var layout = Facade.Instance.DatGrouperSessionModel.ExitMediaMode();
-                Facade.Instance?.DatGrouperMediator?.SetScreenLayout(layout);
-                Facade.Instance?.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
+                var layout = base.DatGrouperSessionModel.ExitMediaMode();
 
-                Facade.Instance?.MediaAssignmentMediator?.ClearView();
-                Facade.Instance?.MediaWebMediator?.ClearView();
-                Facade.Instance?.MediaMediator?.EmptyView();
+                base.DatGrouperMediator?.SetScreenLayout(layout);
+                base.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
+                
+                base.MediaAssignmentMediator?.ClearView();
+                base.MediaWebMediator?.ClearView();
+                base.MediaMediator?.EmptyView();
             }
+
+            return await Complete();
         }
     }
 }

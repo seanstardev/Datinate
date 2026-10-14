@@ -8,56 +8,45 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Mediator
 {
-    internal class DatSummaryMediator : RMediator 
+    internal class DatSummaryMediator : RMediator<IDatSummaryView>
     {
-        private IDatSummaryView? view => (IDatSummaryView?)base.viewBase;
-
-        public DatSummaryMediator(Type actor) : base(actor)
-        {
-        }
-
-        public void HighlightDats(DatGrouperProjectEntry[] includeDatHeadlineVOs, DatGrouperProjectEntry[] ignoreDatHeadlineVOs) 
-        {
-            view?.HighlightDats(
+        public void HighlightDats(
+            DatGrouperProjectEntry[] includeDatHeadlineVOs, 
+            DatGrouperProjectEntry[] ignoreDatHeadlineVOs) 
+            => actor?.HighlightDats(
                 includeDatHeadlineVOs
-                , ignoreDatHeadlineVOs
-             );
-        }
-
+                , ignoreDatHeadlineVOs);
+        
         public void UpdateUnitsView(UnitFormatHelper.Unit unit, bool showUnitInCells) 
-        {
-            view?.UpdateUnits(unit, showUnitInCells, false);
-        }
-
+            => actor?.UpdateUnits(unit, showUnitInCells, false);
+        
         public void PopulateTable(DatSummaryVO [] datSummaries, UnitFormatHelper.Unit unit, bool showUnitInCell) 
-        {
-            view?.PopulateTable(datSummaries, unit, showUnitInCell);
-        }
-
+            => actor?.PopulateTable(datSummaries, unit, showUnitInCell);
+        
         public void ClearView()
-            => view?.ClearView();
+            => actor?.ClearView();
 
         private void OnDatSummarySelected(DatSummaryVO summary) 
-            => base.ExecuteCommand(new LoadDatDetailsCmd(summary.DatFullpath));
+            => base.Execute(new LoadDatDetailsCmd(summary.DatFullpath));
         
         private void OnHomeEvt()
-            => base.ExecuteCommand(new SwitchDatViewCmd(DAT_SCREEN_ENUM.Landing));
+            => base.Execute(new SwitchDatViewCmd(DAT_SCREEN_ENUM.Landing));
         
-        protected override void Initialsed()
+        protected override void Initialised()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.DatSelectedEvt += OnDatSummarySelected;
-                view.HomeClickEvt += OnHomeEvt;
+                actor.DatSelectedEvt += OnDatSummarySelected;
+                actor.HomeClickEvt += OnHomeEvt;
             }
         }
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.DatSelectedEvt -= OnDatSummarySelected;
-                view.HomeClickEvt -= OnHomeEvt;
+                actor.DatSelectedEvt -= OnDatSummarySelected;
+                actor.HomeClickEvt -= OnHomeEvt;
             }
         }
     }

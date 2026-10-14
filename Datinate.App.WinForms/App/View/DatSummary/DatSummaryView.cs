@@ -10,6 +10,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class DatSummaryView : UserControl, IDatSummaryView 
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
 
         public event Action<DatSummaryVO>? DatSelectedEvt;
         public event Action? HomeClickEvt;
@@ -28,9 +30,10 @@ namespace Datinate.App.WinForms.View
 
         public DatSummaryView() 
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IDatSummaryView>(this);
 
             listView.AddColumns(
                 new ColumnHeaderVO.NameEnum[] {
@@ -48,7 +51,7 @@ namespace Datinate.App.WinForms.View
         }
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IDatSummaryView>(this);
         }
 
         /**
@@ -309,28 +312,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (IsDisposed)
-                return;
-
-            if (!IsHandleCreated)
-            {
-                void handler(object? s, EventArgs e)
-                {
-                    HandleCreated -= handler;
-                    Ui(action);
-                }
-
-                HandleCreated += handler;
-                return;
-            }
-
-            if (InvokeRequired)
-            {
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
     }
 }

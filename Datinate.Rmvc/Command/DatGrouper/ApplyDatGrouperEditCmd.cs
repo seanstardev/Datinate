@@ -1,10 +1,10 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ApplyDatGrouperEditCmd : RCommand
+    internal class ApplyDatGrouperEditCmd : CommandBase<RVoid>
     {
         private readonly IDatGrouperDelta delta;
         private readonly bool applyMediaReferenceUpdates;
@@ -15,11 +15,11 @@ namespace Datinate.Rmvc.Command
             this.applyMediaReferenceUpdates = applyMediaReferenceUpdates;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             if (delta != null)
             {
-                Facade.Instance?.DatGrouperMediator?.UpdateAutoFamilies(
+                base.DatGrouperMediator?.UpdateAutoFamilies(
                     delta.DeltaNatureEnum,
                     delta.AutoFamiliesToAdd,
                     delta.AutoFamiliesToRemove,
@@ -28,7 +28,7 @@ namespace Datinate.Rmvc.Command
                     delta.AvailableRedos,
                     delta.AutoAffectedEntities);
 
-                Facade.Instance?.DatGrouperMediator?.UpdateCuratedFamilies(
+                base.DatGrouperMediator?.UpdateCuratedFamilies(
                     delta.DeltaNatureEnum,
                     delta.CuratedFamiliesToAdd,
                     delta.CuratedFamiliesToRemove,
@@ -38,23 +38,27 @@ namespace Datinate.Rmvc.Command
 
                 if (applyMediaReferenceUpdates)
                 {
-                    var media = Facade.Instance?.RadioDatModel?.UpdateMediaReferences(delta.ReplacementReferences);
+                    var media = base.RadioDatModel?.UpdateMediaReferences(
+                        delta.ReplacementReferences);
 
                     if (media != null)
-                        Facade.Instance?.DatGrouperMediator?.SetMediaCache(media);
+                        base.DatGrouperMediator?.SetMediaCache(media);
                 }
 
-                if (Facade.Instance?.DatGrouperModel is { } grouperModel &&
-                    Facade.Instance?.DatGrouperSessionModel is { } sessionModel)
+                if (base.DatGrouperModel is { } grouperModel &&
+                    base.DatGrouperSessionModel is { } sessionModel)
                 {
-                    var partsCurated = DatinateFamilyHelper.GetTotalParts(grouperModel.CuratedFamilies);
+                    var partsCurated = DatinateFamilyHelper.GetTotalParts(
+                        grouperModel.CuratedFamilies);
 
                     sessionModel.PartsCurated = partsCurated;
 
-                    Facade.Instance?.DatGrouperControlsMediator?.SetCompletionStats(
+                    base.DatGrouperControlsMediator?.SetCompletionStats(
                         sessionModel.PartsCurated, sessionModel.PartsTotal);
                 }
             }
+
+            return await Complete();
         }
     }
 }

@@ -1,39 +1,37 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class StartupCmd : RCommand
+    internal class StartupCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {   
+            var projectRootPath = base.GlobalSettingsProxy?.ProjectRoot;
 
-            var facade = Facade.Instance;
-            var projectRootPath = facade?.GlobalSettingsProxy?.ProjectRoot;
-
-            if (facade == null || projectRootPath == null)
-                return;
-
+            if (projectRootPath == null)
+                return await Complete();
 
             // Bundled seed resources are embedded in Datinate.Rmvc.
             var assembly = typeof(Facade).Assembly;
 
+            base.DatDbProxy?.SetProjectRootPath(projectRootPath);
 
-            facade.DatDbProxy?.SetProjectRootPath(projectRootPath);
-
-            facade.ModelDataProxy?.SetProjectRootPath(
+            base.ModelDataProxy?.SetProjectRootPath(
                 projectRootPath,
                 assembly);
 
-            facade.ExpressionsProxy?.SetProjectRootPath(projectRootPath);
-            facade.ProjectProxy?.SetProjectRootPath(projectRootPath);
-            facade.CuratedDatProxy?.SetProjectRootPath(projectRootPath);
-            facade.ExportDatGrouperProjectProxy?.SetProjectRootPath(projectRootPath);
+            base.ExpressionsProxy?.SetProjectRootPath(projectRootPath);
+            base.ProjectProxy?.SetProjectRootPath(projectRootPath);
+            base.CuratedDatProxy?.SetProjectRootPath(projectRootPath);
+            base.ExportDatGrouperProjectProxy?.SetProjectRootPath(projectRootPath);
 
-            facade.AudioProxy?.SetProjectRootPath(
+            base.AudioProxy?.SetProjectRootPath(
                 projectRootPath,
                 assembly);
 
-            facade.GlobalSettingsProxy?.Startup();
+            base.GlobalSettingsProxy?.Startup();
+
+            return await Complete();
         }
     }
 }

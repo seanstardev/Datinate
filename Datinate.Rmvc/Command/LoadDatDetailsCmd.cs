@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class LoadDatDetailsCmd : RCommand 
+    internal class LoadDatDetailsCmd : CommandBase<RVoid>
     {
         private readonly string datFullpath;
 
@@ -11,37 +11,40 @@ namespace Datinate.Rmvc.Command
             this.datFullpath = datFullpath;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
 
-            var summary = Facade.Instance?.ActiveDatsModel?.GetDatSummary(datFullpath);
+            var summary = base.ActiveDatsModel?.GetDatSummary(datFullpath);
             if (summary == null) 
             {
-                base.ExecuteCommand(new ShowMessageCmd(
+                await base.Execute(new ShowMessageCmd(
                     "The selected DAT cannot be found. Please rescan your DAT directories."));
 
-                return;
+                return await Complete();
             }
 
-            var datVO = Facade.Instance?.DatDetailsProxy?.GetDat(datFullpath, summary.DatHeader.DatTypeEnum);
+            var datVO = base.DatDetailsProxy?.GetDat(datFullpath, summary.DatHeader.DatTypeEnum);
             
             if (datVO == null)
             {
-                base.ExecuteCommand(new ShowMessageCmd(
+                await base.Execute(new ShowMessageCmd(
                     "The selected DAT's details cannot be parsed."));
             }
             else
             {
-                if (Facade.Instance?.UnitDisplayModel != null)
+                if (base.UnitDisplayModel != null)
                 {
-                    Facade.Instance?.DatDetailsMediator?.SetView(
+                    base.DatDetailsMediator?.SetView(
                         datVO
-                        , Facade.Instance.UnitDisplayModel.GetUnit()
-                        , Facade.Instance.UnitDisplayModel.GetShowUnitInCells());
+                        , base.UnitDisplayModel.GetUnit()
+                        , base.UnitDisplayModel.GetShowUnitInCells());
                 }
 
-                base.ExecuteCommand(new SetActiveDatModel(datVO, SetActiveDatModel.LOCAL_DAT_MODEL_ENUM.Detailed));
+                await base.Execute(new SetActiveDatModel(
+                    datVO, SetActiveDatModel.LOCAL_DAT_MODEL_ENUM.Detailed));
             }
+
+            return await Complete();
         }
     }
 }

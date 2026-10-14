@@ -1,9 +1,9 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SaveDatRootPathsCmd : RCommand
+    internal class SaveDatRootPathsCmd : CommandBase<RVoid>
     {
         private readonly DatRootDTO[] datRootVOs;
         private readonly string mameHashPath;
@@ -13,22 +13,25 @@ namespace Datinate.Rmvc.Command
             this.datRootVOs = datRootVOs;
             this.mameHashPath = mameHashPath;
         }
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.GlobalSettingsProxy == null) return;
+            if (base.GlobalSettingsProxy == null)
+                return await Complete();
 
-            var success = Facade.Instance.GlobalSettingsProxy.SaveDatRootPathsCfg(datRootVOs, mameHashPath);
+            var success = base.GlobalSettingsProxy.SaveDatRootPathsCfg(datRootVOs, mameHashPath);
 
             if (success)
             {
-                Facade.Instance?.Shell?.ShowMessageBox(
+                base.Shell?.ShowMessageBox(
                     "OK", "The settings have been saved.");
             }
             else
             {
-                Facade.Instance?.Shell?.ShowMessageBox(
+                base.Shell?.ShowMessageBox(
                     "There was a problem", "The settings could not be saved.");
             }
+
+            return await Complete();
         }
     }
 }

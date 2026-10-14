@@ -1,13 +1,15 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ClearCustomiseDatModelCmd:RCommand 
+    internal class ClearCustomiseDatModelCmd : CommandBase<RVoid> 
     {
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            if (Facade.Instance?.ActiveDatsModel != null)
-                Facade.Instance.ActiveDatsModel.CustomiseDat = null;
+            if (base.ActiveDatsModel != null)
+                base.ActiveDatsModel.CustomiseDat = null;
+
+            return await Complete();
         }
     }
 }

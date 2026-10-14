@@ -1,12 +1,14 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ClearProblemListViewCmd : RCommand 
+    internal class ClearProblemListViewCmd : CommandBase<RVoid>
     {
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.ProblemListMediator?.ClearView();
+            base.ProblemListMediator?.ClearView();
+            
+            return await Complete();
         }
     }
 }

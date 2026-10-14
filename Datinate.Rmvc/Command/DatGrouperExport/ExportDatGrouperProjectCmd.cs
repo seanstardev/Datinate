@@ -1,4 +1,4 @@
-﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.DatGrouper;
@@ -9,7 +9,7 @@ using LookupKey = System.ValueTuple<string, string, string, string, string>;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ExportDatGrouperProjectCmd : RCommandAsync
+    internal class ExportDatGrouperProjectCmd : CommandBase<RVoid>
     {
         private readonly IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaPriorities;
         private readonly ExportSoftwareOptionsDTO softwareOptions;
@@ -24,17 +24,17 @@ namespace Datinate.Rmvc.Command
             this.exportEnum = exportEnum;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
             if (exportEnum == DAT_GROUPER_EXPORT_ENUM.NOT_SET)
-                return;
+                return await Complete();
 
-            if (Facade.Instance?.RadioDatModel is not { } radioModel ||
+            if (base.RadioDatModel is not { } radioModel ||
                 radioModel.ActiveProject is not { } activeProject ||
-                Facade.Instance?.DatGrouperModel is not { } grouperModel ||
-                Facade.Instance?.ExportDatGrouperProjectProxy is not { } exportProxy ||
-                Facade.Instance?.Shell is not { } shell)
-                return;
+                base.DatGrouperModel is not { } grouperModel ||
+                base.ExportDatGrouperProjectProxy is not { } exportProxy ||
+                base.Shell is not { } shell)
+                return await Complete();
 
             IReadOnlyList<IGameFamily> curatedFamilies = grouperModel.CuratedFamilies;
 
@@ -42,13 +42,15 @@ namespace Datinate.Rmvc.Command
             {
                 if (exportProxy.GetSoftwareProjectPathExists(activeProject))
                 {
-                    bool allowDelete = await shell.ShowMessageBox(
-                        "Attention",
-                        $"The existing Software Export content for Project '{activeProject.ProjectName}' will be deleted if you continue. Do you wish to proceed?",
-                        true);
+                    bool allowDelete;
+
+                    allowDelete = await shell.ShowMessageBox(
+                            "Attention",
+                            $"The existing Software Export content for Project '{activeProject.ProjectName}' will be deleted if you continue. Do you wish to proceed?",
+                            true);
 
                     if (allowDelete == false)
-                        return;
+                        return await Complete();
                 }
 
                 IReadOnlyList<GamePartVO> sourceParts = radioModel.GetSourceGameParts();
@@ -64,8 +66,8 @@ namespace Datinate.Rmvc.Command
                         : new Dictionary<IGameFamily, IMediaCollectionImportExport?>();
 
                 var flagFilterSet =
-                    Facade.Instance?.ModelDataProxy?.FlagFilterSetByGroup ??
-                    new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
+                    base.ModelDataProxy?.FlagFilterSetByGroup ??
+                        new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();
 
                 Dictionary<string, DAT_GROUP_ENUM> softwareIdDatGroupEnumDictionary =
                     new Dictionary<string, DAT_GROUP_ENUM>();
@@ -74,7 +76,7 @@ namespace Datinate.Rmvc.Command
                     if (sourceIdContent.Value.CollectionSetEnum == COLLECTION_SET_ENUM.Software)
                         softwareIdDatGroupEnumDictionary[sourceIdContent.Key] = sourceIdContent.Value.DatGroupEnum;
 
-                exportProxy.ExportSoftware(
+                await exportProxy.ExportSoftware(
                     curatedFamilies,
                     payloadDictionary,
                     activeProject,
@@ -93,17 +95,16 @@ namespace Datinate.Rmvc.Command
                             info +
                             ".";
 
-                        base.ExecuteCommand(new ShowProgressCmd(message, current, total));
+                        await base.Execute(new ShowProgressCmd(message, current, total));
                     });
 
-                base.ExecuteCommand(new ClearProgressCmd());
-
-                base.ExecuteCommand(new ClearProgressCmd());
+                await base.Execute(new ClearProgressCmd());
 
                 OpenFolderInExplorer(exportProxy.GetSoftwareProjectPath(activeProject));
 
-                await shell.ShowMessageBox("Attention", "Export completed.");
-                return;
+                _ = await shell.ShowMessageBox("Attention", "Export completed.");
+                
+                return await Complete();
             }
 
             if (exportEnum == DAT_GROUPER_EXPORT_ENUM.Media)
@@ -111,20 +112,20 @@ namespace Datinate.Rmvc.Command
                 if (exportProxy.GetMediaProjectPathExists(activeProject))
                 {
                     bool allowDelete = await shell.ShowMessageBox(
-                        "Attention",
-                        $"The existing Media Export content for Project '{activeProject.ProjectName}' will be deleted if you continue. Do you wish to proceed?",
-                        true);
+                            "Attention",
+                            $"The existing Media Export content for Project '{activeProject.ProjectName}' will be deleted if you continue. Do you wish to proceed?",
+                            true);
 
                     if (allowDelete == false)
-                        return;
+                        return await Complete();
                 }
 
-                base.ExecuteCommand(new ShowProgressCmd("Building Media Export collection.", 1, 2));
+                await base.Execute(new ShowProgressCmd("Building Media Export collection.", 1, 2));
 
                 var familyMediaDictionary = radioModel.CreateExportCollection(curatedFamilies);
                 var resourceDetailsDictionary = radioModel.GetResourceDetailsDictionary(curatedFamilies);
 
-                exportProxy.ExportMedia(
+                await exportProxy.ExportMedia(
                     curatedFamilies,
                     activeProject,
                     mediaPriorities,
@@ -143,17 +144,17 @@ namespace Datinate.Rmvc.Command
                             info + 
                             ".";
 
-                        base.ExecuteCommand(new ShowProgressCmd(message, current, total));
+                        await base.Execute(new ShowProgressCmd(message, current, total));
                     });
 
-                base.ExecuteCommand(new ClearProgressCmd());
+                await base.Execute(new ClearProgressCmd());
 
                 OpenFolderInExplorer(exportProxy.GetMediaProjectPath(activeProject));
 
-                await shell.ShowMessageBox("Attention", "Export completed.");
-
-                return;
+                _ = await shell.ShowMessageBox("Attention", "Export completed.");
             }
+
+            return await Complete();
         }
         private static Dictionary<IGamePart, DatGameVO> BuildSoftwarePayloadDictionary(
             IReadOnlyList<GamePartVO> sourceParts,

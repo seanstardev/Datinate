@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class UpdateAssignedMediaCacheCmd : RCommand
+    internal class UpdateAssignedMediaCacheCmd : CommandBase<RVoid>
     {
         private readonly IReadOnlyDictionary<string, HashSet<string>> assignedEntriesCache;
 
@@ -12,9 +12,11 @@ namespace Datinate.Rmvc.Command
             this.assignedEntriesCache = assignedEntriesCache;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaMediator?.SetAssignedEntriesCache(assignedEntriesCache);
+            base.MediaMediator?.SetAssignedEntriesCache(assignedEntriesCache);
+
+            return await Complete();
         }
     }
 }

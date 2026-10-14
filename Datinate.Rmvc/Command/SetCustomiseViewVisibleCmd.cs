@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetCustomiseViewVisibleCmd : RCommand 
+    internal class SetCustomiseViewVisibleCmd : CommandBase<RVoid> 
     {
         private readonly bool makeVisible;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.makeVisible = makeVisible;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.Shell?.SetCustomFormVisible(makeVisible);
+            base.Shell?.SetCustomFormVisible(makeVisible);
+
+            return await Complete();
         }
     }
 }

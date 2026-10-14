@@ -8,6 +8,8 @@ namespace Datinate.App.WinForms.View.UI.Media
 {
     public partial class MiniWebUI : UserControl
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         private const bool CLEARUI_DISPOSE_WEBVIEW = false;
         private const double AUDIO_ZOOM = 0.5;
 
@@ -47,6 +49,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         public MiniWebUI()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             BorderStyle = BorderStyle.None;
@@ -545,14 +548,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void DisposeMiniResources()

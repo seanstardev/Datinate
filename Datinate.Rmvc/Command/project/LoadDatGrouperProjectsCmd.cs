@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.DatGrouper;
+using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadDatGrouperProjectsCmd : RCommand 
+    internal class LoadDatGrouperProjectsCmd : CommandBase<RVoid>
     {
         private readonly string? projectToLoad;
         private readonly bool abortIfDatGrouperSessionActive;
@@ -19,39 +19,39 @@ namespace Datinate.Rmvc.Command
             this.showProjectsView = showProjectsView;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            var shell = Facade.Instance?.Shell;
-
-            if (shell != null &&
+            if (base.Shell != null &&
                 abortIfDatGrouperSessionActive &&
-                shell.CurrentProjectsPageIsProjectLoaderPage == false)
+                base.Shell.CurrentProjectsPageIsProjectLoaderPage == false)
             {
-                _ = shell.ShowMessageBox(
+                _ = base.Shell.ShowMessageBox(
                     "Attention",
                     "Cannot proceed. Please Exit the active DAT Grouper Project and try again.");
 
-                return;
+                return await Complete();
             }
 
             if (showProjectsView)
-                base.ExecuteCommand(new SetDatGrouperFormVisibleCmd());
+                await base.Execute(new SetDatGrouperFormVisibleCmd());
 
-            base.ExecuteCommand(new ShowProgressCmd("loading Projects View.", 1, 2));
+            await base.Execute(new ShowProgressCmd("loading Projects View.", 1, 2));
 
-            Facade.Instance?.Shell?.ShowProjectsView();
-            Facade.Instance?.Shell?.SetProjectsFormTitle("DAT Grouper");
+            base.Shell?.ShowProjectsView();
+            base.Shell?.SetProjectsFormTitle("DAT Grouper");
 
-            base.ExecuteCommand(new ClearDatGrouperViewCmd());
+            await base.Execute(new ClearDatGrouperViewCmd());
             
-            DatGrouperProjectDTO[] projectVOs = 
-                Facade.Instance?.ProjectProxy?.LoadAllProjectVOs() ?? Array.Empty<DatGrouperProjectDTO>();
+            DatGrouperProjectDTO[] projectVOs =
+                base.ProjectProxy?.LoadAllProjectVOs() ?? Array.Empty<DatGrouperProjectDTO>();
 
-            Facade.Instance?.ProjectLoaderMediator?.SetView(projectVOs, projectToLoad);
-            
-            Facade.Instance?.LandingMediator?.SetDatGrouperProjects(projectVOs);
+            base.ProjectLoaderMediator?.SetView(projectVOs, projectToLoad);
 
-            base.ExecuteCommand(new ClearProgressCmd());
+            base.LandingMediator?.SetDatGrouperProjects(projectVOs);
+
+            await base.Execute(new ClearProgressCmd());
+
+            return await Complete();
         }
     }
 }

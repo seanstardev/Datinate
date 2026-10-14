@@ -1,9 +1,9 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SaveExpressionsCmd : RCommandAsync 
+    internal class SaveExpressionsCmd : CommandBase<RVoid>
     {
         private readonly DatFilter[] expressions;
 
@@ -12,30 +12,29 @@ namespace Datinate.Rmvc.Command
             this.expressions = expressions;
         }
 
-        protected override async Task RunAsync() 
+        protected override async Task<RVoid> Run() 
         {
-            var expressionsProxy = Facade.Instance?.ExpressionsProxy;
-            var shell = Facade.Instance?.Shell;
+            if (base.ExpressionsProxy?.ExpressionsPath == null || Shell == null)
+                return await Complete();
 
-            if (expressionsProxy?.ExpressionsPath == null || shell == null)
-                return;
-
-            var expressionsFullpath = await shell.ShowSaveExpressionsDialog(
-                expressionsProxy.ExpressionsPath);
+            var expressionsFullpath = await base.Shell.ShowSaveExpressionsDialog(
+                base.ExpressionsProxy.ExpressionsPath);
 
             if (string.IsNullOrWhiteSpace(expressionsFullpath))
-                return;
+                return await Complete();
 
-            bool success = expressionsProxy.SaveExpressions(
+            bool success = base.ExpressionsProxy.SaveExpressions(
                 expressions, 
                 expressionsFullpath!);
 
             if (success)
-                await shell.ShowMessageBox("OK", "Expressions file saved.");
+                await base.Shell.ShowMessageBox("OK", "Expressions file saved.");
             else
-                await shell.ShowMessageBox(
+                await base.Shell.ShowMessageBox(
                     "There was a problem",
                     "The Expressions file could not be saved");
+
+            return await Complete();
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Datinate.App.WinForms.View
 {
     public partial class LandingView : UserControl, ILandingView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<DatRootDTO[], string>? LoadDatManagerEvt;
         public event Action<DatRootDTO[], string>? SaveDatRootPathsEvt;
         public event Action? RootDatPathRemovedEvt;
@@ -28,6 +30,7 @@ namespace Datinate.App.WinForms.View
 
         public LandingView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
             ApplyVisualTheme();
 
@@ -37,7 +40,7 @@ namespace Datinate.App.WinForms.View
             createProjectShortcutBtn.Click += onCreateProjectShortcutClick;
 
             UpdateDatGrouperLoadState();
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<ILandingView>(this);
         }
 
         public void SetDatGrouperProjects(DatGrouperProjectDTO[] projectVOs)
@@ -59,11 +62,12 @@ namespace Datinate.App.WinForms.View
 
         public void SetDatRootPaths(DatRootDTO[] paths, string mameHashPath)
         {
-            if (pathsContainer.InvokeRequired)
+            if (!uiDispatcher.CheckAccess)
             {
-                pathsContainer.Invoke(new Action(() => SetDatRootPaths(paths, mameHashPath)));
+                uiDispatcher.Run(() => SetDatRootPaths(paths, mameHashPath));
                 return;
             }
+
 
             mameHashTextBox.Text = mameHashPath;
 
@@ -498,16 +502,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated)
-                    return;
-
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         protected void HandleDisposing()
@@ -524,7 +519,7 @@ namespace Datinate.App.WinForms.View
             }
 
             ClearDatGrouperProjectUIs();
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<ILandingView>(this);
         }
 
         private void setMameHashBtn_Click(object sender, EventArgs e)

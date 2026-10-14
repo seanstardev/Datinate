@@ -2,90 +2,37 @@
 using Datinate.Rmvc.Mediator;
 using Datinate.Rmvc.Model;
 using Datinate.Rmvc.Proxy;
-using Datinate.Shared.Rmvc;
 using RMVC;
 
 namespace Datinate.Rmvc
 {
     public class Facade : RFacade 
     {
-        internal static Facade? Instance => RFacade.FacadeInstance<Facade>();
-        internal IShell? Shell => (AppShell as IShell != null) ? (IShell)AppShell : null;
-
-        // View - main:
-        internal MainMediator? MainMediator => base.Mediator<MainMediator>();
-        internal CustomListMediator? CustomListMediator => base.Mediator<CustomListMediator>();
-        internal CompareMediator? CompareMediator => base.Mediator <CompareMediator>();
-        internal ProblemListMediator? ProblemListMediator => base.Mediator <ProblemListMediator>();
-        internal CreateDatMediator? CreateDatMediator => base.Mediator<CreateDatMediator>();
-        internal DatPathsUpdateMediator? DatPathsUpdateMediator => base.Mediator<DatPathsUpdateMediator>();
-        internal DatGrouperControlsMediator? DatGrouperControlsMediator => base.Mediator<DatGrouperControlsMediator>();
-        internal ProgressMediator? ProgressMediator => base.Mediator<ProgressMediator>();
-
-        // View - controls
-        internal DatSummaryMediator? DatSummaryMediator => base.Mediator <DatSummaryMediator>();
-        internal DatDetailsMediator? DatDetailsMediator => base.Mediator <DatDetailsMediator>();
-        internal LandingMediator? LandingMediator => base.Mediator <LandingMediator>();
-        internal MainControlsMediator? MainControlsMediator => base.Mediator <MainControlsMediator>();
-        internal DatGrouperMediator? DatGrouperMediator => base.Mediator <DatGrouperMediator>();
-        internal ProjectLoaderMediator? ProjectLoaderMediator => base.Mediator <ProjectLoaderMediator>();
-        internal AddToProjectMediator? AddToProjectMediator => base.Mediator <AddToProjectMediator>();
-        internal MainWebMediator? MainWebMediator => base.Mediator <MainWebMediator>();
-        internal RbWebSearchMediator? RbWebSearchMediator => base.Mediator<RbWebSearchMediator>();
-        internal Media2Mediator? MediaMediator => base.Mediator<Media2Mediator>();
-        internal MediaAssignmentMediator? MediaAssignmentMediator => base.Mediator<MediaAssignmentMediator>();
-        internal MediaWebMediator? MediaWebMediator  => base.Mediator<MediaWebMediator>();
-        internal ExportMediator? ExportMediator => base.Mediator<ExportMediator>();
-
-        // Proxy
-        internal DatHierarchyProxy? DatHierarchyProxy => base.Model<DatHierarchyProxy>();
-        internal DatDetailsProxy? DatDetailsProxy => base.Model<DatDetailsProxy>();
-        internal CreateDatProxy? CreateDatProxy => base.Model<CreateDatProxy>();
-        internal ExpressionsProxy? ExpressionsProxy => base.Model<ExpressionsProxy>();
-        internal ProjectProxy? ProjectProxy => base.Model<ProjectProxy>();
-        internal GlobalSettingsProxy? GlobalSettingsProxy => base.Model<GlobalSettingsProxy>();
-        internal DatDbProxy? DatDbProxy => base.Model<DatDbProxy>();
-        internal ModelDataProxy? ModelDataProxy => base.Model<ModelDataProxy>();
-        internal RbAuxResourceProxy? RbAuxResourceProxy => base.Model<RbAuxResourceProxy>();
-        internal RbAuxMediaProxy? RbAuxMediaProxy => base.Model<RbAuxMediaProxy>();
-        internal CuratedDatProxy? CuratedDatProxy => base.Model<CuratedDatProxy>();
-        internal RbAuxItemLoaderProxy? RbAuxItemLoaderProxy => base.Model<RbAuxItemLoaderProxy>();
-        internal ExportDatGrouperProjectProxy? ExportDatGrouperProjectProxy => base.Model<ExportDatGrouperProjectProxy>();
-        internal AudioProxy? AudioProxy => base.Model<AudioProxy>();
-
-        // Model
-        internal UnitDisplayModel? UnitDisplayModel => base.Model<UnitDisplayModel>();
-        internal ActiveDatsModel? ActiveDatsModel => base.Model<ActiveDatsModel>();
-        internal RadioDatModel? RadioDatModel => base.Model<RadioDatModel>();
-        internal AutoGrouperModel? AutoGrouperModel => base.Model<AutoGrouperModel>();
-        internal DatGrouperSessionModel? DatGrouperSessionModel => base.Model<DatGrouperSessionModel>();
-        internal DatGrouperModel? DatGrouperModel => base.Model<DatGrouperModel>();
-
         protected override RMediator[] RegisterMediators()
         {
             return new RMediator[]
             {
-                new MainMediator(typeof(IMainView)),
-                new CustomListMediator(typeof(ICustomListView)),
-                new CompareMediator(typeof(ICompareView)),
-                new ProblemListMediator(typeof(IProblemListView)),
-                new CreateDatMediator(typeof(ICreateDatView)),
-                new DatPathsUpdateMediator(typeof(IDatPathsUpdateView)),
-                new DatSummaryMediator(typeof(IDatSummaryView)),
-                new DatDetailsMediator(typeof(IDatDetailsView)),
-                new LandingMediator(typeof(ILandingView)),
-                new MainControlsMediator(typeof(IMainControlsView)),
-                new DatGrouperMediator(typeof(IDatGrouperView)),
-                new ProjectLoaderMediator(typeof(IProjectLoaderView)),
-                new AddToProjectMediator(typeof(IAddToProjectView)),
-                new MainWebMediator(typeof(IMainWebView)),
-                new DatGrouperControlsMediator(typeof(IDatGrouperControlsView)),
-                new RbWebSearchMediator(typeof(IRbWebSearchView)),
-                new Media2Mediator(typeof(IMedia2View)),
-                new MediaAssignmentMediator(typeof(IMediaAssignmentView)),
-                new MediaWebMediator(typeof(IWebMediaView)),
-                new ProgressMediator(typeof(IProgressView)),
-                new ExportMediator(typeof(IExportView))
+                new MainMediator(),
+                new CustomListMediator(),
+                new CompareMediator(),
+                new ProblemListMediator(),
+                new CreateDatMediator(),
+                new DatPathsUpdateMediator(),
+                new DatSummaryMediator(),
+                new DatDetailsMediator(),
+                new LandingMediator(),
+                new MainControlsMediator(),
+                new DatGrouperMediator(),
+                new ProjectLoaderMediator(),
+                new AddToProjectMediator(),
+                new MainWebMediator(),
+                new DatGrouperControlsMediator(),
+                new RbWebSearchMediator(),
+                new Media2Mediator(),
+                new MediaAssignmentMediator(),
+                new MediaWebMediator(),
+                new ProgressMediator(),
+                new ExportMediator()
             };
         }
 

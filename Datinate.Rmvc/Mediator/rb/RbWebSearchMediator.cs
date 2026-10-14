@@ -5,47 +5,35 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class RbWebSearchMediator : RMediator
+    public class RbWebSearchMediator : RMediator<IRbWebSearchView>
     {
-        private IRbWebSearchView? view => (IRbWebSearchView?)base.viewBase;
-        public RbWebSearchMediator(Type view) : base(view)
-        {
-        }
         public void SetSearchTerms(string? gameName, string? systemName) =>
-            view?.SetSearchTerms(gameName, systemName);
+            actor?.SetSearchTerms(gameName, systemName);
         
         public void ClearView() =>
-            view?.ClearView();
+            actor?.ClearView();
 
-        public void SetSearchEngine()
-        {
-
-        }
         public void SetSearchEngine(WEB_SOURCE_ENUM engine, bool invokeSearchNow)
-        {
-            view?.SetSearchEngine(engine, invokeSearchNow);
-        }
+            => actor?.SetSearchEngine(engine, invokeSearchNow);
+        
         public void SearchCurrent()
+            => actor?.SearchCurrent();
+        
+        private void OnLoadUrl(string url)
+            => base.Execute(new LoadWebUrlCmd(url));
+
+        protected override void Initialised()
         {
-            view?.SearchCurrent();
+            if (actor == null) return;
+
+            actor.LoadUrlEvt += OnLoadUrl;
         }
+
         protected override void Disposing()
         {
-            if (view == null) return;
+            if (actor == null) return;
 
-            view.LoadUrlEvt -= OnLoadUrl;
-        }
-
-        private void OnLoadUrl(string url)
-        {
-            base.ExecuteCommand(new LoadWebUrlCmd(url));
-        }
-
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.LoadUrlEvt += OnLoadUrl;
+            actor.LoadUrlEvt -= OnLoadUrl;
         }
     }
 }

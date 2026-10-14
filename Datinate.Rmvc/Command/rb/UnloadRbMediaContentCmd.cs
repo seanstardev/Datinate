@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class UnloadRbMediaContentCmd : RCommand
+    internal class UnloadRbMediaContentCmd : CommandBase<RVoid>
     {
         private readonly bool doNotUnloadRemoteContent;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.doNotUnloadRemoteContent = doNotUnloadRemoteContent;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MainWebMediator?.UnloadPageContent(doNotUnloadRemoteContent);
+            base.MainWebMediator?.UnloadPageContent(doNotUnloadRemoteContent);
+
+            return await Complete();
         }
     }
 }

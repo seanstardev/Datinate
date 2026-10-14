@@ -1,9 +1,9 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class InitialiseDatGrouperMediaCmd : RCommand
+    internal class InitialiseDatGrouperMediaCmd : CommandBase<RVoid>
     {
         private readonly IReadOnlyList<ILookupSet> mediaAndResources;
 
@@ -12,24 +12,24 @@ namespace Datinate.Rmvc.Command
             this.mediaAndResources = mediaAndResources;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var sessionModel = Facade.Instance?.DatGrouperSessionModel;
-
-            if (sessionModel == null ||
-                sessionModel.ContentPathsResolved == false ||
-                sessionModel.MediaInitialisd)
+            if (base.DatGrouperSessionModel == null ||
+                base.DatGrouperSessionModel.ContentPathsResolved == false ||
+                base.DatGrouperSessionModel.MediaInitialisd)
             {
-                return;
+                return await Complete();
             }
 
             var payload = mediaAndResources.Where(l => !l.RadioSource.Hide).ToArray();
 
-            Facade.Instance?.MediaMediator?.InitialiseView(payload);
-                sessionModel.MediaInitialisd = true;
+            base.MediaMediator?.InitialiseView(payload);
+            base.DatGrouperSessionModel.MediaInitialisd = true;
 
             if (payload.Length > 0)
-                Facade.Instance?.MainWebMediator?.SetMediaIsAvailable();
+                base.MainWebMediator?.SetMediaIsAvailable();
+
+            return await Complete();
         }
     }
 }

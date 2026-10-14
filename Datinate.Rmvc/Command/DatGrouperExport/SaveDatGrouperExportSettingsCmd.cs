@@ -1,10 +1,10 @@
-﻿using Datinate.Shared;
+using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SaveDatGrouperExportSettingsCmd : RCommandAsync
+    internal class SaveDatGrouperExportSettingsCmd : CommandBase<RVoid>
     {
         private IReadOnlyList<DatGrouperMediaExportEntryDTO> mediaExportEntries;
         private readonly ExportSoftwareOptionsDTO softwareExportOptions;
@@ -17,13 +17,14 @@ namespace Datinate.Rmvc.Command
             this.softwareExportOptions = softwareExportOptions;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.RadioDatModel?.ActiveProject is not { } project ||
-                Facade.Instance?.ProjectProxy is not { } projectProxy)
+            if (base.RadioDatModel?.ActiveProject is not { } project ||
+                base.ProjectProxy is not { } projectProxy)
             {
-                return;
+                return await Complete();
             }
+
             var updatedProject = new DatGrouperProjectDTO(
                 project.ProjectName,
                 project.SoftwareEntries,
@@ -35,7 +36,9 @@ namespace Datinate.Rmvc.Command
                 softwareExportOptions,
                 mediaExportEntries);
 
-            await base.ExecuteCommandAsync(new SaveProjectCmd(updatedProject));
+            await base.Execute(new SaveProjectCmd(updatedProject));
+
+            return await Complete();
         }
     }
 }

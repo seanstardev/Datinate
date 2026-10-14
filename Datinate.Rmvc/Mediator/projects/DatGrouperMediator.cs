@@ -8,53 +8,36 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Mediator
 {
-    public class DatGrouperMediator : RMediator 
+    public class DatGrouperMediator : RMediator<IDatGrouperView>
     {
-        private IDatGrouperView? view => (IDatGrouperView?)base.viewBase;
-
-        public DatGrouperMediator(Type actor) : base(actor)
-        {
-        }
-
         public void SetAutoView(
             IGameFamily[] families, 
             string projectName,
-            Dictionary<string, CurationPartReport> partFingerprintReportDic) 
-        {
-            view?.SetAutoView(
+            Dictionary<string, CurationPartReport> partFingerprintReportDic)
+            => actor?.SetAutoView(
                 families, 
                 projectName,
                 partFingerprintReportDic);
-        }
+        
         public void SetCuratedView(
             IGameFamily[] families,
             string projectName)
-        {
-            view?.SetCuratedView(families, projectName);
-        }
+            => actor?.SetCuratedView(families, projectName);
+        
         public void SetLocalProgress(int parts, int total, string message)
-        {
-            view?.SetLocalProgress(parts, total, message);  
-        }
+            => actor?.SetLocalProgress(parts, total, message);  
+        
         public void ClearLocalProgress()
-        {
-            view?.ClearLocalProgress();
-        }
-
+            => actor?.ClearLocalProgress();
+        
         public void SetMediaCache(IReadOnlyDictionary<IGameFamily, IMediaCollection> mediaCache)
-        {
-            view?.SetMediaCache(mediaCache);
-        }
+            => actor?.SetMediaCache(mediaCache);
 
         public void SetRenderAliases(bool doRender)
-        {
-            view?.SetRenderAliases(doRender);
-        }
-
+            => actor?.SetRenderAliases(doRender);
+        
         public void SetExcludeFamiliesVisible(bool doExclude)
-        {
-            view?.SetExcludeFamiliesVisible(doExclude);
-        }
+            => actor?.SetExcludeFamiliesVisible(doExclude);
 
         public void UpdateCuratedFamilies(
             DELTA_NATURE_ENUM deltaNatureEnum,
@@ -63,15 +46,14 @@ namespace Datinate.Rmvc.Mediator
             int undoCount,
             int redoCount,
             IReadOnlySet20<IGameEntity> affectedEntities)
-        {
-            view?.UpdateCuratedFamilies(
+            => actor?.UpdateCuratedFamilies(
                 deltaNatureEnum,
                 curatedFamiliesToAdd, 
                 curatedFamiliesToRemove, 
                 undoCount, 
                 redoCount,
                 affectedEntities);
-        }
+        
 
         public void UpdateAutoFamilies(
             DELTA_NATURE_ENUM deltaNatureEnum,
@@ -81,8 +63,7 @@ namespace Datinate.Rmvc.Mediator
             int undoCount,
             int redoCount,
             IReadOnlySet20<IGameEntity> affectedEntities)
-        {
-            view?.UpdateAutoFamilies(
+            => actor?.UpdateAutoFamilies(
                 deltaNatureEnum,
                 autoFamiliesToAdd, 
                 autoFamiliesToRemove, 
@@ -90,152 +71,130 @@ namespace Datinate.Rmvc.Mediator
                 undoCount, 
                 redoCount,
                 affectedEntities);
-        }
-        public void SetScreenLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM layoutEnum) =>
-            view?.SetScreenLayout(layoutEnum);
+        
+        public void SetScreenLayout(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM layoutEnum) 
+            => actor?.SetScreenLayout(layoutEnum);
 
         public void SetMediaMode(DatinateEnums.DAT_GROUPER_LAYOUT_ENUM layoutEnum)
-        {
-            view?.SetMediaMode(layoutEnum);
-        }
+            => actor?.SetMediaMode(layoutEnum);
+        
         public void ResetView() 
-        {
-            view?.ResetView();
-        }
-
+            => actor?.ResetView();
+        
         private void OnBack() 
-        {
-            base.ExecuteCommand(new LoadDatGrouperProjectsCmd(null, false, true));
-        }
-
-        protected override void Initialsed()
-        {
-            if (view == null) return;
-
-            view.InitialisedEvt += OnInitialised;
-
-            view.SaveEvt += OnSave;
-            view.BackEvt += OnBack;
-            view.CurateEvt += OnCurate;
-            view.ExportEvt += OnExport;
-
-            view.GameEntitySelectedEvt += OnGameEntitySelected;
-
-            view.GameEntityDragStartEvt += OnGameEntityDragStart;
-            view.GameEntityDragStopEvt += OnGameEntityDragStop;
-
-            view.ShowGameMediaEvt += OnShowGameMedia;
-            view.SearchGameNameEvt += OnSearchGameName;
-
-            view.ToggleStandardLayoutEvt += OnToggleStandardLayout;
-
-            view.ExitMediaEvt += OnExitMedia;
-
-            view.EditRequestEvt += OnEditRequest;
-            view.DatGrouperActionEvt += OnDatGrouperAction;
-        }
-
+            => base.Execute(new LoadDatGrouperProjectsCmd(null, false, true));
 
         private void OnDatGrouperAction(DatinateEnums.DAT_GROUPER_ACTION_ENUM actionEnum, IGameEntity? entity)
         {
             switch(actionEnum)
             {
                 case DatinateEnums.DAT_GROUPER_ACTION_ENUM.StateUndo:
-                    base.ExecuteCommand(new ApplyDatGrouperUndoRedoCmd(true));
+                    base.Execute(new ApplyDatGrouperUndoRedoCmd(true));
                     break;
                 case DatinateEnums.DAT_GROUPER_ACTION_ENUM.StateRedo:
-                    base.ExecuteCommand(new ApplyDatGrouperUndoRedoCmd(false));
+                    base.Execute(new ApplyDatGrouperUndoRedoCmd(false));
                     break;
             }
         }
 
         private void OnSave()
-        {
-            base.ExecuteCommand(new SaveCuratedCmd());
-        }
+            => base.Execute(new SaveCuratedCmd());
+        
         private void OnExport()
-        {
-            base.ExecuteCommand(new SetDatGrouperExportViewCmd());
-        }
+            => base.Execute(new SetDatGrouperExportViewCmd());
+
         private void OnInitialised()
         {
-            base.ExecuteCommand(new ClearProgressCmd());
-            base.ExecuteCommand(new LazyLoadDatGrouperFilesCmd());
+            base.Execute(new ClearProgressCmd());
+            base.Execute(new LazyLoadDatGrouperFilesCmd());
         }
 
         private void OnExitMedia()
-        {
-            base.ExecuteCommand(new ExitMediaModeCmd());
-        }
-
+            => base.Execute(new ExitMediaModeCmd());
+        
         private void OnToggleStandardLayout()
-        {
-            base.ExecuteCommand(new ToggleDatGrouperLayoutCmd());
-        }
-
+            => base.Execute(new ToggleDatGrouperLayoutCmd());
+        
         private void OnSearchGameName(string searchName)
-        {
-            base.ExecuteCommand(new SetWebSearchTermsCmd(searchName, null, true));
-        }
-
+            => base.Execute(new SetWebSearchTermsCmd(searchName, null, true));
+        
         private void OnGameEntityDragStart(DatGrouperEntryDTO dto)
-        {
-            base.ExecuteCommand(new SetGameEntityDragStartCmd(dto));
-        }
-
+            => base.Execute(new SetGameEntityDragStartCmd(dto));
+        
         private void OnGameEntityDragStop()
-        {
-            base.ExecuteCommand(new SetGameEntityDragStopCmd());
-        }
-
+            => base.Execute(new SetGameEntityDragStopCmd());
+        
         private void OnShowGameMedia(DatGrouperEntryDTO dto) 
-        {
-            base.ExecuteCommand(new ShowMediaCollectionCmd(dto));
-        }
+            => base.Execute(new ShowMediaCollectionCmd(dto));
+        
         private void OnGameEntitySelected(IGameEntity? entity, bool isFromAutoUI)
         {
-            base.ExecuteCommand(new SetWebSearchTermsCmd(
+            base.Execute(new SetWebSearchTermsCmd(
                 DatinateFamilyHelper.GetGameEntityName(entity), null));
 
-            base.ExecuteCommand(new SetDatGrouperControlsCmd(entity, isFromAutoUI));
+            base.Execute(new SetDatGrouperControlsCmd(entity, isFromAutoUI));
         }
 
+        private void OnEditRequest(DatGrouperEditRequestDTO dto)
+            => base.Execute(new RequestDatGrouperEditCmd(dto));
+
         private void OnCurate()
+            => base.Execute(new LoadDatGrouperContentPathsCmd(true));
+
+        protected override void Initialised()
         {
-            base.ExecuteCommand(new LoadDatGrouperContentPathsCmd(true));
+            if (actor == null) return;
+
+            actor.InitialisedEvt += OnInitialised;
+
+            actor.SaveEvt += OnSave;
+            actor.BackEvt += OnBack;
+            actor.CurateEvt += OnCurate;
+            actor.ExportEvt += OnExport;
+
+            actor.GameEntitySelectedEvt += OnGameEntitySelected;
+
+            actor.GameEntityDragStartEvt += OnGameEntityDragStart;
+            actor.GameEntityDragStopEvt += OnGameEntityDragStop;
+
+            actor.ShowGameMediaEvt += OnShowGameMedia;
+            actor.SearchGameNameEvt += OnSearchGameName;
+
+            actor.ToggleStandardLayoutEvt += OnToggleStandardLayout;
+
+            actor.ExitMediaEvt += OnExitMedia;
+
+            actor.EditRequestEvt += OnEditRequest;
+            actor.DatGrouperActionEvt += OnDatGrouperAction;
         }
 
         protected override void Disposing()
         {
-            if (view == null) return;
+            if (actor == null) return;
 
-            view.InitialisedEvt -= OnInitialised;
+            actor.InitialisedEvt -= OnInitialised;
 
-            view.SaveEvt -= OnSave;
-            view.BackEvt -= OnBack;
-            view.CurateEvt -= OnCurate;
-            view.ExportEvt -= OnExport;
+            actor.SaveEvt -= OnSave;
+            actor.BackEvt -= OnBack;
+            actor.CurateEvt -= OnCurate;
+            actor.ExportEvt -= OnExport;
 
-            view.GameEntitySelectedEvt -= OnGameEntitySelected;
+            actor.GameEntitySelectedEvt -= OnGameEntitySelected;
 
-            view.GameEntityDragStartEvt -= OnGameEntityDragStart;
-            view.GameEntityDragStopEvt -= OnGameEntityDragStop;
+            actor.GameEntityDragStartEvt -= OnGameEntityDragStart;
+            actor.GameEntityDragStopEvt -= OnGameEntityDragStop;
 
-            view.SearchGameNameEvt -= OnSearchGameName;
-            view.ShowGameMediaEvt -= OnShowGameMedia;
+            actor.SearchGameNameEvt -= OnSearchGameName;
+            actor.ShowGameMediaEvt -= OnShowGameMedia;
 
-            view.ToggleStandardLayoutEvt -= OnToggleStandardLayout;
+            actor.ToggleStandardLayoutEvt -= OnToggleStandardLayout;
 
-            view.ExitMediaEvt -= OnExitMedia;
+            actor.ExitMediaEvt -= OnExitMedia;
 
-            view.EditRequestEvt -= OnEditRequest;
+            actor.EditRequestEvt -= OnEditRequest;
 
-            view.DatGrouperActionEvt -= OnDatGrouperAction;
+            actor.DatGrouperActionEvt -= OnDatGrouperAction;
         }
 
-        private void OnEditRequest(DatGrouperEditRequestDTO dto)
-        {
-            base.ExecuteCommand(new RequestDatGrouperEditCmd(dto));
-        }
     }
 }

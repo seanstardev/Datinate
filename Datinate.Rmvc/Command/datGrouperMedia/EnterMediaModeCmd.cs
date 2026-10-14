@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class EnterMediaModeCmd : RCommand
+    internal class EnterMediaModeCmd : CommandBase<RVoid>
     {
         private readonly bool enterPreviewMode;
         private readonly bool sourceIsAuto;
@@ -13,20 +13,22 @@ namespace Datinate.Rmvc.Command
             this.sourceIsAuto = sourceIsAuto;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.DatGrouperSessionModel != null)
+            if (base.DatGrouperSessionModel != null)
             {
-                Facade.Instance.MediaAssignmentMediator?.ClearView();
-                Facade.Instance.MediaWebMediator?.ClearView();
-                Facade.Instance.MediaMediator?.EmptyView();
+                base.MediaAssignmentMediator?.ClearView();
+                base.MediaWebMediator?.ClearView();
+                base.MediaMediator?.EmptyView();
 
-                var layout = Facade.Instance.DatGrouperSessionModel.EnterMediaMode(sourceIsAuto, enterPreviewMode);
+                var layout = base.DatGrouperSessionModel.EnterMediaMode(sourceIsAuto, enterPreviewMode);
              
-                Facade.Instance.MediaAssignmentMediator?.SetReadOnlyModeActive(enterPreviewMode);
-                Facade.Instance.DatGrouperMediator?.SetScreenLayout(layout);
-                Facade.Instance.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
+                base.MediaAssignmentMediator?.SetReadOnlyModeActive(enterPreviewMode);
+                base.DatGrouperMediator?.SetScreenLayout(layout);
+                base.DatGrouperControlsMediator?.SetDatGrouperScreenLayout(layout);
             }
+
+            return await Complete();
         }
     }
 }

@@ -8,6 +8,11 @@ namespace Datinate.App.WinForms.View
 {
     public partial class CreateDatView : UserControl, ICreateDatView 
     {
+        void ICreateDatView.Hide() => uiDispatcher.Run(() => base.Hide());
+        void ICreateDatView.Show() => uiDispatcher.Run(() => base.Show());
+        void ICreateDatView.BringToFront() => uiDispatcher.Run(() => base.BringToFront());
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<DatVO, string, bool>? CreateDatEvt;
 
         private DatVO? vo;
@@ -17,14 +22,21 @@ namespace Datinate.App.WinForms.View
 
         public CreateDatView() 
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
 
             UIHelper.PopButton(createBtn);
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<ICreateDatView>(this);
         }
 
         public void SetView(DatVO vo) 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => SetView(vo));
+                return;
+            }
+
             this.vo = vo;
 
             ClearView();
@@ -66,6 +78,12 @@ namespace Datinate.App.WinForms.View
 
         public void ClearView() 
         {
+            if (!uiDispatcher.CheckAccess)
+            {
+                uiDispatcher.Run(() => ClearView());
+                return;
+            }
+
             nameTextBox.Text = "";
             filenameTextBox.Text = "";
             descriptionTextBox.Text = "";
@@ -147,7 +165,7 @@ namespace Datinate.App.WinForms.View
 
         protected void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<ICreateDatView>(this);
         }
 
         private bool GetUseMachineTags() 

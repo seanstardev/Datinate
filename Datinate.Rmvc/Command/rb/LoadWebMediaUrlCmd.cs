@@ -1,18 +1,21 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadWebMediaUrlCmd : RCommand
+    internal class LoadWebMediaUrlCmd : CommandBase<RVoid>
     {
         private readonly string url;
+
         public LoadWebMediaUrlCmd(string url)
         {
             this.url = url;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.MediaWebMediator?.LoadUrl(url);
+            base.MediaWebMediator?.LoadUrl(url);
+
+            return await Complete();
         }
     }
 }

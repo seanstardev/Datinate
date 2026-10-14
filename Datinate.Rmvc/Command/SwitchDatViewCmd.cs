@@ -1,9 +1,9 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SwitchDatViewCmd:RCommand 
+    internal class SwitchDatViewCmd : CommandBase<RVoid>
     {
         private readonly DAT_SCREEN_ENUM datScreenEnum;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
         {
             this.datScreenEnum = datScreenEnum;
         }
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.MainMediator?.ToggleDatListView(datScreenEnum);
+            base.MainMediator?.ToggleDatListView(datScreenEnum);
+
+            return await Complete();
         }
     }
 }

@@ -1,17 +1,19 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ToggleDatGrouperLayoutCmd : RCommand
+    internal class ToggleDatGrouperLayoutCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.DatGrouperSessionModel is not null)
+            if (base.DatGrouperSessionModel is not null)
             {
-                DAT_GROUPER_LAYOUT_ENUM layout = Facade.Instance.DatGrouperSessionModel.ToggleCuratedLayout();
-                Facade.Instance?.DatGrouperMediator?.SetScreenLayout(layout);
+                DAT_GROUPER_LAYOUT_ENUM layout = base.DatGrouperSessionModel.ToggleCuratedLayout();
+                base.DatGrouperMediator?.SetScreenLayout(layout);
             }
+
+            return await Complete();
         }
     }
 }

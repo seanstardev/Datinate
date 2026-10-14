@@ -1,10 +1,10 @@
-﻿using Datinate.Rmvc.Proxy;
+using Datinate.Rmvc.Proxy;
 using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SaveProjectCmd : RCommandAsync
+    internal class SaveProjectCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperProjectDTO projectVO;
 
@@ -13,44 +13,35 @@ namespace Datinate.Rmvc.Command
             this.projectVO = projectVO;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            Facade? context = Facade.Instance;
-            ProjectProxy? projectProxy = context?.ProjectProxy;
-
-            if (context == null || projectProxy == null)
-                return;
+            if (base.ProjectProxy == null)
+                return await Complete();
 
             var success =
-                projectProxy.SaveProject(projectVO);
+                base.ProjectProxy.SaveProject(projectVO);
 
-
-            //            MessageBox.Show(
-            //    "The Project '" + projectVO.ProjectName + "' has been Saved."
-            //    , "OK"
-            //    , MessageBoxButtons.OK
-            //    , MessageBoxIcon.Information
-            //);
-
-            if (Facade.Instance?.Shell == null)
-                return;
+            if (base.Shell == null)
+                return await Complete();
 
             if (success)
             {
-                await Facade.Instance.Shell.ShowMessageBox(
-                    "OK",
-                    "The Project '" + projectVO.ProjectName + "' has been Saved.");
+                _ = await base.Shell.ShowMessageBox(
+                        "OK",
+                        "The Project '" + projectVO.ProjectName + "' has been Saved.");
 
-                base.ExecuteCommand(new LoadDatGrouperProjectsCmd(
+                await base.Execute(new LoadDatGrouperProjectsCmd(
                     projectVO.ProjectName, false, true));
             }
             else
             {
-                await Facade.Instance.Shell.ShowMessageBox(
-                    "There was a problem",
-                    "The Project could not be saved.");
+                _ = await base.Shell.ShowMessageBox(
+                        "There was a problem",
+                        "The Project could not be saved.");
 
             }
+
+            return await Complete();
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.Radio;
+using Datinate.Shared.Radio;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class UpdateMediaCollectionMetaCmd : RCommand
+    internal class UpdateMediaCollectionMetaCmd : CommandBase<RVoid>
     {
         private readonly IGameFamily family;
         private readonly HashSet<string> checkedDescriptors;
@@ -22,28 +22,29 @@ namespace Datinate.Rmvc.Command
             this.descriptorsChanged = descriptorsChanged;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.RadioDatModel is { } radioDatModel)
+            if (base.RadioDatModel is { })
             {
-                var cache = Facade.Instance.RadioDatModel.UpdateMediaCollectionMeta(family, checkedDescriptors, familyNotesText);
-                base.ExecuteCommand(new SetDatGrouperViewMediaCache(cache));
+                var cache = base.RadioDatModel.UpdateMediaCollectionMeta(family, checkedDescriptors, familyNotesText);
+                await base.Execute(new SetDatGrouperViewMediaCache(cache));
 
                 // TODO: DRY with meda assignment command.
                 if (descriptorsChanged)
                 {
-                    if (Facade.Instance?.RadioDatModel is { } radioModel &&
-                        Facade.Instance?.DatGrouperSessionModel is { } sessionModel &&
-                        sessionModel.IsInMediaAssignmentMode)
+                    if (base.RadioDatModel is { } &&
+                        base.DatGrouperSessionModel is { } &&
+                        base.DatGrouperSessionModel.IsInMediaAssignmentMode)
                     {
-                        var scoring = radioModel.GetScoring(family);
+                        var scoring = base.RadioDatModel.GetScoring(family);
+                        
                         if (scoring != null)
-                        {
-                            Facade.Instance?.MediaAssignmentMediator?.SetScoring(scoring);
-                        }
+                            base.MediaAssignmentMediator?.SetScoring(scoring);
                     }
                 }
             }
+
+            return await Complete();
         }
     }
 }

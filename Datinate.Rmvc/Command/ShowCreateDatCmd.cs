@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.Dat;
+using Datinate.Shared.Dat;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class ShowCreateDatCmd : RCommand 
+    internal class ShowCreateDatCmd : CommandBase<RVoid>
     {
         private readonly DatVO dat;
 
@@ -12,16 +12,21 @@ namespace Datinate.Rmvc.Command
             this.dat = dat;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
             if (dat.ContainsChds)
             {
-                Facade.Instance?.Shell?.ShowMessageBox("Attention", "Cannot proceed. DATs with CHDs cannot currently be created by Datinate.");
-                return;
+                base.Shell?.ShowMessageBox(
+                    "Attention", 
+                    "Cannot proceed. DATs with CHDs cannot currently be created by Datinate.");
+                
+                return await Complete();
             }
 
-            Facade.Instance?.Shell?.SetCreateDatFormVisible(true);
-            Facade.Instance?.CreateDatMediator?.SetView(dat);
+            base.Shell?.SetCreateDatFormVisible(true);
+            base.CreateDatMediator?.SetView(dat);
+
+            return await Complete();
         } 
     }
 }

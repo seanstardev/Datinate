@@ -1,10 +1,10 @@
-﻿using Datinate.Rmvc.Dto;
+using Datinate.Rmvc.Dto;
 using Datinate.Shared.Radio;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class LoadCurationEnvironmentCmd : RCommandAsync
+    internal class LoadCurationEnvironmentCmd : CommandBase<RVoid>
     {
         private readonly string projectName;
 
@@ -13,51 +13,45 @@ namespace Datinate.Rmvc.Command
             this.projectName = projectName;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            var curatedProxy = Facade.Instance?.CuratedDatProxy;
-            var radioDatModel = Facade.Instance?.RadioDatModel;
-            var grouperMediator = Facade.Instance?.DatGrouperMediator;
-            var datGrouperModel = Facade.Instance?.DatGrouperModel;
-            var appDataProxy = Facade.Instance?.ModelDataProxy;
+            base.MainWebMediator?.ClearView(false);
 
-            Facade.Instance?.MainWebMediator?.ClearView(false);
-
-            if (curatedProxy == null ||
-                grouperMediator == null ||
-                radioDatModel == null ||
-                datGrouperModel == null ||
-                appDataProxy == null)
+            if (base.CuratedDatProxy == null ||
+                base.DatGrouperMediator == null ||
+                base.RadioDatModel == null ||
+                base.DatGrouperModel == null ||
+                base.ModelDataProxy == null)
             {
-                return;
+                return await Complete();
             }
 
-            await base.ExecuteCommandAsync(new LazyLoadDatGrouperFilesCmd());
+            await base.Execute(new LazyLoadDatGrouperFilesCmd());
 
-            if (Facade.Instance?.DatGrouperSessionModel != null)
+            if (base.DatGrouperSessionModel != null)
             {
-                var layout = Facade.Instance.DatGrouperSessionModel.ActivateCurationMode();
-                base.ExecuteCommand(new ExitMediaModeCmd());
-                grouperMediator?.SetScreenLayout(layout);
+                var layout = base.DatGrouperSessionModel.ActivateCurationMode();
+                await base.Execute(new ExitMediaModeCmd());
+                base.DatGrouperMediator?.SetScreenLayout(layout);
             }
             
             Dictionary<string, IGamePart?>? importErrorReport = null;
 
-            if (curatedProxy.GetDatExists(projectName))
+            if (base.CuratedDatProxy.GetDatExists(projectName))
             {
-                var collection = curatedProxy.LoadCurated(
+                var collection = CuratedDatProxy.LoadCurated(
                     projectName,
-                    radioDatModel.DescriptorDefinitions,
-                    appDataProxy.FlagFilterSetByGroup,
-                    radioDatModel.SourceIdContentDictionary);
+                    base.RadioDatModel.DescriptorDefinitions,
+                    base.ModelDataProxy.FlagFilterSetByGroup,
+                    base.RadioDatModel.SourceIdContentDictionary);
 
                 if (collection is { })
                 {
-                    base.ExecuteCommand(new ShowProgressCmd("Importing Curated Set.", 2, 4));
+                    await base.Execute(new ShowProgressCmd("Importing Curated Set.", 2, 4));
 
                     try
                     {
-                        DatGrouperEditDelta? delta = datGrouperModel.ImportCurated(
+                        DatGrouperEditDelta? delta = base.DatGrouperModel.ImportCurated(
                             collection.Keys, 
                             out var errorReport);
 
@@ -65,13 +59,13 @@ namespace Datinate.Rmvc.Command
 
                         if (delta != null)
                         {
-                            var cache = radioDatModel.ImportMediaUpdates(collection, delta.ReplacementReferences);
+                            var cache = base.RadioDatModel.ImportMediaUpdates(collection, delta.ReplacementReferences);
 
-                            base.ExecuteCommand(new ShowProgressCmd("Rendering Curated Set.", 3, 4));
+                            await base.Execute(new ShowProgressCmd("Rendering Curated Set.", 3, 4));
 
-                            base.ExecuteCommand(new ApplyDatGrouperEditCmd(delta, false));
+                            await base.Execute(new ApplyDatGrouperEditCmd(delta, false));
 
-                            Facade.Instance?.DatGrouperMediator?.SetMediaCache(cache);
+                            base.DatGrouperMediator?.SetMediaCache(cache);
                         }
                     }
                     catch (Exception e)
@@ -79,21 +73,22 @@ namespace Datinate.Rmvc.Command
                         //
                     }
 
-                    base.ExecuteCommand(new ClearProgressCmd());
+                    await base.Execute(new ClearProgressCmd());
                 }
             }
 
-            Facade.Instance?.MainWebMediator?.SetCurationModeActive();
+            base.MainWebMediator?.SetCurationModeActive();
 
             if (importErrorReport != null && importErrorReport.Any())
             {
-                string? errorReportHtml = Facade.Instance?.MainWebMediator?.RenderCuratedImportErrorsReport(importErrorReport);
+                string? errorReportHtml = 
+                    base.MainWebMediator?.RenderCuratedImportErrorsReport(importErrorReport);
 
                 if (errorReportHtml != null && string.IsNullOrWhiteSpace(errorReportHtml) == false)
-                    Facade.Instance?.MainWebMediator?.LoadPageContent(errorReportHtml);
+                    base.MainWebMediator?.LoadPageContent(errorReportHtml);
             }
 
-            return;
+            return await Complete();
         }
     }
 }

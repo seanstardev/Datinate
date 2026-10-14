@@ -1,19 +1,21 @@
-﻿using Datinate.Rmvc.Command;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ExitDatGrouperProjectsCmd : RCommandAsync
+    internal class ExitDatGrouperProjectsCmd : CommandBase<RVoid>
     {
-        protected async override Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            base.ExecuteCommand(new ClearDatGrouperSessionCmd());
-            base.ExecuteCommand(new LoadDatGrouperProjectsCmd(
+            await base.Execute(new ClearDatGrouperSessionCmd());
+
+            await base.Execute(new LoadDatGrouperProjectsCmd(
                 null,
                 false,
                 true));
-            
-            Facade.Instance?.Shell?.SetProjectsFormVisible(false);
+
+            base.Shell?.SetProjectsFormVisible(false);
+
+            return await Complete();
         }
     }
 }

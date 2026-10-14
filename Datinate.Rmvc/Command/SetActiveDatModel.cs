@@ -1,10 +1,10 @@
-﻿using Datinate.Shared.Dat;
+using Datinate.Shared.Dat;
 using RMVC;
 using System.Diagnostics;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetActiveDatModel : RCommand
+    internal class SetActiveDatModel : CommandBase<RVoid>
     {
         internal enum LOCAL_DAT_MODEL_ENUM
         {
@@ -21,19 +21,21 @@ namespace Datinate.Rmvc.Command
             this.localDatModelEnum = localDatModelEnum;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
             switch(localDatModelEnum)
             {
                 case LOCAL_DAT_MODEL_ENUM.Detailed:
-                    if (Facade.Instance?.ActiveDatsModel != null)
-                        Facade.Instance.ActiveDatsModel.DetailedDat = datVO;
+                    if (base.ActiveDatsModel != null)
+                        base.ActiveDatsModel.DetailedDat = datVO;
                     break;
                 default:
                     // TODO:
                     Debug.WriteLine("LOCAL DAT TODO: " + localDatModelEnum);
                     break;
             }
+
+            return await Complete();
         }
     }
 }

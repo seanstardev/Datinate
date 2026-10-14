@@ -5,36 +5,30 @@ using RMVC;
 
 namespace Datinate.Rmvc.Mediator
 {
-    internal class CreateDatMediator : RMediator 
+    internal class CreateDatMediator : RMediator<ICreateDatView>
     {
-        private ICreateDatView? view => (ICreateDatView?)base.viewBase;
-
-        public CreateDatMediator(Type actor) : base(actor)
+        public void SetView(DatVO vo)
+            => actor?.SetView(vo);
+        
+        protected override void Initialised()
         {
-        }
-        protected override void Initialsed()
-        {
-            if (view != null)
+            if (actor != null)
             {
-                view.CreateDatEvt += OnCreateDatClick;
+                actor.CreateDatEvt += OnCreateDatClick;
             }
         }
 
         protected override void Disposing()
         {
-            if (view != null)
+            if (actor != null)
             {
-                view.CreateDatEvt -= OnCreateDatClick;
+                actor.CreateDatEvt -= OnCreateDatClick;
             }
         }
-
-        public void SetView(DatVO vo) 
-        {
-            view?.SetView(vo);
-        }
-
-        private void OnCreateDatClick(DatVO datVO, string fileFullpath, bool useMachineTags) 
-            => base.ExecuteCommand(new CreateNewDatCmd(
+        
+        private void OnCreateDatClick(
+            DatVO datVO, string fileFullpath, bool useMachineTags) 
+            => base.Execute(new CreateNewDatCmd(
                 datVO, 
                 fileFullpath, 
                 useMachineTags));

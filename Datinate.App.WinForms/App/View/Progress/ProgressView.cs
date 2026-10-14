@@ -7,16 +7,19 @@ namespace Datinate.App.WinForms.View
 {
     public partial class ProgressView : UserControl, IProgressView
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         private long lastUiTick;
         private int lastBarValue = int.MinValue;
         private string lastMessage = string.Empty;
 
         public ProgressView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
             progressBar.ForeColor = UIHelper.POP_COLOUR;
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<IProgressView>(this);
         }
 
         [Category("Behavior")]
@@ -118,19 +121,12 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void HandleDisposing()
         {
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<IProgressView>(this);
         }
     }
 }

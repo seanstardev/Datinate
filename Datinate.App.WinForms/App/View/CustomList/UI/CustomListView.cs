@@ -1,4 +1,4 @@
-using Datinate.App.WinForms.View.UI.CustomList;
+﻿using Datinate.App.WinForms.View.UI.CustomList;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
 using Datinate.Shared;
@@ -10,6 +10,9 @@ namespace Datinate.App.WinForms.View
 {
     public partial class CustomListView : UserControl, ICustomListView
     {
+        void ICustomListView.Hide() => uiDispatcher.Run(() => base.Hide());
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<DatVO?>? CreateDatClickEvt;
         public event Action? FormClosingEvt;
         public event Action? LoadExpressionsEvt;
@@ -39,6 +42,7 @@ namespace Datinate.App.WinForms.View
 
         public CustomListView()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
             PerformSearchInputChanges();
 
@@ -63,7 +67,7 @@ namespace Datinate.App.WinForms.View
 
             ClearAll();
 
-            Facade.RegisterActor(this);
+            Facade.RegisterActor<ICustomListView>(this);
         }
         private void IncludedList_RowClicked(string rowText)
         {
@@ -114,7 +118,7 @@ namespace Datinate.App.WinForms.View
             included_lv.RowClicked -= IncludedList_RowClicked;
             excluded_lv.RowClicked -= ExcludedList_RowClicked;
 
-            Facade.UnregisterActor(this);
+            Facade.UnregisterActor<ICustomListView>(this);
         }
         private ManagedListItemReport? BuildDecisionReport(string entryName, bool verbose)
         {
@@ -934,14 +938,7 @@ namespace Datinate.App.WinForms.View
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
     }
 }

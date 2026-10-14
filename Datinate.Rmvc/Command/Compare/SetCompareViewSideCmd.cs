@@ -1,12 +1,10 @@
-﻿using Datinate.Rmvc.Mediator;
-using Datinate.Rmvc.Model;
 using Datinate.Shared.Dat;
 using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SetCompareViewSideCmd:RCommand 
+    internal class SetCompareViewSideCmd : CommandBase<RVoid> 
     {
         private readonly bool left;
 
@@ -14,33 +12,30 @@ namespace Datinate.Rmvc.Command
         {
             this.left = left;
         }
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-         
-            Facade? instance = Facade.Instance;
+            await base.Execute(new SetMainControlsBtnEnabledCmd(
+                MAIN_CONTROL_ENUM.DatCompare, true));
 
-            base.ExecuteCommand(new SetMainControlsBtnEnabledCmd(MAIN_CONTROL_ENUM.DatCompare, true));
-
-            ActiveDatsModel? activeDatsModel = instance?.ActiveDatsModel;
-            CompareMediator? compareMediator = instance?.CompareMediator;
-
-            if (activeDatsModel != null)
+            if (base.ActiveDatsModel != null)
             {
-                DatVO? dat = activeDatsModel.DetailedDat;
+                DatVO? dat = base.ActiveDatsModel.DetailedDat;
 
                 if (left && dat != null)
                 {
-                    activeDatsModel.CompareLeftDat = dat;
-                    compareMediator?.SetLeft(dat);
-                    Facade.Instance?.Shell?.SetCompareFormVisible(true);
+                    base.ActiveDatsModel.CompareLeftDat = dat;
+                    base.CompareMediator?.SetLeft(dat);
+                    base.Shell?.SetCompareFormVisible(true);
                 }
                 else if (dat != null)
                 {
-                    activeDatsModel.CompareRightDat = dat;
-                    compareMediator?.SetRight(dat);
-                    Facade.Instance?.Shell?.SetCompareFormVisible(true);
+                    base.ActiveDatsModel.CompareRightDat = dat;
+                    base.CompareMediator?.SetRight(dat);
+                    base.Shell?.SetCompareFormVisible(true);
                 }
             }
+
+            return await Complete();
         }
     }
 }

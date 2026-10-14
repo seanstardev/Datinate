@@ -9,6 +9,8 @@ namespace Datinate.App.WinForms.View.UI.Media
 {
     public partial class Media2AssignUI : UserControl
     {
+        private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+
         public event Action<Media2AssignUI>? DragStartEvt;
         public event Action<Media2AssignUI>? DragEndEvt;
 
@@ -21,6 +23,10 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string? ActivelyLoadedMediaItem { get; private set; } = null;
+
+        // Selected during card setup; independent of preview content loading.
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        internal string? AutoPlayEntryName { get; set; }
         public ILookupSet? LookupSet => lookupSet;
         public string? SourceId => lookupSet?.Id ?? null;
 
@@ -52,6 +58,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         public Media2AssignUI()
         {
+            uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
             UIHelper.HideTabs(tabControl);
 
@@ -139,7 +146,7 @@ namespace Datinate.App.WinForms.View.UI.Media
         }
         public void LoadUnpreviewableItem(string entryName, bool showMediaAssignmentControls)
         {
-            ActivelyLoadedMediaItem = entryName;
+                ActivelyLoadedMediaItem = entryName;
 
             Ui(() =>
             {
@@ -190,7 +197,8 @@ namespace Datinate.App.WinForms.View.UI.Media
             IMediaCollection? mediaCollection,
             IReadOnlyList<string>? searchPrompts)
         {
-            ActivelyLoadedMediaItem = null;
+                ActivelyLoadedMediaItem = null;
+            AutoPlayEntryName = null;
 
             this.readOnlyMode = readOnlyMode;
             this.mediaCollection = mediaCollection;
@@ -290,7 +298,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         public void LoadMediaItemUri(string uri, string entryName, bool showMediaAssignmentControls)
         {
-            ActivelyLoadedMediaItem = entryName;
+                ActivelyLoadedMediaItem = entryName;
 
             Ui(() =>
             {
@@ -309,7 +317,7 @@ namespace Datinate.App.WinForms.View.UI.Media
         }
         public void LoadMediaItemRawHtml(string rawHtml, string entryName, bool showMediaAssignmentControls)
         {
-            ActivelyLoadedMediaItem = entryName;
+                ActivelyLoadedMediaItem = entryName;
 
             Ui(() =>
             {
@@ -804,14 +812,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         private void Ui(Action action)
         {
-            if (InvokeRequired)
-            {
-                if (IsDisposed || !IsHandleCreated) return;
-                BeginInvoke(action);
-                return;
-            }
-
-            action();
+            uiDispatcher.Run(action);
         }
 
         private void Media2AssignUI_MouseEnter(object sender, EventArgs e)

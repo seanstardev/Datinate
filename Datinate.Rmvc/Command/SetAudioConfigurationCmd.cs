@@ -1,15 +1,17 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetAudioConfigurationCmd : RCommand
+    internal class SetAudioConfigurationCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var audioEnvironmentPath = Facade.Instance?.AudioProxy?.AudioEnvironmentPath;
+            var audioEnvironmentPath = base.AudioProxy?.AudioEnvironmentPath;
 
-            Facade.Instance?.MediaWebMediator?.SetAudioEnvironmentPath(audioEnvironmentPath);
-            Facade.Instance?.MediaMediator?.SetAudioEnvironmentPath(audioEnvironmentPath);
+            base.MediaWebMediator?.SetAudioEnvironmentPath(audioEnvironmentPath);
+            base.MediaMediator?.SetAudioEnvironmentPath(audioEnvironmentPath);
+
+            return await Complete();
         }
     }
 }

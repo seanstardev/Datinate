@@ -1,8 +1,8 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetRenderAliasesInViewCmd : RCommand
+    internal class SetRenderAliasesInViewCmd : CommandBase<RVoid>
     {
         private readonly bool doRender;
 
@@ -11,9 +11,11 @@ namespace Datinate.Rmvc.Command
             this.doRender = doRender;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.DatGrouperMediator?.SetRenderAliases(doRender);
+            base.DatGrouperMediator?.SetRenderAliases(doRender);
+
+            return await Complete();
         }
     }
 }

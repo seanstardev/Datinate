@@ -1,9 +1,9 @@
-﻿using Datinate.Shared.DatGrouper;
+using Datinate.Shared.DatGrouper;
 using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class HighlightProjectDatsCmd : RCommand
+    internal class HighlightProjectDatsCmd : CommandBase<RVoid>
     {
         private readonly DatGrouperProjectEntry[] includeDatHeadlineVOs;
         private readonly DatGrouperProjectEntry[] ignoreDatHeadlineVOs;
@@ -16,20 +16,22 @@ namespace Datinate.Rmvc.Command
             this.ignoreDatHeadlineVOs = ignoreDatHeadlineVOs;
         }
 
-        protected override void Run() 
+        protected override async Task<RVoid> Run() 
         {
-            Facade.Instance?.DatSummaryMediator?.HighlightDats(
+            base.DatSummaryMediator?.HighlightDats(
                 includeDatHeadlineVOs
                 , ignoreDatHeadlineVOs
             );
+
+            return await Complete();
         }
 
         // TODO: Remove this. Not sure highlight project is useful at all.
-        public static void Execute() 
-        {
-            Facade.Instance?.DatSummaryMediator?.HighlightDats(
-                new DatGrouperProjectEntry[] { }
-                , new DatGrouperProjectEntry[] { });
-        }
+        //public static void Execute() 
+        //{
+        //    Facade.Instance?.DatSummaryMediator?.HighlightDats(
+        //        new DatGrouperProjectEntry[] { }
+        //        , new DatGrouperProjectEntry[] { });
+        //}
     }
 }

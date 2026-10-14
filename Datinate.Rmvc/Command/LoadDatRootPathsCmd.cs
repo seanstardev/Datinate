@@ -1,21 +1,24 @@
-﻿using RMVC;
+using RMVC;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class LoadDatRootPathsCmd : RCommand
+    internal class LoadDatRootPathsCmd : CommandBase<RVoid>
     {
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            if (Facade.Instance?.GlobalSettingsProxy is not { } proxy)
-                return;
+            if (base.GlobalSettingsProxy is not { })
+                return await Complete();
 
-            var paths = proxy.LoadCfg();
+            var paths = base.GlobalSettingsProxy.LoadCfg();
+
             if (paths != null)
             {
-                Facade.Instance?.LandingMediator?.LoadDatPaths(
+                base.LandingMediator?.LoadDatPaths(
                     paths,
-                    proxy.MameSlHashPath);
+                    base.GlobalSettingsProxy.MameSlHashPath);
             }
+
+            return await Complete();
         }
     }
 }

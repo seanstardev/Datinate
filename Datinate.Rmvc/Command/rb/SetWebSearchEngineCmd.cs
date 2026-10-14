@@ -1,9 +1,9 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    public class SetWebSearchEngineCmd : RCommand
+    internal class SetWebSearchEngineCmd : CommandBase<RVoid>
     {
         private readonly WEB_SOURCE_ENUM engine;
         private readonly bool invokeSearchNow;
@@ -14,9 +14,11 @@ namespace Datinate.Rmvc.Command
             this.invokeSearchNow = invokeSearchNow;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            Facade.Instance?.RbWebSearchMediator?.SetSearchEngine(engine, invokeSearchNow);
+            base.RbWebSearchMediator?.SetSearchEngine(engine, invokeSearchNow);
+
+            return await Complete();
         }
     }
 }

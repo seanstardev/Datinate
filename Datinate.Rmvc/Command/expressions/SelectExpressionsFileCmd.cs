@@ -1,9 +1,9 @@
-﻿using RMVC;
+using RMVC;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Command
 {
-    internal class SelectExpressionsFileCmd :RCommandAsync
+    internal class SelectExpressionsFileCmd : CommandBase<RVoid>
     {
         private readonly EXPRESSIONS_FILE_TARGET_ENUM expressionsFileTargetEnum;
 
@@ -12,27 +12,25 @@ namespace Datinate.Rmvc.Command
             this.expressionsFileTargetEnum = expressionsFileTargetEnum;
         }
 
-        protected override async Task RunAsync()
+        protected override async Task<RVoid> Run()
         {
-            var expressionsProxy = Facade.Instance?.ExpressionsProxy;
-            var shell = Facade.Instance?.Shell;
+            if (base.ExpressionsProxy?.ExpressionsPath == null || base.Shell == null)
+                return await Complete();
 
-            if (expressionsProxy?.ExpressionsPath == null || shell == null)
-                return;
-
-            var expressionsFullpath = await shell.ShowLoadExpressionsDialog(
-                expressionsProxy.ExpressionsPath);
+            var expressionsFullpath = await base.Shell.ShowLoadExpressionsDialog(ExpressionsProxy.ExpressionsPath);
 
             if (expressionsFullpath == null || string.IsNullOrWhiteSpace(expressionsFullpath))
-                return;
+                return await Complete();
 
             var filters =
-                expressionsProxy.FetchExpressions(expressionsFullpath);
+                base.ExpressionsProxy.FetchExpressions(expressionsFullpath);
 
             if (expressionsFileTargetEnum == EXPRESSIONS_FILE_TARGET_ENUM.CUSTOM_LIST)
-                base.ExecuteCommand(new ApplyExpressionsFileCmd(filters));
+                await base.Execute(new ApplyExpressionsFileCmd(filters));
             else
-                base.ExecuteCommand(new SetProjectLoaderDatExpressionsCmd(expressionsFullpath));
+                await base.Execute(new SetProjectLoaderDatExpressionsCmd(expressionsFullpath));
+
+            return await Complete();
         }
     }
 }

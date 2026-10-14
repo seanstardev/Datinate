@@ -1,10 +1,10 @@
-﻿using Datinate.Shared.Radio;
+using Datinate.Shared.Radio;
 using RMVC;
 using System.Diagnostics;
 
 namespace Datinate.Rmvc.Command
 {
-    public class ShowRbPartGroupingReportsCmd : RCommand
+    internal class ShowRbPartGroupingReportsCmd : CommandBase<RVoid>
     {
         private readonly IGamePart part;
 
@@ -13,26 +13,27 @@ namespace Datinate.Rmvc.Command
             this.part = part;
         }
 
-        protected override void Run()
+        protected override async Task<RVoid> Run()
         {
-            var web = Facade.Instance?.MainWebMediator;
-            var radioDat = Facade.Instance?.RadioDatModel;
-
-            if (web == null || radioDat?.AutoGroupTraceStore == null)
+            if (base.MainWebMediator == null || base.RadioDatModel?.AutoGroupTraceStore == null)
             {
-                Debug.WriteLine("parts cmd: " + web + " -- " + radioDat?.AutoGroupTraceStore);
-                return;
+                Debug.WriteLine("parts cmd: " + base.MainWebMediator + " -- " + base.RadioDatModel?.AutoGroupTraceStore);
+                
+                return await Complete();
             }
 
-            radioDat.AutoGroupTraceStore.TryGetPartReport(part, out var customiseReport);
+            base.RadioDatModel.AutoGroupTraceStore.TryGetPartReport(part, out var customiseReport);
 
-            var managedReport = radioDat.AutoGroupTraceStore.GetManagedReport(
+            var managedReport = base.RadioDatModel.AutoGroupTraceStore.GetManagedReport(
                 part.GetName(), part.GetDirectoryId()!);
 
-            string? htmlPage = web.RenderGamePartGroupingReports(part, managedReport, customiseReport);
+            string? htmlPage = base.MainWebMediator.RenderGamePartGroupingReports(
+                part, managedReport, customiseReport);
 
-            if (!string.IsNullOrWhiteSpace(htmlPage)) 
-                web.LoadPageContent(htmlPage);
+            if (!string.IsNullOrWhiteSpace(htmlPage) && htmlPage != null)
+                base.MainWebMediator.LoadPageContent(htmlPage);
+
+            return await Complete();
         }
     }
 }
