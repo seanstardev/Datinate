@@ -244,17 +244,10 @@ namespace Datinate.App.WinForms.View
         }
         public string? RenderGamePartGroupingReports(
             IGamePart part,
-            ManagedListItemReport? managedReport,
-            string customiseReport)
-        {
-            if (!uiDispatcher.CheckAccess)
-                return uiDispatcher.Read(() => RenderGamePartGroupingReports(part, managedReport, customiseReport));
+            DatCustomisationDecisionReport? managedReport,
+            AutomatedGroupingReport? automatedReport)
+            => HtmlReportsUtil.CreatePartReports(automatedReport, managedReport);
 
-            return HtmlReportsUtil.CreatePartReports(
-                customiseReport,
-                managedReport,
-                new FormsPartReportRenderer(this));
-        }
         private void ApplyAutoSourceTextToPromptCards()
         {
             var stack = PromptStack;

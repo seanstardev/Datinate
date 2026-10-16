@@ -9,39 +9,18 @@ namespace Datinate.App.Shared.Reports
     public static class HtmlReportsUtil
     {
         public static string? CreatePartReports(
-            string? autoGrouperReport,
-            ManagedListItemReport? customiseReport,
-            IPartReportRenderer renderer)
+            AutomatedGroupingReport? automatedReport,
+            DatCustomisationDecisionReport? customiseReport)
         {
-            if (IsNullOrWhiteSpace20(autoGrouperReport) && customiseReport == null)
+            if (automatedReport == null && customiseReport == null)
                 return null;
 
-            ReportImage? automatedImage = null;
-            ReportImage? customisedImage = null;
+            string? automatedContent = AutomatedGroupingReportHtml.CreateContent(automatedReport);
+            string? customisedReport = customiseReport == null
+                ? null
+                : DatCustomisationReportHtml.CreateContent(customiseReport);
 
-            if (!IsNullOrWhiteSpace20(autoGrouperReport))
-                automatedImage = renderer.RenderAutomatedReport(autoGrouperReport);
-
-            if (customiseReport != null)
-                customisedImage = renderer.RenderCustomisedReport(customiseReport);
-
-            return WrapImageFragmentsAsPage(
-                CreateImageFragment(automatedImage),
-                CreateImageFragment(customisedImage));
-        }
-
-        private static string? CreateImageFragment(ReportImage? image)
-        {
-            if (image == null)
-                return null;
-
-            return
-                "<img " +
-                "src=\"data:image/png;base64," + image.PngBase64 + "\" " +
-                "width=\"" + image.DisplayWidth + "\" " +
-                "height=\"" + image.DisplayHeight + "\" " +
-                "style=\"display:block;width:" + image.DisplayWidth + "px;height:" + image.DisplayHeight + "px;\" " +
-                "alt=\"\" />";
+            return WrapReportsAsPage(automatedContent, customisedReport);
         }
 
         public static string? CreateCuratedImportErrorsReport(Dictionary<string, IGamePart?> importErrorReport)
@@ -236,7 +215,7 @@ namespace Datinate.App.Shared.Reports
             return sb.ToString();
         }
 
-        private static string WrapImageFragmentsAsPage(params string?[] fragments)
+        private static string WrapReportsAsPage(params string?[] reports)
         {
             var sb = new System.Text.StringBuilder(4096);
 
@@ -246,18 +225,18 @@ namespace Datinate.App.Shared.Reports
             sb.Append("*{box-sizing:border-box;}");
             sb.Append("html,body{margin:0;padding:0;width:100%;}");
             sb.Append("body{padding:12px;overflow:auto;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:12px;}");
-            sb.Append("div{max-width:100%;}");
-            sb.Append("img{display:block;max-width:100% !important;height:auto !important;object-fit:contain;}");
+            sb.Append(".report-fragment{width:100%;}");
             sb.Append("</style></head><body>");
 
-            for (int i = 0; i < fragments.Length; i++)
+            for (int i = 0; i < reports.Length; i++)
             {
-                var fragment = fragments[i];
-                if (string.IsNullOrWhiteSpace(fragment))
+                string? report = reports[i];
+
+                if (report == null)
                     continue;
 
-                sb.Append("<div>");
-                sb.Append(fragment);
+                sb.Append("<div class=\"report-fragment\">");
+                sb.Append(report);
                 sb.Append("</div>");
             }
 

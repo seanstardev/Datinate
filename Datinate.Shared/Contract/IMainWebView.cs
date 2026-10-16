@@ -16,8 +16,8 @@ namespace Datinate.Shared.Rmvc
         void UnloadPageContent(bool doNotUnloadRemoteContent);
         string? RenderGamePartGroupingReports(
             IGamePart part,
-            ManagedListItemReport? managedReport, 
-            string customiseReport);
+            DatCustomisationDecisionReport? managedReport,
+            AutomatedGroupingReport? automatedReport);
         void StartReceiveGameEntityDrop(DatGrouperEntryDTO datGrouperEntryDTO);
         void StopReceiveGameEntityDrop();
         void SetCurationModeIsActive();

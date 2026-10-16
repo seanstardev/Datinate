@@ -1,4 +1,4 @@
-using Datinate.Shared.Radio;
+﻿using Datinate.Shared.Radio;
 using RMVC;
 using System.Diagnostics;
 
@@ -22,13 +22,13 @@ namespace Datinate.Rmvc.Command
                 return await Complete();
             }
 
-            base.RadioDatModel.AutoGroupTraceStore.TryGetPartReport(part, out var customiseReport);
+            base.RadioDatModel.AutoGroupTraceStore.TryGetPartReport(part, out var automatedReport);
 
             var managedReport = base.RadioDatModel.AutoGroupTraceStore.GetManagedReport(
                 part.GetName(), part.GetDirectoryId()!);
 
             string? htmlPage = base.MainWebMediator.RenderGamePartGroupingReports(
-                part, managedReport, customiseReport);
+                part, managedReport, automatedReport);
 
             if (!string.IsNullOrWhiteSpace(htmlPage) && htmlPage != null)
                 base.MainWebMediator.LoadPageContent(htmlPage);

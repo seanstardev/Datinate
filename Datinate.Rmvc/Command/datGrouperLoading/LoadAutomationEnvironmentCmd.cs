@@ -1,4 +1,4 @@
-using Datinate.Rmvc.Dto;
+﻿using Datinate.Rmvc.Dto;
 using Datinate.Shared;
 using Datinate.Shared.Radio;
 using RMVC;
@@ -35,7 +35,10 @@ namespace Datinate.Rmvc.Command
             Dictionary<string, CurationPartReport> partReportsDictionary; 
 
             // NOTE: We need to do this because setting Exclude on GamePartVO is fragile:
-            var baseFamilies = DatinateFamilyConverter.Convert(families, out partReportsDictionary);
+            var traceStore = base.RadioDatModel?.AutoGroupTraceStore;
+            var baseFamilies = DatinateFamilyConverter.Convert(
+                families, out partReportsDictionary,
+                (source, converted) => traceStore?.AssociateConvertedPartReport(source, converted));
 
             var flagFilterSet = base.ModelDataProxy?.FlagFilterSetByGroup 
                 ?? new Dictionary<DAT_GROUP_ENUM, FlagFilterSet>();

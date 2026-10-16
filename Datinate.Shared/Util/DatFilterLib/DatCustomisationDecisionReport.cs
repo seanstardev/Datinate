@@ -2,7 +2,7 @@
 
 namespace Datinate.Shared
 {
-    public sealed class ManagedListItemReport
+    public sealed class DatCustomisationDecisionReport
     {
         public readonly struct TraceItem
         {
@@ -34,7 +34,7 @@ namespace Datinate.Shared
             }
         }
 
-        private ManagedListItemReport(
+        private DatCustomisationDecisionReport(
             string entryName,
             string? entryCategoryLabel,
             bool isExcluded,
@@ -96,7 +96,7 @@ namespace Datinate.Shared
         public IReadOnlyList<ConditionalMatch> MatchedConditionals { get; }
         public IReadOnlyList<TraceItem> Trace { get; }
 
-        public static ManagedListItemReport CreateDecisive(
+        public static DatCustomisationDecisionReport CreateDecisive(
             string entryName,
             string? entryCategoryLabel,
             bool isExcluded,
@@ -109,7 +109,7 @@ namespace Datinate.Shared
             IReadOnlyList<ConditionalMatch>? matchedConditionals,
             IReadOnlyList<TraceItem>? trace)
         {
-            return new ManagedListItemReport(
+            return new DatCustomisationDecisionReport(
                 entryName,
                 entryCategoryLabel,
                 isExcluded,
@@ -127,7 +127,7 @@ namespace Datinate.Shared
                 trace ?? Array.Empty<TraceItem>());
         }
 
-        public static ManagedListItemReport CreateConditional(
+        public static DatCustomisationDecisionReport CreateConditional(
             string entryName,
             string? entryCategoryLabel,
             bool isExcluded,
@@ -140,7 +140,7 @@ namespace Datinate.Shared
             IReadOnlyList<ConditionalMatch>? matchedConditionals,
             IReadOnlyList<TraceItem>? trace)
         {
-            return new ManagedListItemReport(
+            return new DatCustomisationDecisionReport(
                 entryName,
                 entryCategoryLabel,
                 isExcluded,

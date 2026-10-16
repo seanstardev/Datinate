@@ -1,4 +1,4 @@
-using Datinate.Rmvc.Command;
+﻿using Datinate.Rmvc.Command;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 using Datinate.Shared.Radio;
@@ -23,10 +23,10 @@ namespace Datinate.Rmvc.Mediator
 
         public string? RenderGamePartGroupingReports(
             IGamePart part,
-            ManagedListItemReport? managedReport,
-            string customiseReport)
+            DatCustomisationDecisionReport? managedReport,
+            AutomatedGroupingReport? automatedReport)
             => actor?.RenderGamePartGroupingReports(
-                part, managedReport, customiseReport) ?? null;
+                part, managedReport, automatedReport) ?? null;
 
         public string? RenderCuratedImportErrorsReport(Dictionary<string, IGamePart?> importErrorReport)
             => actor?.RenderCuratedImportErrorsReport(importErrorReport);

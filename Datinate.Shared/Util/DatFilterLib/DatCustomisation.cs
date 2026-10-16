@@ -4,7 +4,7 @@ using static Datinate.Shared.DatFilterHelper;
 
 namespace Datinate.Shared
 {
-    public sealed class ManagedList
+    public sealed class DatCustomisation
     {
         private readonly DatGameVO[] allEntries;
         private readonly Dictionary<string, DatGameVO> entryByName;
@@ -24,7 +24,7 @@ namespace Datinate.Shared
 
         private static readonly Regex MultiSpace = new Regex(@"\s+", RegexOptions.Compiled);
 
-        public ManagedList(DatGameVO[] allEntries, IEnumerable<DatFilter> expressions)
+        public DatCustomisation(DatGameVO[] allEntries, IEnumerable<DatFilter> expressions)
         {
             this.allEntries = allEntries ?? Array.Empty<DatGameVO>();
 
@@ -56,9 +56,9 @@ namespace Datinate.Shared
             BuildLists();
         }
 
-        public Dictionary<string, ManagedListItemReport> GetAllDecisionReports(bool verbose = false, int maxDigestTrace = 15)
+        public Dictionary<string, DatCustomisationDecisionReport> GetAllDecisionReports(bool verbose = false, int maxDigestTrace = 15)
         {
-            var dic = new Dictionary<string, ManagedListItemReport>(
+            var dic = new Dictionary<string, DatCustomisationDecisionReport>(
                 includeAndUnresolvedList.Count + excludeList.Count,
                 StringComparer.Ordinal);
 
@@ -124,7 +124,7 @@ namespace Datinate.Shared
             return false;
         }
 
-        public ManagedListItemReport? BuildDecisionReport(string entryName, bool verbose, int maxDigestTrace = 15)
+        public DatCustomisationDecisionReport? BuildDecisionReport(string entryName, bool verbose, int maxDigestTrace = 15)
         {
             if (!TryGetFinalAction(entryName, out var finalAction))
                 return null;
@@ -182,7 +182,7 @@ namespace Datinate.Shared
 
             if (decisive != null && decisiveIndex.HasValue)
             {
-                return ManagedListItemReport.CreateDecisive(
+                return DatCustomisationDecisionReport.CreateDecisive(
                     entryName,
                     category,
                     isExcluded,
@@ -196,7 +196,7 @@ namespace Datinate.Shared
                     trace);
             }
 
-            return ManagedListItemReport.CreateConditional(
+            return DatCustomisationDecisionReport.CreateConditional(
                 entryName,
                 category,
                 isExcluded,
@@ -391,12 +391,12 @@ namespace Datinate.Shared
             }
         }
 
-        private ManagedListItemReport.TraceItem[] BuildTrace(string entryName, string? category, int maxItems)
+        private DatCustomisationDecisionReport.TraceItem[] BuildTrace(string entryName, string? category, int maxItems)
         {
             if (maxItems <= 0)
-                return Array.Empty<ManagedListItemReport.TraceItem>();
+                return Array.Empty<DatCustomisationDecisionReport.TraceItem>();
 
-            var tmp = new List<ManagedListItemReport.TraceItem>();
+            var tmp = new List<DatCustomisationDecisionReport.TraceItem>();
 
             for (int i = 0; i < expressions.Count; i++)
             {
@@ -406,7 +406,7 @@ namespace Datinate.Shared
                 if (!Matches(exp, expIsCategory, entryName, category))
                     continue;
 
-                tmp.Add(new ManagedListItemReport.TraceItem(
+                tmp.Add(new DatCustomisationDecisionReport.TraceItem(
                     i + 1,
                     exp.GetExpressionAction().ToString(),
                     exp.GetUserFriendlyExpression(),
@@ -416,15 +416,15 @@ namespace Datinate.Shared
                     break;
             }
 
-            return tmp.Count == 0 ? Array.Empty<ManagedListItemReport.TraceItem>() : tmp.ToArray();
+            return tmp.Count == 0 ? Array.Empty<DatCustomisationDecisionReport.TraceItem>() : tmp.ToArray();
         }
 
-        private ManagedListItemReport.ConditionalMatch[] BuildMatchedConditionals(string entryName, string? category)
+        private DatCustomisationDecisionReport.ConditionalMatch[] BuildMatchedConditionals(string entryName, string? category)
         {
             if (!conditionals.TryGetValue(entryName, out var list) || list.Count == 0)
-                return Array.Empty<ManagedListItemReport.ConditionalMatch>();
+                return Array.Empty<DatCustomisationDecisionReport.ConditionalMatch>();
 
-            var tmp = new List<ManagedListItemReport.ConditionalMatch>();
+            var tmp = new List<DatCustomisationDecisionReport.ConditionalMatch>();
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -434,13 +434,13 @@ namespace Datinate.Shared
                 if (!Matches(exp, isCategory, entryName, category))
                     continue;
 
-                tmp.Add(new ManagedListItemReport.ConditionalMatch(
+                tmp.Add(new DatCustomisationDecisionReport.ConditionalMatch(
                     exp.GetUserFriendlyExpression(),
                     exp.GetExpressionAction().ToString(),
                     isCategory));
             }
 
-            return tmp.Count == 0 ? Array.Empty<ManagedListItemReport.ConditionalMatch>() : tmp.ToArray();
+            return tmp.Count == 0 ? Array.Empty<DatCustomisationDecisionReport.ConditionalMatch>() : tmp.ToArray();
         }
 
         private static bool Matches(DatFilter exp, bool expIsCategory, string entryName, string? category)

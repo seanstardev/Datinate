@@ -6,7 +6,8 @@ namespace Datinate.Shared
     {
         public static IEnumerable<BaseGameFamily> Convert(
             IEnumerable<GameFamilyVO> familyVOs,
-            out Dictionary<string, CurationPartReport> reportDic)
+            out Dictionary<string, CurationPartReport> reportDic,
+            Action<GamePartVO, BaseGamePart>? onPartConverted = null)
         {
             reportDic = new Dictionary<string, CurationPartReport>();
             
@@ -16,7 +17,7 @@ namespace Datinate.Shared
             {
                 list.Add(new BaseGameFamily(
                     vo.GetFamilyDisplayName(),
-                    Convert(vo.Games, reportDic),
+                    Convert(vo.Games, reportDic, onPartConverted),
                     Array.Empty<IDescriptor>(),
                     BaseResourceCollection.Empty,
                     false,
@@ -46,7 +47,8 @@ namespace Datinate.Shared
             return reportDic;
         }
 
-        private static BaseGame[] Convert(GameVO[] gameVOs, Dictionary<string, CurationPartReport> reportDic)
+        private static BaseGame[] Convert(GameVO[] gameVOs, Dictionary<string, CurationPartReport> reportDic,
+            Action<GamePartVO, BaseGamePart>? onPartConverted)
         {
             var list = new List<BaseGame>();
 
@@ -54,22 +56,23 @@ namespace Datinate.Shared
             {
                 list.Add(new BaseGame(
                     vo.GetNameWithoutExt(),
-                    Convert(vo.Parts, reportDic),
+                    Convert(vo.Parts, reportDic, onPartConverted),
                     vo.GetLaunchName()));
             }
 
             return list.ToArray();
         }
 
-        private static BaseGamePart[] Convert(GamePartVO[] partVOs, Dictionary<string, CurationPartReport> reportDic)
+        private static BaseGamePart[] Convert(GamePartVO[] partVOs, Dictionary<string, CurationPartReport> reportDic,
+            Action<GamePartVO, BaseGamePart>? onPartConverted)
         {
             var list = new List<BaseGamePart>();
 
             foreach (var vo in partVOs)
             {
-                list.Add(new BaseGamePart(
+                var converted = new BaseGamePart(
                     vo.GetName(),
-                    ConvertAliases(vo.GetAliases()),
+                    ConvertAliases(vo.GetAliases(), onPartConverted),
                     vo.GetChecksums(),
                     vo.GetDirectoryId(),
                     vo.GetDisplayName(),
@@ -77,7 +80,10 @@ namespace Datinate.Shared
                     vo.Tag)
                 { 
                     Exclude = vo.Exclude
-                });
+                };
+
+                list.Add(converted);
+                onPartConverted?.Invoke(vo, converted);
 
                 reportDic[vo.RomsFingerprint] = new CurationPartReport(
                     vo.IsShallowPartReference,
@@ -87,20 +93,24 @@ namespace Datinate.Shared
             return list.ToArray();
         }
 
-        private static BaseGamePart[] ConvertAliases(GamePartVO[] aliasVOs)
+        private static BaseGamePart[] ConvertAliases(GamePartVO[] aliasVOs,
+            Action<GamePartVO, BaseGamePart>? onPartConverted)
         {
             var list = new List<BaseGamePart>();
 
             foreach (var vo in aliasVOs)
             {
-                list.Add(new BaseGamePart(
+                var converted = new BaseGamePart(
                     vo.GetName(),
                     Array.Empty<IGamePart>(),
                     vo.GetChecksums(),
                     vo.GetDirectoryId(),
                     vo.GetDisplayName(),
                     vo.LaunchName,
-                    vo.Tag));
+                    vo.Tag);
+
+                list.Add(converted);
+                onPartConverted?.Invoke(vo, converted);
             }
 
             return list.ToArray();

@@ -685,7 +685,7 @@ namespace Datinate.Rmvc.Model
                 }
 
                 var gameNames = datAdv.Dat.GetEntryNames();
-                var managedList = new ManagedList(datAdv.Dat.Entries.ToArray(), datAdv.Filters);
+                var managedList = new DatCustomisation(datAdv.Dat.Entries.ToArray(), datAdv.Filters);
 
                 SortedDictionary<string, DatFilterHelper.EXPRESSION_ACTION_ENUM> dic =
                     managedList.GetAll();

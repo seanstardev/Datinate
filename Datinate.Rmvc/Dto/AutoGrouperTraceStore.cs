@@ -1,27 +1,13 @@
-using Datinate.Shared;
+﻿using Datinate.Shared;
 using Datinate.Shared.Dat;
 using Datinate.Shared.Radio;
 using System.Runtime.CompilerServices;
-using System.Text;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Rmvc.Dto
 {
-    internal enum AUTO_GROUP_TRACE_REASON_ENUM
-    {
-        SeedJoinParentClone,
-        SeedJoinMameLaunchCategory,
-        SeedJoinNormalisedName,
-        MergeByNamePublisher,
-        MergeByNameRegion,
-        MergeByNormalisedName,
-        MergeByFingerprint,
-        CollapseFamilyByRegionNormalisedTitle
-    }
-
     internal class AutoGrouperTraceStore
     {
-        private const int MaxTraceKeysPerType = 8;
         private const int MaxInitialSiblingSamples = 3;
         private const int MaxFinalFamilySiblingSamples = 3;
         private const int MaxMatchingGroupSamples = 3;
@@ -56,18 +42,18 @@ namespace Datinate.Rmvc.Dto
         private Dictionary<string, ManagedListWrapper> managedListDic = new Dictionary<string, ManagedListWrapper>();
 
         private ConditionalWeakTable<DatGameVO, EntryTrace>? entryTraces;
-        private ConditionalWeakTable<GamePartVO, string>? partReports;
-        private Dictionary<string, string>? partFingerprintReports;
+        private ConditionalWeakTable<IGamePart, AutomatedGroupingReport>? partReports;
+        private ConditionalWeakTable<DatGameVO, AutomatedGroupingReport>? sourceReports;
 
         internal AutoGrouperTraceStore(IReadOnlyDictionary<DAT_GROUP_ENUM, FlagFilterSet> _)
         {
             entryTraces = new ConditionalWeakTable<DatGameVO, EntryTrace>();
-            partReports = new ConditionalWeakTable<GamePartVO, string>();
-            partFingerprintReports = new Dictionary<string, string>(StringComparer.Ordinal);
+            partReports = new ConditionalWeakTable<IGamePart, AutomatedGroupingReport>();
+            sourceReports = new ConditionalWeakTable<DatGameVO, AutomatedGroupingReport>();
             fingerprintTitleSamples = new Dictionary<string, List<FingerprintTitleSample>>(StringComparer.Ordinal);
         }
 
-        public void RecordSeed(DatGameVO entry, string seedRaw, string seedKey)
+        internal void RecordSeed(DatGameVO entry, string seedRaw, string seedKey)
         {
             if (entryTraces == null)
                 return;
@@ -77,7 +63,7 @@ namespace Datinate.Rmvc.Dto
             t.SeedKey = seedKey;
         }
 
-        public void RecordInitialSeedGroup(IReadOnlyList<DatGameVO> entries)
+        internal void RecordInitialSeedGroup(IReadOnlyList<DatGameVO> entries)
         {
             if (entryTraces == null || entries.Count == 0)
                 return;
@@ -93,7 +79,7 @@ namespace Datinate.Rmvc.Dto
             }
         }
 
-        public void RecordFinalFamily(IReadOnlyList<DatGameVO> entries)
+        internal void RecordFinalFamily(IReadOnlyList<DatGameVO> entries)
         {
             if (entryTraces == null || entries.Count == 0)
                 return;
@@ -109,7 +95,7 @@ namespace Datinate.Rmvc.Dto
             }
         }
 
-        public void RecordSeedJoin(
+        internal void RecordSeedJoin(
             DatGameVO entry,
             AUTO_GROUP_TRACE_REASON_ENUM joinReason,
             string joinKey,
@@ -123,7 +109,7 @@ namespace Datinate.Rmvc.Dto
             RecordKeyEventInTrace(t.SeedJoinsByType, joinReason, joinKey, otherBucketSize, otherNameSamples);
         }
 
-        public void RecordMerge(
+        internal void RecordMerge(
             DatEntrySet a,
             DatEntrySet b,
             AUTO_GROUP_TRACE_REASON_ENUM mergeReason,
@@ -145,7 +131,7 @@ namespace Datinate.Rmvc.Dto
                 RecordMergeForEntry(e, mergeReason, mergeKey, aEntries.Count, aSamples);
         }
 
-        public void AttachPartReport(
+        internal void AttachPartReport(
             GamePartVO part,
             DatGameVO entry,
             DAT_GROUP_ENUM datGroupEnum,
@@ -153,7 +139,7 @@ namespace Datinate.Rmvc.Dto
             string datReference,
             string? derivedPartOwner)
         {
-            if (partReports == null || partFingerprintReports == null)
+            if (partReports == null || sourceReports == null)
                 return;
 
             EntryTrace? trace = null;
@@ -162,98 +148,110 @@ namespace Datinate.Rmvc.Dto
 
             var raw = entry.Name ?? string.Empty;
             var fingerprint = string.IsNullOrWhiteSpace(part.Fingerprint) ? entry.Fingerprint : part.Fingerprint;
-            var fingerprintTitleMatches = RegisterAndGetFingerprintTitleSamples(fingerprint, raw, datGroupEnum);
+            RegisterFingerprintTitle(fingerprint, raw, datGroupEnum);
 
-            var sb = new StringBuilder(3072);
-
-            AppendHeader(sb, "Automated Grouping Report");
-            AppendText(sb, raw);
-            AppendFingerprintTitleMatches(sb, raw, datGroupEnum, fingerprintTitleMatches);
-
-            AppendHeader(sb, "Identity");
-
-            if (string.IsNullOrWhiteSpace(datReference) == false)
-                AppendKV(sb, "DAT:", $"{datGroupEnum} | {datReference}");
-            else
-                AppendKV(sb, "DAT:", $"{datGroupEnum}");
-
-            AppendKV(sb, "Fingerprint:", fingerprint);
-
-            AppendHeader(sb, "Comparison data");
-            AppendKV(sb, "Title after removing flags:", entry.FlaglessName);
-            AppendKV(sb, "Comparison key (title + publisher):", entry.NamePublisherKey);
-            AppendKV(sb, "Comparison key (title + region):", entry.NameRegionKey);
-            AppendKV(sb, "MAME launch/category name:", entry.MameLaunchName);
-            AppendKV(sb, "Clone of:", entry.ParentName);
-            AppendKV(sb, "Part owner name:", entry.PartOwnerName);
-            AppendKV(sb, "Derived part-owner key:", derivedPartOwner);
-
-            AppendHeader(sb, "Grouping timeline");
-            AppendGroupingTimeline(sb, entry, trace);
-
-            AppendHeader(sb, "Initial grouping");
-            AppendKV(sb, "This item was first grouped using:", GetFriendlyTraceReason(GetSeedTraceReason(entry, trace)));
-            AppendKV(sb, "Seed value:", trace?.SeedRaw ?? "<not captured>");
-            AppendKV(sb, "Normalised grouping key:", trace?.SeedKey ?? "<not captured>");
-
-            AppendHeader(sb, "Grouping result");
-            AppendInitialGroupingResult(sb, trace);
-
-            AppendHeader(sb, "Final family result");
-            AppendFinalFamilyResult(sb, trace);
-
-            AppendHeader(sb, "Seed-group joins");
-            AppendTraceGroups(
-                sb,
-                trace?.SeedJoinsByType,
-                countLabelSingular: "seed-group join",
-                countLabelPlural: "seed-group joins",
-                sizeLabel: "Size of matching group at that step:",
-                emptyMessage: "No additional seed-group joins were captured after the initial grouping step.");
-
-            AppendHeader(sb, "Later merges");
-            AppendTraceGroups(
-                sb,
-                trace?.MergesByType,
-                countLabelSingular: "merge event",
-                countLabelPlural: "merge events",
-                sizeLabel: "Size of matching group at that step:",
-                emptyMessage: "No later merges were captured.");
-
-            var str = NormaliseReportText(sb.ToString());
+            var report = new AutomatedGroupingReport(
+                new AutomatedGroupingIdentity(raw, datSourceId, datGroupEnum, datReference, fingerprint),
+                new AutomatedGroupingComparison(entry.FlaglessName, entry.NamePublisherKey,
+                    entry.NameRegionKey, entry.MameLaunchName, entry.ParentName,
+                    entry.PartOwnerName, derivedPartOwner),
+                trace?.SeedRaw != null && trace.SeedKey != null
+                    ? new AutomatedGroupingSeed(GetSeedTraceReason(entry, trace), trace.SeedRaw, trace.SeedKey)
+                    : null,
+                trace != null && trace.InitialSeedGroupSize > 0
+                    ? new AutomatedGroupingMembership(trace.InitialSeedGroupSize, trace.InitialSeedSiblingSamples)
+                    : null,
+                trace != null && trace.FinalFamilySize > 0
+                    ? new AutomatedGroupingMembership(trace.FinalFamilySize, trace.FinalFamilySiblingSamples)
+                    : null,
+                trace != null,
+                SnapshotMatches(trace?.SeedJoinsByType),
+                SnapshotMatches(trace?.MergesByType),
+                Array.Empty<AutomatedGroupingName>());
 
             partReports.Remove(part);
-            partReports.Add(part, str);
+            partReports.Add(part, report);
 
-            partFingerprintReports[fingerprint] = str;
+            sourceReports.Remove(entry);
+            sourceReports.Add(entry, report);
         }
 
-        public bool TryGetPartReport(IGamePart part, out string report)
+        internal bool TryGetPartReport(IGamePart part, out AutomatedGroupingReport? report)
         {
-            report = string.Empty;
+            AutomatedGroupingReport? captured = null;
 
-            if (partFingerprintReports != null &&
-                partFingerprintReports.TryGetValue(part.Fingerprint, out report))
+            if (partReports != null)
+                partReports.TryGetValue(part, out captured);
+
+            // Shallow parts are new instances retaining the original source entry.
+            if (captured == null && part is GamePartVO gamePart &&
+                gamePart.IsShallowPartReference && sourceReports != null)
             {
-                return true;
+                sourceReports.TryGetValue(gamePart.DatGameSource, out captured);
             }
 
-            if (part is GamePartVO gamePart &&
-                partReports != null &&
-                partReports.TryGetValue(gamePart, out report))
+            if (captured == null)
             {
-                return true;
+                report = null;
+                return false;
             }
 
-            report = string.Empty;
-            return false;
+            // Resolve names at interrogation time, after grouping has populated the
+            // registry. Earlier attachments must also see later fingerprint matches.
+            var names = new List<AutomatedGroupingName>();
+
+            if (fingerprintTitleSamples != null &&
+                fingerprintTitleSamples.TryGetValue(captured.Identity.Fingerprint, out var matches))
+            {
+                foreach (var match in matches)
+                {
+                    if (match.Name != captured.Identity.EntryName || match.DatGroupEnum != captured.Identity.DatGroup)
+                        names.Add(new AutomatedGroupingName(match.Name, match.DatGroupEnum));
+                }
+            }
+
+            report = new AutomatedGroupingReport(captured.Identity, captured.Comparison,
+                captured.Seed, captured.InitialGroup, captured.FinalFamily, captured.HasCapturedTrace,
+                captured.SeedJoins, captured.LaterMerges, names);
+
+            return true;
         }
 
-        public void AddManagedListReport(string id, Dictionary<string, ManagedListItemReport> dictionary)
+        // The UI receives BaseGamePart instances from DatinateFamilyConverter.
+        // Transfer each exact association while its original part is still known;
+        // fingerprint equality is not sufficient to identify a report's source.
+        internal void AssociateConvertedPartReport(GamePartVO source, BaseGamePart converted)
+        {
+            if (partReports != null && TryGetPartReport(source, out var report) && report != null)
+            {
+                partReports.Remove(converted);
+                partReports.Add(converted, report);
+            }
+        }
+
+        private static IEnumerable<AutomatedGroupingMatch> SnapshotMatches(
+            Dictionary<AUTO_GROUP_TRACE_REASON_ENUM, Dictionary<string, MergeKeyTrace>>? groups)
+        {
+            if (groups == null)
+                yield break;
+
+            foreach (var group in groups)
+            {
+                foreach (var pair in group.Value)
+                {
+                    MergeKeyTrace trace = pair.Value;
+
+                    yield return new AutomatedGroupingMatch(group.Key, pair.Key, trace.MergeCount,
+                        trace.OtherSetSizeSample > 0 ? trace.OtherSetSizeSample : null, trace.OtherNameSamples);
+                }
+            }
+        }
+
+        internal void AddManagedListReport(string id, Dictionary<string, DatCustomisationDecisionReport> dictionary)
             => managedListDic[id] = new ManagedListWrapper(dictionary);
         
 
-        public ManagedListItemReport? GetManagedReport(string entryName, string id)
+        internal DatCustomisationDecisionReport? GetManagedReport(string entryName, string id)
         {
             if (managedListDic.ContainsKey(id))
                 return managedListDic[id].GetReport(entryName);
@@ -374,226 +372,6 @@ namespace Datinate.Rmvc.Dto
             }
         }
 
-        private static void AppendHeader(StringBuilder sb, string text)
-        {
-            AppendBlankLine(sb);
-            sb.Append("## ");
-            sb.AppendLine(text);
-        }
-
-        private static void AppendText(StringBuilder sb, string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-
-            sb.AppendLine(value.Trim());
-        }
-
-        private static void AppendBlankLine(StringBuilder sb)
-        {
-            if (sb.Length == 0)
-                return;
-
-            var n = sb.Length;
-            if (n >= 2 && sb[n - 1] == '\n' && sb[n - 2] == '\n')
-                return;
-
-            sb.AppendLine();
-        }
-
-        private static void AppendKV(StringBuilder sb, string keyWithColon, string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-
-            sb.AppendLine($"\t{keyWithColon}\t{value}");
-        }
-
-        private static void AppendGroupingTimeline(StringBuilder sb, DatGameVO entry, EntryTrace? trace)
-        {
-            sb.AppendLine($"\t- Seeded by {GetFriendlyTraceReason(GetSeedTraceReason(entry, trace)).ToLowerInvariant()}.");
-
-            if (trace != null && trace.InitialSeedGroupSize > 0)
-                sb.AppendLine($"\t- Initial group size: {FormatCount(trace.InitialSeedGroupSize, "item")}.");
-
-            if (trace?.SeedJoinsByType != null && trace.SeedJoinsByType.Count > 0)
-            {
-                var joinSummary = BuildReasonSummary(trace.SeedJoinsByType, "seed-group join", "seed-group joins");
-                if (!string.IsNullOrWhiteSpace(joinSummary))
-                    sb.AppendLine($"\t- Additional seed-group joins: {joinSummary}.");
-            }
-
-            if (trace?.MergesByType != null && trace.MergesByType.Count > 0)
-            {
-                var mergeSummary = BuildReasonSummary(trace.MergesByType, "merge event", "merge events");
-                if (!string.IsNullOrWhiteSpace(mergeSummary))
-                    sb.AppendLine($"\t- Later merges: {mergeSummary}.");
-            }
-            else
-            {
-                sb.AppendLine("\t- No later merges were needed.");
-            }
-
-            if (trace != null && trace.FinalFamilySize > 0)
-                sb.AppendLine($"\t- Final family size: {FormatCount(trace.FinalFamilySize, "item")}.");
-        }
-
-        private static string BuildReasonSummary(
-            Dictionary<AUTO_GROUP_TRACE_REASON_ENUM, Dictionary<string, MergeKeyTrace>> groupsByType,
-            string singular,
-            string plural)
-        {
-            var parts = new List<string>();
-
-            foreach (var pair in groupsByType)
-            {
-                var total = 0;
-                foreach (var keyPair in pair.Value)
-                    total += keyPair.Value.MergeCount;
-
-                if (total <= 0)
-                    continue;
-
-                parts.Add($"{GetFriendlyTraceReason(pair.Key)} ({total} {(total == 1 ? singular : plural)})");
-            }
-
-            return string.Join(", ", parts);
-        }
-
-        private static void AppendInitialGroupingResult(StringBuilder sb, EntryTrace? trace)
-        {
-            if (trace == null || trace.InitialSeedGroupSize <= 0)
-            {
-                AppendText(sb, "The initial grouping outcome was not captured.");
-                return;
-            }
-
-            AppendKV(sb, "This item started in an initial group of:", FormatCount(trace.InitialSeedGroupSize, "item"));
-
-            if (trace.InitialSeedGroupSize <= 1)
-            {
-                AppendText(sb, "No other items matched this item's initial grouping seed.");
-                return;
-            }
-
-            if (trace.InitialSeedSiblingSamples.Count == 0)
-            {
-                AppendText(sb, "This item grouped with other matching items, but no example item names were captured.");
-                return;
-            }
-
-            AppendBlankLine(sb);
-            AppendText(sb, "Other matching items in this initial group:");
-
-            for (var i = 0; i < trace.InitialSeedSiblingSamples.Count; i++)
-                sb.AppendLine($"\t\t\t- {trace.InitialSeedSiblingSamples[i]}");
-
-            var remaining = (trace.InitialSeedGroupSize - 1) - trace.InitialSeedSiblingSamples.Count;
-            if (remaining > 0)
-                sb.AppendLine($"\t\t\t... and {remaining} other {Pluralise(remaining, "item", "items")}.");
-        }
-
-        private static void AppendFinalFamilyResult(StringBuilder sb, EntryTrace? trace)
-        {
-            if (trace == null || trace.FinalFamilySize <= 0)
-            {
-                AppendText(sb, "The final family outcome was not captured.");
-                return;
-            }
-
-            AppendKV(sb, "This item ended in a final family of:", FormatCount(trace.FinalFamilySize, "item"));
-
-            if (trace.FinalFamilySize <= 1)
-            {
-                AppendText(sb, "No other items ended up grouped with this item.");
-                return;
-            }
-
-            if (trace.FinalFamilySiblingSamples.Count == 0)
-            {
-                AppendText(sb, "Other final family members existed, but no example item names were captured.");
-                return;
-            }
-
-            AppendBlankLine(sb);
-            AppendText(sb, "Sample final family members:");
-
-            for (var i = 0; i < trace.FinalFamilySiblingSamples.Count; i++)
-                sb.AppendLine($"\t\t\t- {trace.FinalFamilySiblingSamples[i]}");
-
-            var remaining = (trace.FinalFamilySize - 1) - trace.FinalFamilySiblingSamples.Count;
-            if (remaining > 0)
-                sb.AppendLine($"\t\t\t... and {remaining} other {Pluralise(remaining, "item", "items")}.");
-        }
-
-        private static void AppendTraceGroups(
-            StringBuilder sb,
-            Dictionary<AUTO_GROUP_TRACE_REASON_ENUM, Dictionary<string, MergeKeyTrace>>? groupsByType,
-            string countLabelSingular,
-            string countLabelPlural,
-            string sizeLabel,
-            string emptyMessage)
-        {
-            if (groupsByType == null || groupsByType.Count == 0)
-            {
-                AppendText(sb, emptyMessage);
-                return;
-            }
-
-            var wroteAny = false;
-
-            foreach (var typePair in groupsByType)
-            {
-                if (typePair.Value.Count == 0)
-                    continue;
-
-                if (wroteAny)
-                    AppendBlankLine(sb);
-
-                wroteAny = true;
-                sb.AppendLine($"\t{GetFriendlyTraceReason(typePair.Key)}:");
-
-                var shown = 0;
-                foreach (var keyPair in typePair.Value)
-                {
-                    var mk = keyPair.Value;
-
-                    sb.AppendLine($"\t\tKey:\t{FormatTraceKey(keyPair.Key)}");
-                    sb.AppendLine($"\t\tSeen:\t{mk.MergeCount} {(mk.MergeCount == 1 ? countLabelSingular : countLabelPlural)}");
-
-                    if (mk.OtherNameSamples.Count > 0)
-                    {
-                        sb.AppendLine("\t\tSample items from matching group:");
-                        for (var i = 0; i < mk.OtherNameSamples.Count; i++)
-                            sb.AppendLine($"\t\t\t- {mk.OtherNameSamples[i]}");
-                    }
-
-                    if (mk.OtherSetSizeSample > 0)
-                        sb.AppendLine($"\t\t{sizeLabel}\t{FormatCount(mk.OtherSetSizeSample, "item")}");
-
-                    shown++;
-
-                    if (shown >= MaxTraceKeysPerType)
-                    {
-                        var omitted = typePair.Value.Count - shown;
-                        if (omitted > 0)
-                        {
-                            AppendBlankLine(sb);
-                            sb.AppendLine($"\t\t... and {omitted} other matching {Pluralise(omitted, "key", "keys")}.");
-                        }
-
-                        break;
-                    }
-
-                    if (shown < typePair.Value.Count)
-                        AppendBlankLine(sb);
-                }
-            }
-
-            if (!wroteAny)
-                AppendText(sb, emptyMessage);
-        }
-
         private static AUTO_GROUP_TRACE_REASON_ENUM GetSeedTraceReason(DatGameVO entry, EntryTrace? trace)
         {
             if (!string.IsNullOrWhiteSpace(entry.ParentName))
@@ -606,80 +384,13 @@ namespace Datinate.Rmvc.Dto
             return AUTO_GROUP_TRACE_REASON_ENUM.SeedJoinNormalisedName;
         }
 
-        private static string GetFriendlyTraceReason(AUTO_GROUP_TRACE_REASON_ENUM traceReason)
-        {
-            return traceReason switch
-            {
-                AUTO_GROUP_TRACE_REASON_ENUM.SeedJoinParentClone => "Parent/clone relationship",
-                AUTO_GROUP_TRACE_REASON_ENUM.SeedJoinMameLaunchCategory => "MAME launch/category name",
-                AUTO_GROUP_TRACE_REASON_ENUM.SeedJoinNormalisedName => "Normalised name",
-                AUTO_GROUP_TRACE_REASON_ENUM.MergeByNamePublisher => "Normalised title + publisher",
-                AUTO_GROUP_TRACE_REASON_ENUM.MergeByNameRegion => "Normalised title + region",
-                AUTO_GROUP_TRACE_REASON_ENUM.MergeByNormalisedName => "Normalised name",
-                AUTO_GROUP_TRACE_REASON_ENUM.MergeByFingerprint => "Exact fingerprint",
-                AUTO_GROUP_TRACE_REASON_ENUM.CollapseFamilyByRegionNormalisedTitle => "Collapsed family by region-normalised title",
-                _ => traceReason.ToString()
-            };
-        }
-
-        private static string FormatTraceKey(string? key)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-                return "<empty>";
-
-            return key;
-        }
-
-        private static string FormatCount(int count, string singular)
-        {
-            return $"{count} {Pluralise(count, singular, singular + "s")}";
-        }
-
-        private static string Pluralise(int count, string singular, string plural)
-        {
-            return count == 1 ? singular : plural;
-        }
-
-        private static string NormaliseReportText(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return string.Empty;
-
-            // NOTE: The two-argument Replace already uses ordinal, case-sensitive matching.
-            var lines = text.Replace("\r\n", "\n").Split('\n');
-
-            var sb = new StringBuilder(text.Length);
-            var previousBlank = false;
-
-            for (var i = 0; i < lines.Length; i++)
-            {
-                var line = lines[i].TrimEnd();
-                var isBlank = line.Length == 0;
-
-                if (isBlank)
-                {
-                    if (previousBlank)
-                        continue;
-
-                    previousBlank = true;
-                    sb.AppendLine();
-                    continue;
-                }
-
-                previousBlank = false;
-                sb.AppendLine(line);
-            }
-
-            return sb.ToString().TrimEnd();
-        }
-
-        private IReadOnlyList<FingerprintTitleSample> RegisterAndGetFingerprintTitleSamples(
+        private void RegisterFingerprintTitle(
             string fingerprint,
             string raw,
             DAT_GROUP_ENUM datGroupEnum)
         {
             if (fingerprintTitleSamples == null || string.IsNullOrWhiteSpace(fingerprint))
-                return Array.Empty<FingerprintTitleSample>();
+                return;
 
             if (!fingerprintTitleSamples.TryGetValue(fingerprint, out var samples))
             {
@@ -705,45 +416,18 @@ namespace Datinate.Rmvc.Dto
                     samples.Add(new FingerprintTitleSample(raw, datGroupEnum));
             }
 
-            return samples;
-        }
-
-        private static void AppendFingerprintTitleMatches(
-            StringBuilder sb,
-            string raw,
-            DAT_GROUP_ENUM datGroupEnum,
-            IReadOnlyList<FingerprintTitleSample> matches)
-        {
-            if (matches.Count <= 1)
-                return;
-
-            for (var i = 0; i < matches.Count; i++)
-            {
-                var match = matches[i];
-
-                if (string.IsNullOrWhiteSpace(match.Name))
-                    continue;
-
-                if (string.Equals(match.Name, raw, StringComparison.Ordinal) &&
-                    match.DatGroupEnum == datGroupEnum)
-                {
-                    continue;
-                }
-
-                sb.AppendLine($"{match.Name} [{match.DatGroupEnum}]");
-            }
         }
 
         private sealed class ManagedListWrapper
         {
-            private readonly Dictionary<string, ManagedListItemReport> dictionary;
+            private readonly Dictionary<string, DatCustomisationDecisionReport> dictionary;
 
-            public ManagedListWrapper(Dictionary<string, ManagedListItemReport> dictionary)
+            public ManagedListWrapper(Dictionary<string, DatCustomisationDecisionReport> dictionary)
             {
                 this.dictionary = dictionary;
             }
 
-            public ManagedListItemReport? GetReport(string entryName)
+            public DatCustomisationDecisionReport? GetReport(string entryName)
             {
                 if (dictionary.ContainsKey(entryName))
                     return dictionary[entryName];

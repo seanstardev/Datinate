@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.UI.CustomList;
+﻿using Datinate.App.Shared.Reports;
+using Datinate.App.WinForms.View.UI.CustomList;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Rmvc;
 using Datinate.Shared;
@@ -12,6 +13,7 @@ namespace Datinate.App.WinForms.View
     {
         void ICustomListView.Hide() => uiDispatcher.Run(() => base.Hide());
         private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
+        private readonly FormsReportToolTip reportToolTip;
 
         public event Action<DatVO?>? CreateDatClickEvt;
         public event Action? FormClosingEvt;
@@ -38,12 +40,13 @@ namespace Datinate.App.WinForms.View
 
         private bool suppressFlagSelectionChanged;
         private string? flagSearchText;
-        private ManagedList? lastManagedList;
+        private DatCustomisation? lastManagedList;
 
         public CustomListView()
         {
             uiDispatcher = new Datinate.App.WinForms.View.Util.UiDispatcher(this);
             InitializeComponent();
+            reportToolTip = new FormsReportToolTip(this);
             PerformSearchInputChanges();
 
             UIHelper.PopSplitter(splitContainer1);
@@ -69,6 +72,15 @@ namespace Datinate.App.WinForms.View
 
             Facade.RegisterActor<ICustomListView>(this);
         }
+
+        protected override async void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (!DesignMode)
+                await reportToolTip.WarmUpAsync();
+        }
+
         private void IncludedList_RowClicked(string rowText)
         {
             List_RowClicked(included_lv, rowText);
@@ -91,7 +103,7 @@ namespace Datinate.App.WinForms.View
             if (report == null)
                 return;
 
-            ManagedListItemReportToolTip.Show(origin, report, pinned: true, screenPoint: Control.MousePosition);
+            reportToolTip.Show(origin, DatCustomisationReportHtml.CreateContent(report), pinned: true, screenPoint: Control.MousePosition);
         }
 
         private void OnSaveExpressions(DatFilter[] filters)
@@ -115,12 +127,14 @@ namespace Datinate.App.WinForms.View
 
         protected void HandleDisposing()
         {
+            reportToolTip.Dispose();
+
             included_lv.RowClicked -= IncludedList_RowClicked;
             excluded_lv.RowClicked -= ExcludedList_RowClicked;
 
             Facade.UnregisterActor<ICustomListView>(this);
         }
-        private ManagedListItemReport? BuildDecisionReport(string entryName, bool verbose)
+        private DatCustomisationDecisionReport? BuildDecisionReport(string entryName, bool verbose)
         {
             var ml = lastManagedList;
             if (ml == null)
@@ -133,6 +147,8 @@ namespace Datinate.App.WinForms.View
         {
             Ui(() =>
             {
+                reportToolTip.Hide();
+
                 categories = Array.Empty<Flag>();
                 flagStrings = Array.Empty<string>();
                 expressions = new List<DatFilter>();
@@ -294,7 +310,7 @@ namespace Datinate.App.WinForms.View
                     return;
                 }
 
-                var ml = new ManagedList(completeGameArray, expressions);
+                var ml = new DatCustomisation(completeGameArray, expressions);
                 lastManagedList = ml;
 
                 var inc = BuildFileRows(ml.GetIncludedAndImplict(), ml, searchState);
@@ -441,7 +457,7 @@ namespace Datinate.App.WinForms.View
 
         private List<(string Text, EXPRESSION_ACTION_ENUM Action)> BuildFileRows(
             IEnumerable<KeyValuePair<string, EXPRESSION_ACTION_ENUM>> rows,
-            ManagedList ml,
+            DatCustomisation ml,
             SearchState searchState)
         {
             var list = rows is ICollection<KeyValuePair<string, EXPRESSION_ACTION_ENUM>> c
@@ -457,7 +473,7 @@ namespace Datinate.App.WinForms.View
             return list;
         }
 
-        private bool SearchMatchesFile(string fileName, ManagedList ml, SearchState searchState)
+        private bool SearchMatchesFile(string fileName, DatCustomisation ml, SearchState searchState)
         {
             if (!searchState.HasSearch)
                 return true;
@@ -643,7 +659,7 @@ namespace Datinate.App.WinForms.View
 
         private void UpdateCategoryListUI(
             List<(string Text, EXPRESSION_ACTION_ENUM Action)> includedRowsList,
-            ManagedList ml,
+            DatCustomisation ml,
             string? prevCategory)
         {
             var totalCategoryOptions = CountNonEmptyCategoryOptions();
@@ -692,7 +708,7 @@ namespace Datinate.App.WinForms.View
 
         private Dictionary<string, int> CountCategoryOccurrences(
             List<(string Text, EXPRESSION_ACTION_ENUM Action)> includedRowsList,
-            ManagedList ml)
+            DatCustomisation ml)
         {
             var categoryCounts = new Dictionary<string, int>(StringComparer.Ordinal);
 
