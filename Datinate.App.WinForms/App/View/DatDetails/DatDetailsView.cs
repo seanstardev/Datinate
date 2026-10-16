@@ -1,4 +1,4 @@
-﻿using Datinate.App.Core.RomSummary;
+﻿using Datinate.App.Shared.RomSummary;
 using Datinate.App.WinForms.View.Dto;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.Util;

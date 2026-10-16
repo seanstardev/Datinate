@@ -1,4 +1,4 @@
-namespace Datinate.App.Core.RomSummary
+namespace Datinate.App.Shared.RomSummary
 {
     public sealed class RomExtensionSummary
     {

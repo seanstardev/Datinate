@@ -3,7 +3,7 @@ using System.Linq;
 using Datinate.Shared;
 using Datinate.Shared.Dat;
 
-namespace Datinate.App.Core.RomSummary
+namespace Datinate.App.Shared.RomSummary
 {
     public sealed class RomSummaryBuilder
     {

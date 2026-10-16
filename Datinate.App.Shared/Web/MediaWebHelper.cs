@@ -1,15 +1,18 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Datinate.App.Core.Web
+namespace Datinate.App.Shared.Web
 {
     public static class MediaWebHelper
     {
         public const string AboutBlankUri = "about:blank";
+
+        private static readonly HttpClient Http = new();
 
         public static string MediaWebUserDataFolder
         {
@@ -32,6 +35,33 @@ namespace Datinate.App.Core.Web
                 "Datinate",
                 "MediaWebView");
 
+        // Reads a local file or downloads an HTTP/HTTPS resource as raw bytes, without decoding its contents.
+        public static async Task<byte[]> LoadBytesAsync(Uri uri)
+        {
+            if (!uri.IsFile)
+                return await Http.GetByteArrayAsync(uri).ConfigureAwait(false);
+
+            string path = uri.LocalPath;
+
+            if (!File.Exists(path))
+                throw new FileNotFoundException(path);
+
+            // NOTE: .NET Standard 2.0 lacks File.ReadAllBytesAsync(), so read asynchronously through a stream.
+            using (var file = new FileStream(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 4096,
+                options: FileOptions.Asynchronous))
+            using (var buffer = new MemoryStream())
+            {
+                await file.CopyToAsync(buffer).ConfigureAwait(false);
+
+                return buffer.ToArray();
+            }
+        }
+
         public static async Task<Uri> CreateTempHtmlAsync(string html)
         {
             Directory.CreateDirectory(TempHtmlFolder);
@@ -40,6 +70,7 @@ namespace Datinate.App.Core.Web
                 TempHtmlFolder,
                 Guid.NewGuid().ToString("N") + ".html");
 
+            // NOTE: .NET Standard 2.0 lacks File.WriteAllTextAsync(), so write asynchronously through a stream.
             using (var stream = new FileStream(
                 path,
                 FileMode.Create,

@@ -1,4 +1,5 @@
-﻿using Datinate.App.Core.Web;
+﻿using Datinate.App.Shared.Reports;
+using Datinate.App.Shared.Web;
 using Datinate.App.WinForms.Properties;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.Util;
@@ -249,7 +250,10 @@ namespace Datinate.App.WinForms.View
             if (!uiDispatcher.CheckAccess)
                 return uiDispatcher.Read(() => RenderGamePartGroupingReports(part, managedReport, customiseReport));
 
-            return HtmlReportsUtil.CreatePartReports(part, customiseReport, managedReport, this);
+            return HtmlReportsUtil.CreatePartReports(
+                customiseReport,
+                managedReport,
+                new FormsPartReportRenderer(this));
         }
         private void ApplyAutoSourceTextToPromptCards()
         {

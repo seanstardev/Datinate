@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Datinate.App.Core\Datinate.App.Core.csproj" />
+    <ProjectReference Include="..\Datinate.App.Shared\Datinate.App.Shared.csproj" />
     <ProjectReference Include="..\Datinate.Rmvc\Datinate.Rmvc.csproj" />
     <ProjectReference Include="..\Datinate.Shared\Datinate.Shared.csproj" />
   </ItemGroup>

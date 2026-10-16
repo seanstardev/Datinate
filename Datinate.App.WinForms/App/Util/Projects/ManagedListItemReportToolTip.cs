@@ -131,7 +131,7 @@ namespace Datinate.App.WinForms.View.Util
             }
         }
 
-        private static string RenderToPngBase64(
+        internal static string RenderToPngBase64(
             ManagedListItemReport report, 
             out int widthPx, 
             out int heightPx, 
@@ -162,31 +162,6 @@ namespace Datinate.App.WinForms.View.Util
                 DrawDecisionToolTipCore(g, new Rectangle(0, 0, w, h), baseFont);
             });
         }
-
-        public static string? RenderToPngDataUri(ManagedListItemReport report, out int widthPx, out int heightPx, Font? font = null)
-        {
-            var b64 = RenderToPngBase64(report, out widthPx, out heightPx, font);
-            if (string.IsNullOrEmpty(b64))
-                return null;
-
-            return "data:image/png;base64," + b64;
-        }
-
-        public static string? CreateHtmlFragment(ManagedListItemReport report, Font? font = null)
-        {
-            var uri = RenderToPngDataUri(report, out var w, out var h, font);
-            if (string.IsNullOrEmpty(uri))
-                return null;
-
-            return
-                "<img " +
-                "src=\"" + uri + "\" " +
-                "width=\"" + w + "\" " +
-                "height=\"" + h + "\" " +
-                "style=\"display:block;width:" + w + "px;height:" + h + "px;\" " +
-                "alt=\"\" />";
-        }
-
 
         private static void HookOrigin(Control? origin)
         {

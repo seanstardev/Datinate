@@ -1,4 +1,4 @@
-﻿using Datinate.App.Core.Web;
+﻿using Datinate.App.Shared.Web;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 

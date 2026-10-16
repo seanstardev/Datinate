@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Datinate.Shared", "..\Datin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Datinate.Rmvc", "..\Datinate.Rmvc\Datinate.Rmvc.csproj", "{4FA67D0A-8CF1-3DFF-D840-D4BE6E9F6ACE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Datinate.App.Core", "..\Datinate.App.Core\Datinate.App.Core.csproj", "{1F81C273-6204-4AFF-9C48-AE24DC06A40C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Datinate.App.Shared", "..\Datinate.App.Shared\Datinate.App.Shared.csproj", "{1F81C273-6204-4AFF-9C48-AE24DC06A40C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

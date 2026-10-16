@@ -1,4 +1,4 @@
-namespace Datinate.App.WinForms.View.Util
+﻿namespace Datinate.App.WinForms.View.Util
 {
     internal static class DatGrouperPartToolTip
     {
@@ -72,47 +72,18 @@ namespace Datinate.App.WinForms.View.Util
             });
         }
 
-        public static string? RenderToPngDataUri(string text, out int widthPx, out int heightPx, Control control, bool fullHeight = false)
+        internal static string RenderFullReportToPngBase64(
+            string text,
+            out int widthPx,
+            out int heightPx,
+            Font font)
         {
-            Font font = control.Font;
-
-            var b64 = RenderToPngBase64(
+            return RenderToPngBase64(
                 text,
                 out widthPx,
                 out heightPx,
                 font,
-                fullHeight ? LayoutMode.FullImage : LayoutMode.Tooltip);
-
-            if (string.IsNullOrEmpty(b64))
-                return null;
-
-            return "data:image/png;base64," + b64;
-        }
-
-        public static string? CreateHtmlFragment(string text, Control dpiSource)
-        {
-            var dataUri = RenderToPngDataUri(text, out int widthPx, out int heightPx, dpiSource, fullHeight: true);
-            if (string.IsNullOrEmpty(dataUri))
-                return null;
-
-            var scale = 1f;
-
-            if (dpiSource != null && !dpiSource.IsDisposed)
-                scale = Math.Max(1f, dpiSource.DeviceDpi / 96f);
-
-            var w = (int)Math.Round(widthPx / scale);
-            var h = (int)Math.Round(heightPx / scale);
-
-            if (w < 1) w = 1;
-            if (h < 1) h = 1;
-
-            return
-                "<img " +
-                "src=\"" + dataUri + "\" " +
-                "width=\"" + w + "\" " +
-                "height=\"" + h + "\" " +
-                "style=\"display:block; width:" + w + "px; height:" + h + "px;\" " +
-                "alt=\"\" />";
+                LayoutMode.FullImage);
         }
 
         private static void EnsureFonts(Font font)

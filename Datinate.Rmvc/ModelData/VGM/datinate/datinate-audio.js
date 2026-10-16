@@ -246,6 +246,21 @@
         previewMode = false;
     }
 
+    // Acknowledge the completed reset, rather than only its invocation by the browser host.
+    async function resetAndPost(requestId) {
+        try {
+            await reset();
+
+            post("reset-complete", { requestId });
+        }
+        catch (error) {
+            post("reset-failed", {
+                requestId,
+                error: error?.message || String(error)
+            });
+        }
+    }
+
     function buildBrowserArchivePlaylist(entries) {
         return entries.map(entry => ({
             title: cleanTitle(entry.path),
@@ -1020,7 +1035,8 @@
         setRepeatPlaylist,
         toggleRepeatPlaylist,
         setVolume,
-        reset
+        reset,
+        resetAndPost
     };
 
     post("facade-ready");

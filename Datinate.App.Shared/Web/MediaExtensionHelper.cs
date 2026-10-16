@@ -1,6 +1,6 @@
 using System;
 
-namespace Datinate.App.Core.Web
+namespace Datinate.App.Shared.Web
 {
     public static class MediaExtensionHelper
     {

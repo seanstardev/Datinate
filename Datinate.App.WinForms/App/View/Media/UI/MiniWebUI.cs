@@ -1,4 +1,5 @@
-﻿using Datinate.App.Core.Web;
+﻿using Datinate.App.Shared.Web;
+using Datinate.App.Shared.Web.Audio;
 using Datinate.App.WinForms.Properties;
 using Datinate.App.WinForms.View.Data;
 using Datinate.App.WinForms.View.Util;
@@ -29,8 +30,6 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         private readonly PictureBox imageView;
      
-        private static readonly HttpClient Http = new();
-
         private string? pendingUri;
         private bool coreConfigured;
 
@@ -407,20 +406,9 @@ namespace Datinate.App.WinForms.View.UI.Media
 
             try
             {
-                byte[] bytes;
-
-                if (uri.IsFile)
-                {
-                    var path = uri.LocalPath;
-
-                    if (!File.Exists(path)) throw new FileNotFoundException(path);
-
-                    bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
-                }
-                else
-                {
-                    bytes = await Http.GetByteArrayAsync(uri).ConfigureAwait(false);
-                }
+                byte[] bytes = await MediaWebHelper
+                    .LoadBytesAsync(uri)
+                    .ConfigureAwait(false);
 
                 if (token != navToken)
                     return;

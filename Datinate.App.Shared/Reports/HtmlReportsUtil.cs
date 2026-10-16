@@ -1,34 +1,52 @@
-﻿using Datinate.Shared;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Datinate.Shared;
 using Datinate.Shared.Radio;
 
-namespace Datinate.App.WinForms.View.Util
+namespace Datinate.App.Shared.Reports
 {
     public static class HtmlReportsUtil
     {
         public static string? CreatePartReports(
-            IGamePart part,
             string? autoGrouperReport,
             ManagedListItemReport? customiseReport,
-            Control someControl)
+            IPartReportRenderer renderer)
         {
-            if (string.IsNullOrWhiteSpace(autoGrouperReport) && customiseReport == null)
+            if (IsNullOrWhiteSpace20(autoGrouperReport) && customiseReport == null)
                 return null;
 
-            string? report1 = null;
-            string? report2 = null;
+            ReportImage? automatedImage = null;
+            ReportImage? customisedImage = null;
 
-            if (!string.IsNullOrWhiteSpace(autoGrouperReport))
-                report1 = DatGrouperPartToolTip.CreateHtmlFragment(autoGrouperReport, someControl);
+            if (!IsNullOrWhiteSpace20(autoGrouperReport))
+                automatedImage = renderer.RenderAutomatedReport(autoGrouperReport);
 
             if (customiseReport != null)
-                report2 = ManagedListItemReportToolTip.CreateHtmlFragment(customiseReport);
+                customisedImage = renderer.RenderCustomisedReport(customiseReport);
 
-            return WrapImageFragmentsAsPage(report1, report2);
+            return WrapImageFragmentsAsPage(
+                CreateImageFragment(automatedImage),
+                CreateImageFragment(customisedImage));
+        }
+
+        private static string? CreateImageFragment(ReportImage? image)
+        {
+            if (image == null)
+                return null;
+
+            return
+                "<img " +
+                "src=\"data:image/png;base64," + image.PngBase64 + "\" " +
+                "width=\"" + image.DisplayWidth + "\" " +
+                "height=\"" + image.DisplayHeight + "\" " +
+                "style=\"display:block;width:" + image.DisplayWidth + "px;height:" + image.DisplayHeight + "px;\" " +
+                "alt=\"\" />";
         }
 
         public static string? CreateCuratedImportErrorsReport(Dictionary<string, IGamePart?> importErrorReport)
         {
-            if (importErrorReport == null || importErrorReport.Count == 0)
+            if (importErrorReport.Count == 0)
                 return null;
 
             static string H(string? value) => System.Net.WebUtility.HtmlEncode(value ?? string.Empty);
@@ -217,6 +235,7 @@ namespace Datinate.App.WinForms.View.Util
 
             return sb.ToString();
         }
+
         private static string WrapImageFragmentsAsPage(params string?[] fragments)
         {
             var sb = new System.Text.StringBuilder(4096);
@@ -233,12 +252,12 @@ namespace Datinate.App.WinForms.View.Util
 
             for (int i = 0; i < fragments.Length; i++)
             {
-                var f = fragments[i];
-                if (string.IsNullOrWhiteSpace(f))
+                var fragment = fragments[i];
+                if (string.IsNullOrWhiteSpace(fragment))
                     continue;
 
                 sb.Append("<div>");
-                sb.Append(f);
+                sb.Append(fragment);
                 sb.Append("</div>");
             }
 
