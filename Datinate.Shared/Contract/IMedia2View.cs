@@ -4,7 +4,7 @@ namespace Datinate.Shared.Rmvc
 {
     public interface IMedia2View : IRContract
     {
-        event Action<RbMediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
+        event Action<MediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
         event Action<ILookupSet, string, bool>? ShowMediaCardEvt;
         event Action? MediaCardDragStartEvt;
         event Action? MediaCardDragEndEvt;

@@ -14,7 +14,7 @@ namespace Datinate.App.WinForms.View
     {
         private readonly Datinate.App.WinForms.View.Util.UiDispatcher uiDispatcher;
 
-        public event Action<RbMediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
+        public event Action<MediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
         public event Action<ILookupSet, string, bool>? ShowMediaCardEvt;
         public event Action? MediaCardDragStartEvt;
         public event Action? MediaCardDragEndEvt;
@@ -579,7 +579,7 @@ namespace Datinate.App.WinForms.View
             ui.MediaAssignmentChangeEvt += OnMediaAssignmentChange;
         }
 
-        private void OnMediaAssignmentChange(RbMediaItemAssignmentUpdate assignment) =>
+        private void OnMediaAssignmentChange(MediaItemAssignmentUpdate assignment) =>
             MediaAssignmentChangeEvt?.Invoke(assignment);
 
         private void UnwireAssignUI(Media2AssignUI ui)

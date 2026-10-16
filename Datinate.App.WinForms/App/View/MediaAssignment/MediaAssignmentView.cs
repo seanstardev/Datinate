@@ -175,11 +175,11 @@ namespace Datinate.App.WinForms.View
                 UpdateDescriptorGrayscaleFromMouse();
             });
         }
-        public void SetScoring(DatGrouperScoring scoring)
+        public void SetScoring(DatGrouperScoring scoring, MediaScoringSummaryDTO summary)
         {
             if (!uiDispatcher.CheckAccess)
             {
-                uiDispatcher.Run(() => SetScoring(scoring));
+                uiDispatcher.Run(() => SetScoring(scoring, summary));
                 return;
             }
 
@@ -188,43 +188,12 @@ namespace Datinate.App.WinForms.View
 
             Ui(() =>
             {
-                int total = scoring.MediaDictionary.Count + scoring.ResourceDictionary.Count;
+                scoringLabel.Text = summary.Hits + " / " + summary.Total;
+                scoringPercentLabel.Text = summary.Percent + "%";
 
-                int hits = 0;
+                ApplyScoringSummaryVisualState(summary.IsPerfect, summary.IsScoringExempt);
 
-                foreach (var kvp in scoring.ResourceDictionary)
-                {
-                    if (kvp.Value.HasScore)
-                        hits++;
-                }
-
-                foreach (var kvp in scoring.MediaDictionary)
-                {
-                    if (kvp.Value.HasScore)
-                        hits++;
-                }
-
-                bool isPerfect = total > 0 && hits == total;
-
-                int percent = total <= 0
-                    ? 0
-                    : (int)Math.Round((hits * 100d) / total, MidpointRounding.AwayFromZero);
-
-                if (percent < 0)
-                    percent = 0;
-                else if (percent > 100)
-                    percent = 100;
-
-                // Do not visually claim 100% unless scoring is genuinely complete.
-                if (!isPerfect && percent == 100)
-                    percent = 99;
-
-                scoringLabel.Text = hits + " / " + total;
-                scoringPercentLabel.Text = percent + "%";
-
-                ApplyScoringSummaryVisualState(isPerfect, scoring.IsScoringExempt);
-
-                scoringUI.SetUI(scoring);
+                scoringUI.SetUI(scoring, summary);
 
                 SetScoringActive(scoringBtn.Checked);
             });

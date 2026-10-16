@@ -3,9 +3,9 @@ using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.Shared
 {
-    public class RbMediaItemAssignmentUpdate
+    public class MediaItemAssignmentUpdate
     {
-        public RbMediaItemAssignmentUpdate(
+        public MediaItemAssignmentUpdate(
             IGameFamily family,
             string sourceId,
             MEDIA_ASSIGNMENT_ENUM assignmentEnum,

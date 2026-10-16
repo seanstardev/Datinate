@@ -248,7 +248,7 @@ namespace Datinate.Rmvc.Model
             IReadOnlyDictionary<IGameFamily, IMediaCollectionImportExport?> importedCollection,
             IReadOnlyDictionary<IGameFamily, IGameFamily> deltaRemaps)
         {
-            var mediaUpdates = new List<RbMediaItemAssignmentUpdate>();
+            var mediaUpdates = new List<MediaItemAssignmentUpdate>();
             var metaUpdates = new List<PendingMetaUpdate>();
 
             lock (gate)
@@ -281,7 +281,7 @@ namespace Datinate.Rmvc.Model
                         if (string.IsNullOrWhiteSpace(entryName))
                             continue;
 
-                        mediaUpdates.Add(new RbMediaItemAssignmentUpdate(
+                        mediaUpdates.Add(new MediaItemAssignmentUpdate(
                             targetFamily,
                             sourceId,
                             DatinateEnums.MEDIA_ASSIGNMENT_ENUM.Assigned,
@@ -348,7 +348,7 @@ namespace Datinate.Rmvc.Model
             return MediaCollectionsView;
         }
 
-        public IReadOnlyDictionary<IGameFamily, IMediaCollection> UpdateMediaCollectionItem(RbMediaItemAssignmentUpdate assignment)
+        public IReadOnlyDictionary<IGameFamily, IMediaCollection> UpdateMediaCollectionItem(MediaItemAssignmentUpdate assignment)
         {
             return UpdateMediaCollectionItems(new[] { assignment });
         }
@@ -383,7 +383,7 @@ namespace Datinate.Rmvc.Model
         }
 
         private IReadOnlyDictionary<IGameFamily, IMediaCollection> UpdateMediaCollectionItems(
-            RbMediaItemAssignmentUpdate[] assignments)
+            MediaItemAssignmentUpdate[] assignments)
         {
             lock (gate)
             {
@@ -399,7 +399,7 @@ namespace Datinate.Rmvc.Model
                         if (existingContentPaths.TryGetValue(col.ContentPath, out var exists))
                             contentPathExists = exists;
 
-                    collection.SourceIdAssignmentDictionary[assignment.SourceId] = new RbMediaItemAssignment(
+                    collection.SourceIdAssignmentDictionary[assignment.SourceId] = new MediaItemAssignment(
                         assignment.SourceId,
                         assignment.AssignmentEnum,
                         assignment.EntryName,
@@ -449,10 +449,10 @@ namespace Datinate.Rmvc.Model
         }
         private sealed class PendingMediaImportUpdate
         {
-            public RbMediaItemAssignmentUpdate[] PendingAssignments { get; }
+            public MediaItemAssignmentUpdate[] PendingAssignments { get; }
             public PendingMetaUpdate[] PendingMetaUpdates { get; }
             public PendingMediaImportUpdate(
-                RbMediaItemAssignmentUpdate[] pendingAssignments,
+                MediaItemAssignmentUpdate[] pendingAssignments,
                 PendingMetaUpdate[] pendingMetaUpdates)
             {
                 PendingAssignments = pendingAssignments;

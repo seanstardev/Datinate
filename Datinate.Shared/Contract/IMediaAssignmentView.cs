@@ -12,7 +12,7 @@ namespace Datinate.Shared.Rmvc
         void SetView(IMediaCollection mediaCollection);
         void SetViewMediaItem(string entryName, RadioSourceDTO radioSource);
         void SetReadOnlyModeActive(bool readOnlyMode);
-        void SetScoring(DatGrouperScoring scoring);
+        void SetScoring(DatGrouperScoring scoring, MediaScoringSummaryDTO summary);
         void SetScoringActive(bool active);
         void SetDescriptorDefinitions(IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions);
         void SetMediaCardDragStart();

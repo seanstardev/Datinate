@@ -37,7 +37,7 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
             });
         }
 
-        public void SetUI(DatGrouperScoring scoring)
+        public void SetUI(DatGrouperScoring scoring, MediaScoringSummaryDTO summary)
         {
             Ui(() =>
             {
@@ -46,27 +46,10 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
 
                 try
                 {
-                    int total = scoring.ResourceDictionary.Count + scoring.MediaDictionary.Count;
-                    int hits = 0;
-
-                    foreach (var item in scoring.ResourceDictionary.Values)
-                    {
-                        if (item.HasScore)
-                            hits++;
-                    }
-
-                    foreach (var item in scoring.MediaDictionary.Values)
-                    {
-                        if (item.HasScore)
-                            hits++;
-                    }
-
-                    bool isPerfect = total > 0 && hits == total;
-
                     BackColor =
-                        scoring.IsScoringExempt
+                        summary.IsScoringExempt
                             ? Color.FromArgb(180, 85, 0)
-                            : isPerfect
+                            : summary.IsPerfect
                                 ? Color.DarkGreen
                                 : SystemColors.Control;
 
@@ -79,7 +62,7 @@ namespace Datinate.App.WinForms.View.UI.MediaAssignment
 
                     rowContainer.Controls.Clear();
 
-                    int totalRows = scoring.ResourceDictionary.Count + scoring.MediaDictionary.Count;
+                    int totalRows = summary.Total;
                     int rowIndex = 0;
 
                     foreach (var resource in scoring.ResourceDictionary)

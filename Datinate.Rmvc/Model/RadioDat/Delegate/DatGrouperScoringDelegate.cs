@@ -131,7 +131,7 @@ namespace Datinate.Rmvc.Delegate.RadioDat
 
         private static IReadOnlyList<string> GetMediaSources(
             MEDIA_TYPE_ENUM mediaEnum, 
-            IEnumerable<RbMediaItemAssignment> assignedItems,
+            IEnumerable<MediaItemAssignment> assignedItems,
             Dictionary<string, RadioSourceDTO> sourceIdContentDictionary,
             Dictionary<string, ResourceDetailsDTO> sourceIdResourceDictionary)
         {

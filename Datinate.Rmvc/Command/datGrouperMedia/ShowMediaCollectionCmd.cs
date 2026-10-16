@@ -56,7 +56,10 @@ namespace Datinate.Rmvc.Command
                         var scoring = base.RadioDatModel.GetScoring(family);
                         
                         if (scoring != null)
-                            base.MediaAssignmentMediator?.SetScoring(scoring);
+                        {
+                            var summary = new MediaScoringSummaryDTO(scoring);
+                            base.MediaAssignmentMediator?.SetScoring(scoring, summary);
+                        }
 
                         // TODO: ?:
                         base.DatGrouperMediator?.SetMediaMode(DatGrouperSessionModel.CurrentLayout);

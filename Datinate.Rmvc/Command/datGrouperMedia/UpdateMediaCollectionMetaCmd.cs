@@ -1,3 +1,4 @@
+using Datinate.Shared;
 using Datinate.Shared.Radio;
 using RMVC;
 
@@ -39,7 +40,10 @@ namespace Datinate.Rmvc.Command
                         var scoring = base.RadioDatModel.GetScoring(family);
                         
                         if (scoring != null)
-                            base.MediaAssignmentMediator?.SetScoring(scoring);
+                        {
+                            var summary = new MediaScoringSummaryDTO(scoring);
+                            base.MediaAssignmentMediator?.SetScoring(scoring, summary);
+                        }
                     }
                 }
             }

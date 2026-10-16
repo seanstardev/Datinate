@@ -44,7 +44,7 @@ namespace Datinate.Shared
     {
         bool IsEmptyForExport { get; }
         bool IsEmpty { get; }
-        IReadOnlyDictionary<string, RbMediaItemAssignment> SourceIdAssignmentDictionary { get; }
+        IReadOnlyDictionary<string, MediaItemAssignment> SourceIdAssignmentDictionary { get; }
         IReadOnlySet20<string> CheckedDescriptorCodes { get; }
         string FamilyNotes { get; }
         IGameFamily Family { get; }
@@ -122,10 +122,10 @@ namespace Datinate.Shared
             }
         }
 
-        public Dictionary<string, RbMediaItemAssignment>
+        public Dictionary<string, MediaItemAssignment>
             SourceIdAssignmentDictionary
         { get; } =
-                new Dictionary<string, RbMediaItemAssignment>();
+                new Dictionary<string, MediaItemAssignment>();
 
         public HashSet<string> CheckedDescriptorCodes
         {
@@ -143,7 +143,7 @@ namespace Datinate.Shared
         IReadOnlySet20<string> IMediaCollectionImportExport.CheckedDescriptorCodes =>
             _checkedDescriptorCodesView;
 
-        IReadOnlyDictionary<string, RbMediaItemAssignment>
+        IReadOnlyDictionary<string, MediaItemAssignment>
             IMediaCollection.SourceIdAssignmentDictionary =>
                 SourceIdAssignmentDictionary;
 

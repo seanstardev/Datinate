@@ -2,9 +2,9 @@
 
 namespace Datinate.Shared
 {
-    public class RbMediaItemAssignment
+    public class MediaItemAssignment
     {
-        public RbMediaItemAssignment(string sourceId, MEDIA_ASSIGNMENT_ENUM assignmentEnum, string? entryName, string? lookupName, bool contentPathExists)
+        public MediaItemAssignment(string sourceId, MEDIA_ASSIGNMENT_ENUM assignmentEnum, string? entryName, string? lookupName, bool contentPathExists)
         {
             SourceId = sourceId;
             AssignmentEnum = assignmentEnum;

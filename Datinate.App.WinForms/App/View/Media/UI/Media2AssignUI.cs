@@ -14,7 +14,7 @@ namespace Datinate.App.WinForms.View.UI.Media
         public event Action<Media2AssignUI>? DragStartEvt;
         public event Action<Media2AssignUI>? DragEndEvt;
 
-        public event Action<RbMediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
+        public event Action<MediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
 
         public event Action<ILookupSet, string>? LoadMediaCardEvt;
         public event Action<Media2AssignUI, ILookupSet, FastEntryListUI.EntryInfo, bool>? EntrySelectedEvt;
@@ -490,7 +490,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         private void OnAssignmentChange(MEDIA_ASSIGNMENT_ENUM assignmentEnum)
         {
-            RbMediaItemAssignmentUpdate? assignmentItem = null;
+            MediaItemAssignmentUpdate? assignmentItem = null;
             switch (assignmentEnum)
             {
                 case MEDIA_ASSIGNMENT_ENUM.Assigned:
@@ -510,7 +510,7 @@ namespace Datinate.App.WinForms.View.UI.Media
                         {
                             SetAssignmentBannersVisible(true, false);
 
-                            assignmentItem = new RbMediaItemAssignmentUpdate(
+                            assignmentItem = new MediaItemAssignmentUpdate(
                                 mediaCollection.Family,
                                 lookupSet.Id,
                                 MEDIA_ASSIGNMENT_ENUM.Assigned,
@@ -531,7 +531,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
                     if (mediaCollection != null && lookupSet != null)
                     {
-                        assignmentItem = new RbMediaItemAssignmentUpdate(
+                        assignmentItem = new MediaItemAssignmentUpdate(
                             mediaCollection.Family,
                             lookupSet.Id,
                             MEDIA_ASSIGNMENT_ENUM.None);
@@ -552,7 +552,7 @@ namespace Datinate.App.WinForms.View.UI.Media
                         {
                             SetAssignmentBannersVisible(false, true);
 
-                            assignmentItem = new RbMediaItemAssignmentUpdate(
+                            assignmentItem = new MediaItemAssignmentUpdate(
                                 mediaCollection.Family,
                                 lookupSet.Id,
                                 MEDIA_ASSIGNMENT_ENUM.NotFound);

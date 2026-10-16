@@ -66,7 +66,7 @@ namespace Datinate.Rmvc.Mediator
             => base.Execute(
                 new FetchMediaCardContentCmd(lookupSet, lookupName, entryWasSelectedByUser, entryName));
 
-        private void OnMediaAssignmentChange(RbMediaItemAssignmentUpdate assignment)
+        private void OnMediaAssignmentChange(MediaItemAssignmentUpdate assignment)
             => base.Execute(new UpdateMediaCollectionItemCmd(assignment));
 
         private void OnShowMediaCard(ILookupSet lookupSet, string entryName, bool isAutoLoaded)

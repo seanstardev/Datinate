@@ -5,9 +5,9 @@ namespace Datinate.Rmvc.Command
 {
     internal class UpdateMediaCollectionItemCmd : CommandBase<RVoid>
     {
-        private readonly RbMediaItemAssignmentUpdate assignment;
+        private readonly MediaItemAssignmentUpdate assignment;
 
-        public UpdateMediaCollectionItemCmd(RbMediaItemAssignmentUpdate assignment)
+        public UpdateMediaCollectionItemCmd(MediaItemAssignmentUpdate assignment)
         {
             this.assignment = assignment;
         }
@@ -26,8 +26,11 @@ namespace Datinate.Rmvc.Command
             {
                 var scoring = base.RadioDatModel.GetScoring(assignment.Family);
                 
-                if (scoring != null) 
-                    base.MediaAssignmentMediator?.SetScoring(scoring);
+                if (scoring != null)
+                {
+                    var summary = new MediaScoringSummaryDTO(scoring);
+                    base.MediaAssignmentMediator?.SetScoring(scoring, summary);
+                }
                 
             }
 

@@ -13,8 +13,8 @@ namespace Datinate.Rmvc.Mediator
             IReadOnlySet20<DescriptorDefinitionDTO> descriptorDefinitions)
             => actor?.SetDescriptorDefinitions(descriptorDefinitions);
         
-        public void SetScoring(DatGrouperScoring scoring)
-            => actor?.SetScoring(scoring);
+        public void SetScoring(DatGrouperScoring scoring, MediaScoringSummaryDTO summary)
+            => actor?.SetScoring(scoring, summary);
         
         public void SetView(IMediaCollection mediaCollection)
             => actor?.SetView(mediaCollection);
