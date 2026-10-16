@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Util;
+﻿using Datinate.App.Shared.DatGrouper;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.Radio;
 using System.Drawing.Drawing2D;
@@ -1308,7 +1309,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
                 var labelKey = CreateDatReferenceLabel(ap);
 
-                tmp.Add((labelKey, TreeNodeNameUtil.GetGamePartNameRender(ap)));
+                tmp.Add((labelKey, DatGrouperTextBuilder.CreatePartLabel(ap)));
             }
 
             return tmp.Count == 0 ? null : tmp;

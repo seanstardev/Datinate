@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Dto;
+﻿using Datinate.App.Shared.DatGrouper;
+using Datinate.App.WinForms.View.Dto;
 using Datinate.App.WinForms.View.UI.DatGrouperControls;
 using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
@@ -1045,13 +1046,13 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
                             _ = uniquePointerIds.Add(pointer);
                     }
 
-                    var partNode = gameNode.Nodes.Add(TreeNodeNameUtil.GetGamePartNameRender(gamePart));
+                    var partNode = gameNode.Nodes.Add(DatGrouperTextBuilder.CreatePartLabel(gamePart));
                     partNode.Tag = gamePart;
                     
                     ApplyPartNodeVisual(partNode, gamePart);
                 }
 
-                gameNode.Text = TreeNodeNameUtil.GetGameNameRender(partsForCounts, game.GetNameWithoutExt());
+                gameNode.Text = DatGrouperTextBuilder.CreateGameLabel(partsForCounts, game.GetNameWithoutExt());
 
                 var gameStatus = EvaluateGameStatus(partsForCounts);
 
@@ -1096,7 +1097,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
                 var game = games[i];
 
                 var gameNode = gameFamilyNode.Nodes.Add(
-                    TreeNodeNameUtil.GetGameNameRender(game.GetGameParts(false), game.GetNameWithoutExt()));
+                    DatGrouperTextBuilder.CreateGameLabel(game.GetGameParts(false), game.GetNameWithoutExt()));
                 
                 gameNode.Tag = game;
                 gameNode.ForeColor = Color.DarkSlateGray;
@@ -1107,7 +1108,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
                 {
                     var gamePart = parts[pi];
 
-                    var partNode = gameNode.Nodes.Add(TreeNodeNameUtil.GetGamePartNameRender(gamePart));
+                    var partNode = gameNode.Nodes.Add(DatGrouperTextBuilder.CreatePartLabel(gamePart));
                     partNode.Tag = gamePart;
 
                     ApplyPartNodeVisual(partNode, gamePart);
@@ -1835,13 +1836,13 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
             node.ToolTipText = nodeTag switch
             {
                 IGameFamily family =>
-                    TreeNodeNameUtil.CreateTooltip(family, mediaCollection),
+                    TreeNodeToolTipHelper.CreateTooltip(family, mediaCollection),
 
                 IGame game =>
-                    TreeNodeNameUtil.CreateTooltip(game),
+                    TreeNodeToolTipHelper.CreateTooltip(game),
 
                 IGamePart part =>
-                    TreeNodeNameUtil.CreateTooltip(part),
+                    TreeNodeToolTipHelper.CreateTooltip(part),
 
                 _ => string.Empty
             };
@@ -1881,7 +1882,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
         {
             var (membership, isShallow) = GetPartVisualState(gamePart);
 
-            partNode.Text = TreeNodeNameUtil.GetGamePartNameRender(gamePart);
+            partNode.Text = DatGrouperTextBuilder.CreatePartLabel(gamePart);
             partNode.ForeColor = Color.FromArgb(
                 DatFilterHelper.GetExpressionColourArgb(membership));
 
@@ -1936,7 +1937,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
                 parts.Add(part);
             }
 
-            gameNode.Text = TreeNodeNameUtil.GetGameNameRender(parts, game.GetNameWithoutExt());
+            gameNode.Text = DatGrouperTextBuilder.CreateGameLabel(parts, game.GetNameWithoutExt());
 
             bool isParent =
                 gameNode.Parent != null &&

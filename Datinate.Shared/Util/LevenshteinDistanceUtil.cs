@@ -1,4 +1,4 @@
-﻿namespace Datinate.App.WinForms.View.Util
+﻿namespace Datinate.Shared
 {
     public static class LevenshteinDistanceUtil
     {
@@ -29,6 +29,7 @@
 
             int mPlus1 = m + 1;
 
+            // NOTE: System.Memory supplies Span<T> for netstandard2.0; retain the stack-allocated fast path.
             Span<int> prev = mPlus1 <= 512 ? stackalloc int[mPlus1] : new int[mPlus1];
             Span<int> curr = mPlus1 <= 512 ? stackalloc int[mPlus1] : new int[mPlus1];
 
@@ -76,8 +77,12 @@
         }
         public static string? GetBestMatch(string targetString, string[] strings)
         {
-            ArgumentNullException.ThrowIfNull(targetString);
-            ArgumentNullException.ThrowIfNull(strings);
+            // NOTE: netstandard2.0 has no ArgumentNullException.ThrowIfNull().
+            if (targetString == null)
+                throw new ArgumentNullException(nameof(targetString));
+
+            if (strings == null)
+                throw new ArgumentNullException(nameof(strings));
 
             int bestScore = int.MaxValue;
             string? bestMatch = null;

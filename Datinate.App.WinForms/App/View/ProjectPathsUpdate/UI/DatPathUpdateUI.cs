@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.Util;
+﻿using Datinate.App.Shared.Projects;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using Datinate.Shared.DatGrouper;
 
@@ -70,42 +71,20 @@ namespace Datinate.App.WinForms.View.UI.ProjectPathsUpdate
         }
 
 
-        private void quickFindBtn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) 
+        private void quickFindBtn_LinkClicked(
+            object sender,
+            LinkLabelLinkClickedEventArgs e)
         {
-            string dir = Path.GetDirectoryName(oldPathLabel.Text) ?? string.Empty;
-            
-            if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir)) 
+            string? replacement =
+                DatReplacementFinder.FindReplacement(oldPathLabel.Text);
+
+            if (string.IsNullOrWhiteSpace(replacement))
             {
                 FormsHelper.ShowWarningDialog("Could not find a similar file.");
                 return;
             }
-            
-            string targetFilename = Path.GetFileName(oldPathLabel.Text);
-            string[] fullpaths = Directory.GetFiles(dir);
 
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-            string trialFullpath;
-            
-            for (int i = 0; i < fullpaths.Length; i++) 
-            {
-                trialFullpath = fullpaths[i];
-                if (trialFullpath.ToLower().EndsWith(".json")) continue;
-                dic.Add(Path.GetFileName(trialFullpath), trialFullpath);
-            }
-
-            string? bestMatch = LevenshteinDistanceUtil.GetBestMatch(targetFilename, dic.Keys.ToArray());
-            
-            // TODO: document this RomVault phenomenon
-            if (string.IsNullOrWhiteSpace(bestMatch) || bestMatch.ToLower().EndsWith(".dat.old")) 
-            {
-                FormsHelper.ShowWarningDialog("Could not find a similar file.");
-                return;
-            }
-            else 
-            {
-                string bestFullpath = dic[bestMatch];
-                newPathLabel.Text = bestFullpath;
-            }
+            newPathLabel.Text = replacement;
         }
     }
 }

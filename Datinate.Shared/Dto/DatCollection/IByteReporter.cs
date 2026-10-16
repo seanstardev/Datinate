@@ -1,4 +1,4 @@
-﻿namespace Datinate.Shared
+﻿namespace Datinate.Shared.Dat
 {
 
     /**

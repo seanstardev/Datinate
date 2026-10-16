@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.View.UI.DatGrouper;
+﻿using Datinate.App.Shared.DatGrouper;
+using Datinate.App.WinForms.View.UI.DatGrouper;
 using Datinate.Shared;
 using Datinate.Shared.Radio;
 

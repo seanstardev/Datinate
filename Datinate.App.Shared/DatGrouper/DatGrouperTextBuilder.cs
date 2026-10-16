@@ -1,18 +1,17 @@
 ﻿using Datinate.Shared;
 using Datinate.Shared.Radio;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
-namespace Datinate.App.WinForms.View.UI.DatGrouper
+namespace Datinate.App.Shared.DatGrouper
 {
-    public static class TreeNodeNameUtil
+    public static class DatGrouperTextBuilder
     {
-        private static readonly Dictionary<string, int> datGroupTabCountCache =
-            new(StringComparer.Ordinal);
-        private static readonly object datGroupTabCountLock = new();
-        private const int DatGroupTargetColumnPx = 120;
-
         public static string CreateTooltip(
             IGameEntity entity,
+            Func<string, int> getSourceTabCount,
             IMediaCollection? mediaCollection = null)
         {
             if (entity is IGameEntityProxy)
@@ -27,7 +26,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             if (entity is IGame game)
             {
-                return GetGameTooltipRender(
+                return CreateGameTooltip(
                     game.GetGameParts(false),
                     game.GetNameWithoutExt());
             }
@@ -38,7 +37,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
                 var sb = new StringBuilder();
 
-                AppendTooltipPartRow(sb, part);
+                AppendTooltipPartRow(sb, part, getSourceTabCount);
 
                 if (aliases.Any())
                 {
@@ -48,7 +47,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
                 }
                 for (int i = 0; i < aliases.Length; i++)
                 {
-                    AppendTooltipPartRow(sb, aliases[i], true);
+                    AppendTooltipPartRow(sb, aliases[i], getSourceTabCount, true);
 
                     if (i != aliases.Length - 1)
                         sb.AppendLine();
@@ -59,7 +58,8 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             return string.Empty;
         }
-        public static string GetGameNameRender(IReadOnlyList<IGamePart> partsArr, string? gameName)
+
+        public static string CreateGameLabel(IReadOnlyList<IGamePart> partsArr, string? gameName)
         {
             var sb = new StringBuilder();
 
@@ -87,7 +87,8 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             return result;
         }
-        public static string GetGamePartNameRender(IGamePart part)
+
+        public static string CreatePartLabel(IGamePart part)
         {
             string entryName = part.GetName();
 
@@ -119,7 +120,8 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             return entryName;
         }
-        private static string GetGameTooltipRender(
+
+        private static string CreateGameTooltip(
             IReadOnlyList<IGamePart> partsArr,
             string? gameName)
         {
@@ -161,6 +163,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             return sb.ToString();
         }
+
         private static string CreateFamilyTooltip(
             IGameFamily family,
             IMediaCollection? mediaCollection)
@@ -256,6 +259,7 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             return sb.ToString();
         }
+
         private static string GetTooltipComment(string comment)
         {
             const int maxLength = 100;
@@ -269,8 +273,10 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
             if (comment.Length <= maxLength)
                 return comment;
 
-            return comment[..maxLength].TrimEnd() + "...";
+            // NOTE: netstandard2.0 has no range-based string slicing.
+            return comment.Substring(0, maxLength).TrimEnd() + "...";
         }
+
         private static IReadOnlyCollection<string> GetFamilySources(
             IGameFamily family)
         {
@@ -305,45 +311,10 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
             }
         }
 
-        private static int GetDatGroupTabCount(string datGroup)
-        {
-            lock (datGroupTabCountLock)
-            {
-                if (datGroupTabCountCache.TryGetValue(datGroup, out int cached))
-                    return cached;
-
-                var font = SystemFonts.StatusFont;
-
-                const int maxTabs = 10;
-
-                for (int tabCount = 1; tabCount <= maxTabs; tabCount++)
-                {
-                    string test =
-                        datGroup + new string('\t', tabCount);
-
-                    int width = TextRenderer.MeasureText(
-                        test,
-                        font,
-                        Size.Empty,
-                        TextFormatFlags.NoPadding |
-                        TextFormatFlags.SingleLine |
-                        TextFormatFlags.ExpandTabs).Width;
-
-                    if (width >= DatGroupTargetColumnPx)
-                    {
-                        datGroupTabCountCache[datGroup] = tabCount;
-                        return tabCount;
-                    }
-                }
-
-                datGroupTabCountCache[datGroup] = maxTabs;
-                return maxTabs;
-            }
-        }
-
         private static void AppendTooltipPartRow(
             StringBuilder sb,
             IGamePart part,
+            Func<string, int> getSourceTabCount,
             bool indent = false)
         {
             string datGroup =
@@ -353,12 +324,12 @@ namespace Datinate.App.WinForms.View.UI.DatGrouper
 
             sb.Append(datGroup);
 
-            int tabCount = GetDatGroupTabCount(datGroup);
+            int tabCount = getSourceTabCount(datGroup);
 
             for (int i = 0; i < tabCount; i++)
                 sb.Append('\t');
 
-            sb.Append(GetGamePartNameRender(part));
+            sb.Append(CreatePartLabel(part));
         }
     }
 }
