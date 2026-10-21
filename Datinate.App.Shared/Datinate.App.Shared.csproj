@@ -19,4 +19,9 @@
     <Folder Include="RomSummary\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- NOTE: netstandard2.0 lacks the compiler marker required by record/init properties. -->
+    <Compile Include="..\Datinate.Shared\netstandard20\IsExternalInit.cs" Link="netstandard20\IsExternalInit.cs" />
+  </ItemGroup>
+
 </Project>

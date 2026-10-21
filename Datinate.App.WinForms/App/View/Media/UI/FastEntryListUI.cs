@@ -1,20 +1,17 @@
-﻿using Datinate.Shared;
+﻿using Datinate.App.Shared.Media;
+using Datinate.Shared;
 using System.ComponentModel;
 
 namespace Datinate.App.WinForms.View.UI.Media
 {
     public sealed partial class FastEntryListUI : ListView
     {
+        private readonly MediaEntryListSession entries = new();
 
-        public event Action<EntryInfo>? EntrySingleClicked;
-        public event Action<EntryInfo>? EntryDoubleClicked;
-
-        private string[] entriesFlaglessUpper = Array.Empty<string>();
-
-        private string[] lastReferenceFlaglessUppers = Array.Empty<string>();
+        public event Action<MediaEntryInfo>? EntrySingleClicked;
+        public event Action<MediaEntryInfo>? EntryDoubleClicked;
 
         private static readonly string[] PctTextCache = BuildPctTextCache();
-        private readonly Dictionary<string, int> backingIndexByFull = new(StringComparer.Ordinal);
         private string? pendingSelectedEntry;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -22,21 +19,13 @@ namespace Datinate.App.WinForms.View.UI.Media
         {
             get
             {
-                if (viewOrder.Length == 0 || entriesFull.Length == 0)
+                if (entries.VisibleCount == 0 || entries.EntryCount == 0)
                     return null;
 
                 if (SelectedIndices.Count == 0)
                     return null;
 
-                int virtualIndex = SelectedIndices[0];
-                if ((uint)virtualIndex >= (uint)viewOrder.Length)
-                    return null;
-
-                int backingIndex = viewOrder[virtualIndex];
-                if ((uint)backingIndex >= (uint)entriesFull.Length)
-                    return null;
-
-                return entriesFull[backingIndex];
+                return entries.GetNameAtViewIndex(SelectedIndices[0]);
             }
             set
             {
@@ -49,7 +38,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
                 pendingSelectedEntry = null;
 
-                if (string.IsNullOrEmpty(value) || viewOrder.Length == 0 || entriesFull.Length == 0)
+                if (string.IsNullOrEmpty(value) || entries.VisibleCount == 0 || entries.EntryCount == 0)
                 {
                     SelectedIndices.Clear();
                     return;
@@ -58,24 +47,16 @@ namespace Datinate.App.WinForms.View.UI.Media
                 // NOTE: Ensure the underlying ListView knows the current virtual size before selecting.
                 EnsureVirtualListSize();
 
-                int backingIndex = FindBackingIndexForSelection(value);
+                int backingIndex = entries.FindBackingIndex(value);
                 if (backingIndex < 0)
                 {
                     SelectedIndices.Clear();
                     return;
                 }
 
-                int virtualIndex = -1;
-                for (int i = 0; i < viewOrder.Length; i++)
-                {
-                    if (viewOrder[i] == backingIndex)
-                    {
-                        virtualIndex = i;
-                        break;
-                    }
-                }
+                int virtualIndex = entries.FindViewIndex(backingIndex);
 
-                if (virtualIndex < 0 || (uint)virtualIndex >= (uint)viewOrder.Length)
+                if (virtualIndex < 0 || (uint)virtualIndex >= (uint)entries.VisibleCount)
                 {
                     SelectedIndices.Clear();
                     return;
@@ -95,18 +76,6 @@ namespace Datinate.App.WinForms.View.UI.Media
             }
         }
 
-        public readonly record struct EntryInfo(int BackingIndex, string Name, int ScorePct, bool IsAlreadyAssigned);
-
-        private string[] entriesFull = Array.Empty<string>();
-        private string[] entriesFlagless = Array.Empty<string>();
-        private readonly Dictionary<string, string> flaglessByFull = new(StringComparer.Ordinal);
-
-        private bool[] assigned = Array.Empty<bool>();
-
-        private int[] viewOrder = Array.Empty<int>();
-        private int[] scorePct = Array.Empty<int>();
-        private int[] scratch = Array.Empty<int>();
-
         private readonly ColumnHeader nameCol;
         private readonly ColumnHeader scoreCol;
 
@@ -114,14 +83,6 @@ namespace Datinate.App.WinForms.View.UI.Media
         private int cacheStart = -1;
         private int cacheEnd = -1;
         private bool sortModeLocked;
-
-        private bool alphaSort = false;
-        private string lastReferenceFlagless = string.Empty;
-        private int scoreGeneration = 1;
-        private int[] scoreGen = Array.Empty<int>();
-
-        private string lastFilterFull = string.Empty;
-        private string lastFilterFlagless = string.Empty;
 
         private int hotVirtualIndex = -1;
 
@@ -139,7 +100,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         private const int ScoreColumnWidthMin = 34;
 
-        public const int HighConfidenceThresholdPct  = 100;
+        public const int HighConfidenceThresholdPct = MediaEntryListSession.HighConfidenceThresholdPct;
 
         private int lastAutoBackingIndex = -1;
         private int lastAutoScore = -1;
@@ -147,6 +108,8 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         public FastEntryListUI()
         {
+            entries.ViewOrderChanging += OnViewOrderChanging;
+
             View = System.Windows.Forms.View.Details;
             VirtualMode = true;
             FullRowSelect = true;
@@ -203,6 +166,7 @@ namespace Datinate.App.WinForms.View.UI.Media
                 Cursor = Cursors.Default;
             }
         }
+
         public void SetEntries(string[] newEntries, HashSet<string>? alreadyAssigned = null)
         {
             // NOTE: New dataset => never carry selection/pending from previous visit.
@@ -210,65 +174,12 @@ namespace Datinate.App.WinForms.View.UI.Media
             if (IsHandleCreated)
                 SelectedIndices.Clear();
 
-            entriesFull = newEntries ?? Array.Empty<string>();
-            alphaSort = false;
-
-            entriesFlagless = new string[entriesFull.Length];
-            entriesFlaglessUpper = new string[entriesFull.Length];
-
-            flaglessByFull.Clear();
-            backingIndexByFull.Clear();
-
-            for (int i = 0; i < entriesFull.Length; i++)
-            {
-                var full = entriesFull[i] ?? string.Empty;
-                var flagless = DatinateHelper.GetFlaglessName(full) ?? string.Empty;
-
-                entriesFlagless[i] = flagless;
-                entriesFlaglessUpper[i] = flagless.ToUpperInvariant();
-
-                flaglessByFull[full] = flagless;
-
-                if (!backingIndexByFull.ContainsKey(full))
-                    backingIndexByFull.Add(full, i);
-            }
-
-            assigned = new bool[entriesFull.Length];
-            if (alreadyAssigned != null && alreadyAssigned.Count > 0)
-            {
-                for (int i = 0; i < entriesFull.Length; i++)
-                    assigned[i] = alreadyAssigned.Contains(entriesFull[i]);
-            }
-
-            viewOrder = new int[entriesFull.Length];
-            scorePct = new int[entriesFull.Length];
-            scoreGen = new int[entriesFull.Length];
-
-            scoreGeneration = 1;
-
-            for (int i = 0; i < entriesFull.Length; i++)
-            {
-                viewOrder[i] = i;
-                scorePct[i] = -1;
-                scoreGen[i] = 0;
-            }
-
-            EnsureScratchCapacity(entriesFull.Length);
-
-            lastReferenceFlagless = string.Empty;
-            lastReferenceFlaglessUppers = Array.Empty<string>();
-
-            lastFilterFull = string.Empty;
-            lastFilterFlagless = string.Empty;
-
+            entries.SetEntries(newEntries, alreadyAssigned);
             lastAutoBackingIndex = -1;
             lastAutoScore = -1;
 
-            singleHighConfidenceMatch = null;
-            highConfidenceMatches = Array.Empty<EntryInfo>();
-
             BeginUpdate();
-            VirtualListSize = viewOrder.Length;
+            VirtualListSize = entries.VisibleCount;
             EndUpdate();
 
             ApplyPendingSelectionIfAny();
@@ -280,151 +191,115 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         public void ToggleSort()
         {
-            SetSortModeShowAll(!alphaSort);
+            // NOTE: Any view rebuild must not preserve old selection/pending.
+            pendingSelectedEntry = null;
+
+            if (IsHandleCreated)
+                SelectedIndices.Clear();
+
+            entries.ToggleSort();
+            RefreshVirtualView();
             ScrollToTop();
         }
 
         public void FilterByText(string searchText)
         {
-            alphaSort = true;
-
-            string filterFull = searchText.Trim();
-            string filterFlagless = DatinateHelper.GetFlaglessName(filterFull) ?? string.Empty;
-
-            lastFilterFull = filterFull;
-            lastFilterFlagless = filterFlagless;
-
-            EnsureScratchCapacity(entriesFull.Length);
-
-            int count = 0;
-
-            if (filterFull.Length == 0 && filterFlagless.Length == 0)
-            {
-                for (int i = 0; i < entriesFull.Length; i++)
-                    scratch[count++] = i;
-            }
-            else
-            {
-                for (int i = 0; i < entriesFull.Length; i++)
-                {
-                    if (filterFull.Length > 0 &&
-                        entriesFull[i].IndexOf(filterFull, StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        scratch[count++] = i;
-                        continue;
-                    }
-
-                    if (filterFlagless.Length > 0 &&
-                        entriesFlagless[i].IndexOf(filterFlagless, StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        scratch[count++] = i;
-                    }
-                }
-            }
-
-            if (count == 0)
-            {
-                lastAutoBackingIndex = -1;
-                lastAutoScore = -1;
-
-                ReplaceViewOrder(Array.Empty<int>());
-                return;
-            }
-
-            var newViewOrder = new int[count];
-            Array.Copy(scratch, newViewOrder, count);
-
-            Array.Sort(newViewOrder, CompareAlpha);
-
             lastAutoBackingIndex = -1;
             lastAutoScore = -1;
 
-            ReplaceViewOrder(newViewOrder);
+            if (!IsHandleCreated)
+            {
+                entries.FilterByText(searchText);
+                return;
+            }
+
+            BeginUpdate();
+
+            try
+            {
+                entries.FilterByText(searchText);
+
+                if (VirtualListSize != entries.VisibleCount)
+                    VirtualListSize = entries.VisibleCount;
+            }
+            finally
+            {
+                EndUpdate();
+            }
+
+            ApplyPendingSelectionIfAny();
+            ResizeColumns();
+
+            if (VirtualListSize > 0)
+                RedrawItems(0, VirtualListSize - 1, true);
+
+            Invalidate();
+        }
+
+        private void OnViewOrderChanging(int newCount)
+        {
+            if (IsHandleCreated)
+            {
+                // NOTE: Clear selection while the old VirtualListSize and old viewOrder still agree.
+                SelectedIndices.Clear();
+
+                // NOTE: During the transition, expose only indexes that are valid in BOTH
+                // the old and new viewOrder arrays.
+                int transitionSize = Math.Min(entries.VisibleCount, newCount);
+
+                if (VirtualListSize != transitionSize)
+                    VirtualListSize = transitionSize;
+            }
+
+            ClearCache();
         }
 
         public void SetAlreadyAssigned(HashSet<string> alreadyAssigned)
         {
-            Array.Clear(assigned, 0, assigned.Length);
-
-            if (alreadyAssigned.Count > 0)
-            {
-                for (int i = 0; i < entriesFull.Length; i++)
-                    assigned[i] = alreadyAssigned.Contains(entriesFull[i]);
-            }
-
+            entries.SetAlreadyAssigned(alreadyAssigned);
             ClearCache();
             Invalidate();
         }
+
         public int SetEntryToScoreAgainst(
             IReadOnlySet20<string> textsToMatch,
             bool excludeAlreadyAssigned)
         {
-            alphaSort = false;
-
             // NOTE: New scoring session => never keep whatever was selected last time.
             pendingSelectedEntry = null;
+
             if (IsHandleCreated)
                 SelectedIndices.Clear();
 
-            var references = new List<string>(textsToMatch.Count);
-            var seenReferences = new HashSet<string>(StringComparer.Ordinal);
-
-            foreach (string textToMatch in textsToMatch)
-            {
-                if (string.IsNullOrWhiteSpace(textToMatch))
-                    continue;
-
-                string refFull = textToMatch.Trim();
-                string refFlagless = DatinateHelper.GetFlaglessName(refFull) ?? string.Empty;
-
-                if (string.IsNullOrWhiteSpace(refFlagless))
-                    refFlagless = refFull;
-
-                if (string.IsNullOrWhiteSpace(refFlagless))
-                    continue;
-
-                string refFlaglessUpper = refFlagless.ToUpperInvariant();
-
-                // NOTE: Different full names can reduce to the same flagless name.
-                if (seenReferences.Add(refFlaglessUpper))
-                    references.Add(refFlaglessUpper);
-            }
-
-            if (references.Count == 0)
-            {
-                SetReferenceFlagless(Array.Empty<string>(), forceReset: true);
-                singleHighConfidenceMatch = null; // NOTE: clear stale.
-                highConfidenceMatches = Array.Empty<EntryInfo>();
-                RefreshVirtualView();
-                ScrollToTop();
-                return 0;
-            }
-
-            // NOTE: Keep comparison deterministic so an unchanged reference set
-            // does not invalidate the score cache merely because enumeration order changed.
-            references.Sort(StringComparer.Ordinal);
-
-            SetReferenceFlagless(references.ToArray(), forceReset: false);
-
-            int bestScore = 0;
-
-            for (int i = 0; i < entriesFull.Length; i++)
-            {
-                int s = GetScorePct(i);
-                if (s > bestScore)
-                    bestScore = s;
-            }
-
-            SetSortModeShowAll(alpha: false);
+            int bestScore = entries.SetScoringReferences(textsToMatch, excludeAlreadyAssigned);
+            RefreshVirtualView();
             ScrollToTop();
 
             lastAutoBackingIndex = -1;
             lastAutoScore = -1;
-
-            IdentifyHighConfidenceMatches(excludeAlreadyAssigned);
+            ApplyAutomaticSelection();
 
             return bestScore;
         }
+
+        private void ApplyAutomaticSelection()
+        {
+            if (entries.SingleHighConfidenceMatch is not MediaEntryInfo match)
+                return;
+
+            if (match.BackingIndex == lastAutoBackingIndex && match.ScorePct == lastAutoScore)
+                return;
+
+            lastAutoBackingIndex = match.BackingIndex;
+            lastAutoScore = match.ScorePct;
+
+            if (IsHandleCreated)
+            {
+                SelectedIndices.Clear();
+                SelectedIndices.Add(entries.FindViewIndex(match.BackingIndex));
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
@@ -579,40 +454,6 @@ namespace Datinate.App.WinForms.View.UI.Media
                 ControlPaint.DrawFocusRectangle(e.Graphics, e.Item.Bounds, fore, SystemColors.Highlight);
         }
 
-        private void SetSortModeShowAll(bool alpha)
-        {
-            alphaSort = alpha;
-
-            // NOTE: Any view rebuild must not preserve old selection/pending.
-            pendingSelectedEntry = null;
-
-            if (IsHandleCreated)
-                SelectedIndices.Clear();
-
-            lastFilterFull = string.Empty;
-            lastFilterFlagless = string.Empty;
-
-            int n = entriesFull.Length;
-
-            if (viewOrder.Length != n)
-                viewOrder = new int[n];
-
-            for (int i = 0; i < n; i++)
-                viewOrder[i] = i;
-
-            if (alphaSort || string.IsNullOrWhiteSpace(lastReferenceFlagless))
-            {
-                Array.Sort(viewOrder, CompareAlpha);
-            }
-            else
-            {
-                EnsureScoresForViewOrder();
-                Array.Sort(viewOrder, CompareScoreDescThenAlpha);
-            }
-
-            RefreshVirtualView();
-        }
-
         protected override CreateParams CreateParams
         {
             get
@@ -625,7 +466,7 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         protected override void OnRetrieveVirtualItem(RetrieveVirtualItemEventArgs e)
         {
-            if ((uint)e.ItemIndex >= (uint)viewOrder.Length)
+            if ((uint)e.ItemIndex >= (uint)entries.VisibleCount)
             {
                 e.Item = CreateEmptyVirtualItem();
                 return;
@@ -647,14 +488,14 @@ namespace Datinate.App.WinForms.View.UI.Media
         }
         protected override void OnCacheVirtualItems(CacheVirtualItemsEventArgs e)
         {
-            if (viewOrder.Length == 0)
+            if (entries.VisibleCount == 0)
             {
                 ClearCache();
                 return;
             }
 
             int startIndex = Math.Max(0, e.StartIndex);
-            int endIndex = Math.Min(e.EndIndex, viewOrder.Length - 1);
+            int endIndex = Math.Min(e.EndIndex, entries.VisibleCount - 1);
 
             if (startIndex > endIndex)
             {
@@ -691,38 +532,16 @@ namespace Datinate.App.WinForms.View.UI.Media
             if (info.HasValue)
                 EntrySingleClicked?.Invoke(info.Value);
         }
-        private EntryInfo? GetEntryAtVirtualIndex(int virtualIndex)
-        {
-            if ((uint)virtualIndex >= (uint)viewOrder.Length)
-                return null;
-
-            int backingIndex = viewOrder[virtualIndex];
-            return new EntryInfo(
-                backingIndex,
-                entriesFull[backingIndex],
-                scorePct[backingIndex],
-                assigned[backingIndex]);
-        }
+        private MediaEntryInfo? GetEntryAtVirtualIndex(int virtualIndex)
+            => entries.GetCachedEntryAtViewIndex(virtualIndex);
         private ListViewItem CreateItem(int virtualIndex)
         {
-            if ((uint)virtualIndex >= (uint)viewOrder.Length)
+            if (!entries.TryGetEntryAtViewIndex(virtualIndex, out var entry))
                 return CreateEmptyVirtualItem();
 
-            int backingIndex = viewOrder[virtualIndex];
-
-            if ((uint)backingIndex >= (uint)entriesFull.Length ||
-                (uint)backingIndex >= (uint)assigned.Length ||
-                (uint)backingIndex >= (uint)scorePct.Length ||
-                (uint)backingIndex >= (uint)scoreGen.Length ||
-                (uint)backingIndex >= (uint)entriesFlaglessUpper.Length)
-            {
-                return CreateEmptyVirtualItem();
-            }
-
-            string name = entriesFull[backingIndex];
-            bool isAssigned = assigned[backingIndex];
-
-            int pct = GetScorePct(backingIndex);
+            string name = entry.Name;
+            bool isAssigned = entry.IsAlreadyAssigned;
+            int pct = entry.ScorePct;
             string pctText = (uint)pct <= 100u ? PctTextCache[pct] : string.Empty;
 
             var item = new ListViewItem(name);
@@ -748,134 +567,10 @@ namespace Datinate.App.WinForms.View.UI.Media
 
             return item;
         }
-        private int CompareAlpha(int a, int b)
-        {
-            var sa = entriesFull[a];
-            var sb = entriesFull[b];
 
-            int c = StringComparer.OrdinalIgnoreCase.Compare(sa, sb);
-            if (c != 0) return c;
+        public MediaEntryInfo? GetSingleHighConfidenceMatch() => entries.SingleHighConfidenceMatch;
 
-            return StringComparer.Ordinal.Compare(sa, sb);
-        }
-
-        private int CompareScoreDescThenAlpha(int a, int b)
-        {
-            int pa = scorePct[a];
-            int pb = scorePct[b];
-
-            int c = pb.CompareTo(pa);
-            if (c != 0) return c;
-
-            return CompareAlpha(a, b);
-        }
-        private void IdentifyHighConfidenceMatches(bool excludeAlreadyAssigned)
-        {
-            singleHighConfidenceMatch = null;
-            highConfidenceMatches = Array.Empty<EntryInfo>();
-
-            if (viewOrder.Length == 0)
-            {
-                lastAutoBackingIndex = -1;
-                lastAutoScore = -1;
-                return;
-            }
-
-            int bestVirtualIndex = -1;
-            int bestBackingIndex = -1;
-            int bestScore = -1;
-
-            int countHigh = 0;
-
-            for (int i = 0; i < viewOrder.Length; i++)
-            {
-                int backingIndex = viewOrder[i];
-                int score = GetScorePct(backingIndex);
-
-                if (score < HighConfidenceThresholdPct)
-                    continue;
-
-                if (excludeAlreadyAssigned && assigned[backingIndex])
-                    continue;
-
-                if (countHigh == 0)
-                {
-                    bestVirtualIndex = i;
-                    bestBackingIndex = backingIndex;
-                    bestScore = score;
-                }
-
-                countHigh++;
-            }
-
-            if (countHigh == 0)
-            {
-                lastAutoBackingIndex = -1;
-                lastAutoScore = -1;
-                return;
-            }
-
-            var matches = new EntryInfo[countHigh];
-            int w = 0;
-
-            for (int i = 0; i < viewOrder.Length; i++)
-            {
-                int backingIndex = viewOrder[i];
-                int score = GetScorePct(backingIndex);
-
-                if (score < HighConfidenceThresholdPct)
-                    continue;
-
-                if (excludeAlreadyAssigned && assigned[backingIndex])
-                    continue;
-
-                matches[w++] = new EntryInfo(
-                    backingIndex,
-                    entriesFull[backingIndex],
-                    score,
-                    assigned[backingIndex]);
-            }
-
-            highConfidenceMatches = matches;
-
-            if (countHigh != 1)
-            {
-                lastAutoBackingIndex = -1;
-                lastAutoScore = -1;
-                return;
-            }
-
-            if (bestBackingIndex == lastAutoBackingIndex && bestScore == lastAutoScore)
-            {
-                singleHighConfidenceMatch = matches[0];
-                return;
-            }
-
-            lastAutoBackingIndex = bestBackingIndex;
-            lastAutoScore = bestScore;
-
-            if (IsHandleCreated)
-            {
-                SelectedIndices.Clear();
-                SelectedIndices.Add(bestVirtualIndex);
-            }
-
-            singleHighConfidenceMatch = matches[0];
-        }
-
-
-        private EntryInfo? singleHighConfidenceMatch = null;
-        private EntryInfo[] highConfidenceMatches = Array.Empty<EntryInfo>();
-
-        public EntryInfo? GetSingleHighConfidenceMatch()
-        {
-            return singleHighConfidenceMatch;
-        }
-
-        public IReadOnlyList<EntryInfo> GetAllHighConfidenceMatches()
-        {
-            return highConfidenceMatches;
-        }
+        public IReadOnlyList<MediaEntryInfo> GetAllHighConfidenceMatches() => entries.HighConfidenceMatches;
 
         private void ResizeColumns()
         {
@@ -924,79 +619,6 @@ namespace Datinate.App.WinForms.View.UI.Media
             cacheEnd = -1;
         }
 
-        private void EnsureScratchCapacity(int required)
-        {
-            if (scratch.Length >= required)
-                return;
-
-            scratch = new int[required];
-        }
-        private static int ComputePercentUpper(string sUpper, string tUpper)
-        {
-            int maxLen = sUpper.Length >= tUpper.Length ? sUpper.Length : tUpper.Length;
-            if (maxLen == 0)
-                return 100;
-
-            int dist = ComputeDistanceUpper(sUpper, tUpper);
-            int pct = (int)Math.Round(100.0 * (1.0 - (double)dist / maxLen));
-
-            if (pct < 0) return 0;
-            if (pct > 100) return 100;
-            return pct;
-        }
-
-        private static int ComputeDistanceUpper(string s, string t)
-        {
-            int n = s.Length;
-            int m = t.Length;
-
-            if (n == 0) return m;
-            if (m == 0) return n;
-
-            if (m > n)
-            {
-                var tmp = s; s = t; t = tmp;
-                n = s.Length;
-                m = t.Length;
-            }
-
-            int mPlus1 = m + 1;
-
-            Span<int> prev = mPlus1 <= 512 ? stackalloc int[mPlus1] : new int[mPlus1];
-            Span<int> curr = mPlus1 <= 512 ? stackalloc int[mPlus1] : new int[mPlus1];
-
-            for (int j = 0; j <= m; j++)
-                prev[j] = j;
-
-            for (int i = 1; i <= n; i++)
-            {
-                curr[0] = i;
-
-                char sc = s[i - 1];
-
-                for (int j = 1; j <= m; j++)
-                {
-                    char tc = t[j - 1];
-                    int cost = sc == tc ? 0 : 1;
-
-                    int del = prev[j] + 1;
-                    int ins = curr[j - 1] + 1;
-                    int sub = prev[j - 1] + cost;
-
-                    int v = del < ins ? del : ins;
-                    if (sub < v) v = sub;
-
-                    curr[j] = v;
-                }
-
-                var swap = prev;
-                prev = curr;
-                curr = swap;
-            }
-
-            return prev[m];
-        }
-
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
@@ -1018,14 +640,12 @@ namespace Datinate.App.WinForms.View.UI.Media
                 Native.SetWindowStyle(Handle, style & ~Native.WS_HSCROLL);
         }
 
-
         private static class Native
         {
             public const int GWL_STYLE = -16;
             public const int WS_HSCROLL = 0x00100000;
 
             public const int SB_HORZ = 0;
-
 
             [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
             private static extern nint GetWindowLongPtr64(nint hWnd, int nIndex);
@@ -1053,110 +673,13 @@ namespace Datinate.App.WinForms.View.UI.Media
                     SetWindowLong32(hWnd, GWL_STYLE, style);
             }
         }
-        private void SetReferenceFlagless(string[] newReferenceFlaglessUppers, bool forceReset)
-        {
-            newReferenceFlaglessUppers ??= Array.Empty<string>();
 
-            if (!forceReset &&
-                lastReferenceFlaglessUppers.Length == newReferenceFlaglessUppers.Length)
-            {
-                bool same = true;
-
-                for (int i = 0; i < newReferenceFlaglessUppers.Length; i++)
-                {
-                    if (!string.Equals(
-                        lastReferenceFlaglessUppers[i],
-                        newReferenceFlaglessUppers[i],
-                        StringComparison.Ordinal))
-                    {
-                        same = false;
-                        break;
-                    }
-                }
-
-                if (same)
-                    return;
-            }
-
-            lastReferenceFlaglessUppers = newReferenceFlaglessUppers;
-
-            // NOTE: This existing field is used as a simple "has scoring reference"
-            // indicator elsewhere in the control.
-            lastReferenceFlagless =
-                newReferenceFlaglessUppers.Length == 0
-                    ? string.Empty
-                    : newReferenceFlaglessUppers[0];
-
-            scoreGeneration++;
-            if (scoreGeneration == int.MaxValue)
-            {
-                Array.Clear(scoreGen, 0, scoreGen.Length);
-                scoreGeneration = 1;
-            }
-
-            lastAutoBackingIndex = -1;
-            lastAutoScore = -1;
-
-            if (IsHandleCreated)
-                SelectedIndices.Clear();
-
-            ClearCache();
-        }
-        private int GetScorePct(int backingIndex)
-        {
-            if (lastReferenceFlaglessUppers.Length == 0)
-                return -1;
-
-            if (scoreGen[backingIndex] != scoreGeneration)
-            {
-                string entryUpper = entriesFlaglessUpper[backingIndex];
-
-                int bestScore = 0;
-
-                for (int i = 0; i < lastReferenceFlaglessUppers.Length; i++)
-                {
-                    string referenceUpper = lastReferenceFlaglessUppers[i];
-
-                    int score;
-
-                    // NOTE: Avoid Levenshtein entirely for an exact match.
-                    if (string.Equals(referenceUpper, entryUpper, StringComparison.Ordinal))
-                    {
-                        score = 100;
-                    }
-                    else
-                    {
-                        score = ComputePercentUpper(referenceUpper, entryUpper);
-                    }
-
-                    if (score > bestScore)
-                        bestScore = score;
-
-                    // NOTE: Cannot improve upon a perfect match.
-                    if (bestScore == 100)
-                        break;
-                }
-
-                scorePct[backingIndex] = bestScore;
-                scoreGen[backingIndex] = scoreGeneration;
-            }
-
-            return scorePct[backingIndex];
-        }
-        private void EnsureScoresForViewOrder()
-        {
-            if (lastReferenceFlaglessUppers.Length == 0)
-                return;
-
-            for (int i = 0; i < viewOrder.Length; i++)
-                _ = GetScorePct(viewOrder[i]);
-        }
         private void RefreshVirtualView()
         {
             ClearCache();
 
             BeginUpdate();
-            VirtualListSize = viewOrder.Length;
+            VirtualListSize = entries.VisibleCount;
             EndUpdate();
             ApplyPendingSelectionIfAny();
 
@@ -1210,44 +733,13 @@ namespace Datinate.App.WinForms.View.UI.Media
             if (!IsHandleCreated)
                 return;
 
-            int want = viewOrder.Length;
+            int want = entries.VisibleCount;
             if (VirtualListSize == want)
                 return;
 
             BeginUpdate();
             VirtualListSize = want;
             EndUpdate();
-        }
-
-        private int FindBackingIndexForSelection(string value)
-        {
-            // NOTE: Fast exact match.
-            if (backingIndexByFull.TryGetValue(value, out int idx))
-                return idx;
-
-            // NOTE: Trim fallback (common when values come from persisted text)
-            var trimmed = value.Trim();
-            if (trimmed.Length != value.Length && backingIndexByFull.TryGetValue(trimmed, out idx))
-                return idx;
-
-            // NOTE: Ignore-case fallback
-            for (int i = 0; i < entriesFull.Length; i++)
-            {
-                if (string.Equals(entriesFull[i], value, StringComparison.OrdinalIgnoreCase))
-                    return i;
-            }
-
-            // NOTE: Flagless fallback (only if persisted value might be flagless)
-            var wantFlaglessUpper = DatinateHelper.GetFlaglessName(value) ?? value;
-            wantFlaglessUpper = wantFlaglessUpper.ToUpperInvariant();
-
-            for (int i = 0; i < entriesFlaglessUpper.Length; i++)
-            {
-                if (entriesFlaglessUpper[i] == wantFlaglessUpper)
-                    return i;
-            }
-
-            return -1;
         }
 
         private void ApplyPendingSelectionIfAny()
@@ -1259,7 +751,7 @@ namespace Datinate.App.WinForms.View.UI.Media
                 return;
 
             // NOTE: Don't consume pending until the list is actually ready.
-            if (entriesFull.Length == 0 || viewOrder.Length == 0)
+            if (entries.EntryCount == 0 || entries.VisibleCount == 0)
                 return;
 
             var s = pendingSelectedEntry;
@@ -1270,14 +762,14 @@ namespace Datinate.App.WinForms.View.UI.Media
 
         public bool TrySelectEntry(string? value)
         {
-            if (string.IsNullOrEmpty(value) || viewOrder.Length == 0 || entriesFull.Length == 0)
+            if (string.IsNullOrEmpty(value) || entries.VisibleCount == 0 || entries.EntryCount == 0)
             {
                 pendingSelectedEntry = null;
                 SelectedIndices.Clear();
                 return false;
             }
 
-            int backingIndex = FindBackingIndexForSelection(value);
+            int backingIndex = entries.FindBackingIndex(value);
             if (backingIndex < 0)
             {
                 pendingSelectedEntry = null;
@@ -1296,17 +788,9 @@ namespace Datinate.App.WinForms.View.UI.Media
 
             EnsureVirtualListSize();
 
-            int virtualIndex = -1;
-            for (int i = 0; i < viewOrder.Length; i++)
-            {
-                if (viewOrder[i] == backingIndex)
-                {
-                    virtualIndex = i;
-                    break;
-                }
-            }
+            int virtualIndex = entries.FindViewIndex(backingIndex);
 
-            if ((uint)virtualIndex >= (uint)viewOrder.Length)
+            if ((uint)virtualIndex >= (uint)entries.VisibleCount)
             {
                 SelectedIndices.Clear();
                 return false;
@@ -1325,49 +809,5 @@ namespace Datinate.App.WinForms.View.UI.Media
             return true;
         }
 
-        private void ReplaceViewOrder(int[] newViewOrder)
-        {
-            if (!IsHandleCreated)
-            {
-                viewOrder = newViewOrder;
-                ClearCache();
-                return;
-            }
-
-            BeginUpdate();
-
-            try
-            {
-                // NOTE: Clear selection while the old VirtualListSize and old viewOrder still agree.
-                SelectedIndices.Clear();
-
-                // NOTE: During the transition, expose only indexes that are valid in BOTH
-                // the old and new viewOrder arrays.
-                int transitionSize = Math.Min(viewOrder.Length, newViewOrder.Length);
-
-                if (VirtualListSize != transitionSize)
-                    VirtualListSize = transitionSize;
-
-                ClearCache();
-
-                viewOrder = newViewOrder;
-
-                if (VirtualListSize != viewOrder.Length)
-                    VirtualListSize = viewOrder.Length;
-            }
-            finally
-            {
-                EndUpdate();
-            }
-
-            ApplyPendingSelectionIfAny();
-
-            ResizeColumns();
-
-            if (VirtualListSize > 0)
-                RedrawItems(0, VirtualListSize - 1, true);
-
-            Invalidate();
-        }
     }
 }

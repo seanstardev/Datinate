@@ -15,6 +15,8 @@
         {
             if (disposing)
             {
+                entries.ViewOrderChanging -= OnViewOrderChanging;
+
                 boldFont?.Dispose();
                 boldFont = null;
 

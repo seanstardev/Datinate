@@ -1,4 +1,5 @@
-﻿using Datinate.App.WinForms.Properties;
+﻿using Datinate.App.Shared.Media;
+using Datinate.App.WinForms.Properties;
 using Datinate.App.WinForms.View.Dto;
 using Datinate.App.WinForms.View.UI;
 using Datinate.App.WinForms.View.UI.Media;
@@ -456,7 +457,7 @@ namespace Datinate.App.WinForms.View
         private void AssignUI_EntrySingleClicked(
             Media2AssignUI sourceUI,
             ILookupSet lookupSet,
-            FastEntryListUI.EntryInfo info,
+            MediaEntryInfo info,
             bool entryWasSelectedByUser)
         {
             var lookup = lookupSet.GetLookup(info.Name);
@@ -600,7 +601,7 @@ namespace Datinate.App.WinForms.View
         private void AssignUI_LoadInMediaWebView(ILookupSet set, string entryName) =>
             ShowMediaCardEvt?.Invoke(set, entryName, false);
 
-        private void AssignUI_EntryDoubleClicked(ILookupSet lookupSet, FastEntryListUI.EntryInfo info)
+        private void AssignUI_EntryDoubleClicked(ILookupSet lookupSet, MediaEntryInfo info)
         { }
 
         private void ScrollMediaContainerToTop()

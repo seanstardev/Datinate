@@ -1,8 +1,8 @@
-﻿using Datinate.App.WinForms.View.Util;
+﻿using Datinate.App.Shared.Media;
+using Datinate.App.WinForms.View.Util;
 using Datinate.Shared;
 using System.ComponentModel;
 using System.Text;
-using static Datinate.App.WinForms.View.UI.Media.FastEntryListUI;
 using static Datinate.Shared.DatinateEnums;
 
 namespace Datinate.App.WinForms.View.UI.Media
@@ -17,8 +17,8 @@ namespace Datinate.App.WinForms.View.UI.Media
         public event Action<MediaItemAssignmentUpdate>? MediaAssignmentChangeEvt;
 
         public event Action<ILookupSet, string>? LoadMediaCardEvt;
-        public event Action<Media2AssignUI, ILookupSet, FastEntryListUI.EntryInfo, bool>? EntrySelectedEvt;
-        public event Action<ILookupSet, FastEntryListUI.EntryInfo>? EntryDoubleClicked;
+        public event Action<Media2AssignUI, ILookupSet, MediaEntryInfo, bool>? EntrySelectedEvt;
+        public event Action<ILookupSet, MediaEntryInfo>? EntryDoubleClicked;
 
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -266,7 +266,7 @@ namespace Datinate.App.WinForms.View.UI.Media
                             if (selected)
                             {
                                 assignControls.SetAssignment(MEDIA_ASSIGNMENT_ENUM.Assigned);
-                                var entryInfo = new EntryInfo(0, assignment.EntryName, 0, false);
+                                var entryInfo = new MediaEntryInfo(0, assignment.EntryName, 0, false);
                                 EntrySelectedEvt?.Invoke(this, lookupSet, entryInfo, false);
                                 performBestGuess = false;
                             }
@@ -276,7 +276,7 @@ namespace Datinate.App.WinForms.View.UI.Media
                     if (info != null && performBestGuess)
                     {
                         oneOrMoreHighConfidenceMatchesFound = true;
-                        EntrySelectedEvt?.Invoke(this, lookupSet, (EntryInfo)info, false);
+                        EntrySelectedEvt?.Invoke(this, lookupSet, (MediaEntryInfo)info, false);
                     }
                     else if (readOnlyMode && entryListUI.GetAllHighConfidenceMatches().Any()/* && performBestGuess*/)
                     {
@@ -779,7 +779,7 @@ namespace Datinate.App.WinForms.View.UI.Media
             OnAssignmentChange(MEDIA_ASSIGNMENT_ENUM.NotFound);
         }
 
-        private void EntryListUI_EntrySingleClicked(FastEntryListUI.EntryInfo info)
+        private void EntryListUI_EntrySingleClicked(MediaEntryInfo info)
         {
             if (lookupSet == null)
                 return;
@@ -787,7 +787,7 @@ namespace Datinate.App.WinForms.View.UI.Media
             EntrySelectedEvt?.Invoke(this, lookupSet, info, true);
         }
 
-        private void EntryListUI_EntryDoubleClicked(FastEntryListUI.EntryInfo info)
+        private void EntryListUI_EntryDoubleClicked(MediaEntryInfo info)
         {
             var ls = lookupSet;
             if (ls == null)
