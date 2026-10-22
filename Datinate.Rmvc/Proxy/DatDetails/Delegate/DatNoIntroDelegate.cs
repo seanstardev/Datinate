@@ -79,8 +79,10 @@ namespace Datinate.Rmvc.Delegate.DatDetails
                     continue;
 
                 var displayName =
-                    (gameEl.SelectSingleNode("description") as XmlElement)?.InnerText
-                    ?? gameEl.GetAttribute("name")
+                    // NOTE: Name was incorrectly set to be the description for a long time. Changed in Q4 2026.
+                    //(gameEl.SelectSingleNode("description") as XmlElement)?.InnerText
+                    //?? 
+                    gameEl.GetAttribute("name")
                     ?? string.Empty;
 
                 var finalName = BuildGameName(gameNode.DirPath, displayName);
